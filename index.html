@@ -292,3 +292,53 @@
         window.toggleDrop = (id) => {
             const el = document.getElementById(id);
             const isShow = el.classList.contains('show');
+            document.querySelectorAll('.dropdown-content').forEach(d => d.classList.remove('show'));
+            if(!isShow) el.classList.add('show');
+        };
+
+        window.setSrv = (id, n) => { currentSrv = id; document.getElementById('active-srv').innerText = n; updPlayer(); toggleDrop('srv-menu'); }
+        window.setS = (val) => { s = val; e = 1; document.getElementById('s-val').innerText = val; loadEpisodes(); toggleDrop('s-menu'); }
+        window.setE = (val) => { e = val; document.getElementById('e-val').innerText = val; updPlayer(); toggleDrop('e-menu'); }
+        window.closePlayer = () => { document.getElementById('player-overlay').style.display = 'none'; document.getElementById('frame').src = ''; document.body.style.overflow = 'auto'; }
+        
+        window.setMode = (m) => { 
+            mode = m; 
+            document.getElementById('m-btn').className = m === 'movie' ? 'px-6 py-2 rounded-full text-[9px] font-black uppercase transition-all bg-white text-black' : 'px-6 py-2 rounded-full text-[9px] font-black uppercase text-white/40';
+            document.getElementById('t-btn').className = m === 'tv' ? 'px-6 py-2 rounded-full text-[9px] font-black uppercase transition-all bg-white text-black' : 'px-6 py-2 rounded-full text-[9px] font-black uppercase text-white/40';
+            init(); 
+        }
+
+        function updPlayer() {
+            let src = '';
+            if(mode === 'movie') {
+                if(currentSrv === 'cinemaos') src = `https://cinemaos.tech/player/${activeID}`;
+                else if(currentSrv === 'vidsrcto') src = `https://vidsrc.to/embed/movie/${activeID}`;
+                else if(currentSrv === 'vidsrcme') src = `https://vidsrc.me/embed/movie?tmdb=${activeID}`;
+                else if(currentSrv === 'vidsrcicu') src = `https://vidsrc.icu/embed/movie/${activeID}`;
+                else if(currentSrv === '2embed') src = `https://www.2embed.cc/embed/${activeID}`;
+            } else {
+                if(currentSrv === 'cinemaos') src = `https://cinemaos.tech/player/${activeID}/${s}/${e}`;
+                else if(currentSrv === 'vidsrcto') src = `https://vidsrc.to/embed/tv/${activeID}/${s}/${e}`;
+                else if(currentSrv === 'vidsrcme') src = `https://vidsrc.me/embed/tv?tmdb=${activeID}&sea=${s}&epi=${e}`;
+                else if(currentSrv === 'vidsrcicu') src = `https://vidsrc.icu/embed/tv/${activeID}/${s}/${e}`;
+                else if(currentSrv === '2embed') src = `https://www.2embed.cc/embedtv/${activeID}&s=${s}&e=${e}`;
+            }
+            document.getElementById('frame').src = src;
+        }
+
+        async function loadEpisodes() {
+            const d = await fetch(`https://api.themoviedb.org/3/tv/${activeID}/season/${s}?api_key=${KEY}`).then(r => r.json());
+            document.getElementById('e-menu').innerHTML = d.episodes.map(ep => `<button onclick="setE(${ep.episode_number})" class="drop-item">Episode ${ep.episode_number}</button>`).join('');
+            updPlayer();
+        }
+
+        async function loadGenres() {
+            const r = await fetch(`https://api.themoviedb.org/3/genre/${mode}/list?api_key=${KEY}`);
+            const d = await r.json();
+            document.getElementById('genre-menu').innerHTML = d.genres.map(g => `<button onclick="init('','${g.id}')" class="drop-item">${g.name}</button>`).join('');
+        }
+
+        init();
+    </script>
+</body>
+</html>
