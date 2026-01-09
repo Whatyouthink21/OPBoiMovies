@@ -13,34 +13,19 @@
         .frost-bg { background: var(--glass); backdrop-filter: blur(40px); border: 1px solid var(--border); }
         .hero-vignette { background: linear-gradient(to top, #0a0b0d 10%, transparent 70%), linear-gradient(to right, #0a0b0d 10%, transparent 70%); }
 
-        /* THE KILL-SWITCH BLUR FIX */
-        #search-overlay { 
-            position: fixed; inset: 0; background: rgba(0,0,0,0.85); 
-            backdrop-filter: blur(25px); z-index: 5500; 
-            display: none !important; /* Physically removed by default */
-            opacity: 0; transition: opacity 0.2s ease;
-            pointer-events: none;
+        /* Scoped Search Styling - No Full Screen Blur */
+        #search-results {
+            display: none; 
+            position: absolute; 
+            top: calc(100% + 12px); 
+            right: 0; 
+            width: 450px; 
+            max-height: 60vh; 
+            border-radius: 24px; 
+            overflow-y: auto; 
+            z-index: 9999;
+            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.8);
         }
-        #search-overlay.active { 
-            display: block !important; /* Only exists when active class is present */
-            opacity: 1; 
-            pointer-events: all; 
-        }
-
-        #search-results { 
-            display: none; position: absolute; top: calc(100% + 15px); right: 0; 
-            width: 400px; max-height: 500px; border-radius: 24px; padding: 12px; 
-            z-index: 6000; overflow-y: auto; border: 1px solid var(--border);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-        }
-        #search-results.active { display: block; animation: slideUp 0.2s ease-out; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        .search-item { 
-            display: flex; gap: 15px; padding: 12px; border-radius: 16px; 
-            cursor: pointer; transition: 0.2s; border: 1px solid transparent;
-        }
-        .search-item:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.1); }
 
         .dropdown-content { display: none; position: absolute; top: calc(100% + 10px); right: 0; min-width: 200px; border-radius: 12px; padding: 8px; z-index: 5000; }
         .dropdown-content.show { display: block; }
@@ -59,9 +44,7 @@
 </head>
 <body>
 
-    <div id="search-overlay"></div>
-
-    <nav class="fixed top-0 w-full z-[100] px-8 py-4 flex items-center justify-between">
+    <nav class="fixed top-0 w-full z-[100] px-8 py-4 flex items-center justify-between bg-[#0a0b0d]/80 backdrop-blur-md">
         <div class="flex items-center gap-10">
             <h1 class="text-xl font-black italic tracking-tighter cursor-pointer" onclick="location.reload()">AURA</h1>
             <div class="flex frost-bg rounded-full p-1">
@@ -75,15 +58,15 @@
         </div>
 
         <div class="flex items-center gap-6">
-            <div class="relative z-[6001]">
+            <div class="relative" id="search-container">
                 <input type="text" id="search" autocomplete="off" placeholder="SEARCH TITLES..." class="frost-bg px-6 py-2 rounded-full text-[11px] w-64 outline-none focus:border-white/40 transition-all uppercase font-bold focus:w-80">
-                <div id="search-results" class="frost-bg"></div>
+                <div id="search-results" class="frost-bg p-2"></div>
             </div>
             
             <div id="auth-container">
-                <button id="login-btn" onclick="login()" class="frost-bg px-6 py-2 rounded-full text-[9px] font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all">GOOGLE LOGIN</button>
+                <button id="login-btn" onclick="login()" class="frost-bg px-6 py-2 rounded-full text-[9px] font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all">LOGIN</button>
                 <div id="user-profile" class="hidden flex items-center gap-3 frost-bg pl-4 pr-1 py-1 rounded-full cursor-pointer relative" onclick="toggleDrop('user-menu')">
-                    <span id="user-name" class="text-[10px] font-black uppercase tracking-tighter"></span>
+                    <span id="user-name" class="text-[10px] font-black uppercase"></span>
                     <img id="user-pic" class="w-8 h-8 rounded-full border border-white/20">
                     <div id="user-menu" class="dropdown-content frost-bg">
                         <button onclick="logout()" class="drop-item !text-red-400">Sign Out</button>
@@ -107,10 +90,10 @@
 
     <main class="px-10 lg:px-24 py-16 relative z-20">
         <div id="my-list-section" class="mb-20 hidden">
-            <h3 class="text-[10px] font-black uppercase tracking-[0.4em] opacity-30 mb-8">Your Collection</h3>
+            <h3 class="text-[10px] font-black uppercase tracking-[0.4em] opacity-30 mb-8">Collection</h3>
             <div id="my-list-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8"></div>
         </div>
-        <h3 id="feed-title" class="text-[10px] font-black uppercase tracking-[0.4em] opacity-30 mb-8">Discovery Feed</h3>
+        <h3 id="feed-title" class="text-[10px] font-black uppercase tracking-[0.4em] opacity-30 mb-8">Discovery</h3>
         <div id="grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8"></div>
     </main>
 
@@ -119,7 +102,7 @@
             <div class="w-[95%] max-w-[1700px] flex justify-between items-center mb-8">
                 <button onclick="closePlayer()" class="frost-bg px-8 py-3 rounded-xl text-[9px] font-black uppercase tracking-widest">← Exit</button>
                 <div class="flex gap-3">
-                    <button id="modal-add-btn" onclick="toggleMyList()" class="frost-bg px-8 py-3 rounded-xl text-[9px] font-black uppercase tracking-widest"></button>
+                    <button id="modal-add-btn" onclick="toggleMyList()" class="frost-bg px-8 py-3 rounded-xl text-[9px] font-black uppercase"></button>
                     <div class="relative">
                         <button onclick="toggleDrop('srv-menu')" class="frost-bg px-8 py-3 rounded-xl text-[9px] font-black uppercase"><span id="active-srv">Aura Primary</span></button>
                         <div id="srv-menu" class="dropdown-content frost-bg"></div>
@@ -167,57 +150,53 @@
 
         onAuthStateChanged(auth, (user) => {
             currentUser = user;
-            const lb = document.getElementById('login-btn'), up = document.getElementById('user-profile');
             if (user) {
-                lb.classList.add('hidden'); up.classList.remove('hidden');
+                document.getElementById('login-btn').classList.add('hidden');
+                document.getElementById('user-profile').classList.remove('hidden');
                 document.getElementById('user-name').innerText = user.displayName.split(' ')[0];
                 document.getElementById('user-pic').src = user.photoURL;
                 onSnapshot(collection(db, "users", user.uid, "mylist"), (s) => { myList = s.docs.map(d => d.data()); updateListUI(); updateBtnStates(); });
-            } else { lb.classList.remove('hidden'); up.classList.add('hidden'); myList = []; updateListUI(); }
+            } else {
+                document.getElementById('login-btn').classList.remove('hidden');
+                document.getElementById('user-profile').classList.add('hidden');
+                myList = []; updateListUI();
+            }
         });
 
-        window.toggleMyList = async () => {
-            if (!currentUser) return alert("Login required");
-            const docRef = doc(db, "users", currentUser.uid, "mylist", activeItem.id.toString());
-            myList.some(x => x.id === activeItem.id) ? await deleteDoc(docRef) : await setDoc(docRef, activeItem);
-        };
+        const sIn = document.getElementById('search'), sRes = document.getElementById('search-results');
 
-        // --- HARD RESET SEARCH LOGIC ---
-        const sIn = document.getElementById('search'), sRes = document.getElementById('search-results'), sOv = document.getElementById('search-overlay');
-
-        window.closeSearch = () => {
-            sRes.classList.remove('active');
-            sOv.classList.remove('active');
-            sIn.value = '';
-            // Physically hide the overlay immediately
-            sOv.style.setProperty('display', 'none', 'important');
+        // NEW SEARCH LOGIC: Scoped container toggle
+        const toggleSearch = (show) => {
+            sRes.style.display = show ? 'block' : 'none';
+            if (!show) sIn.value = '';
         };
 
         sIn.addEventListener('input', async (e) => {
             const val = e.target.value.trim();
-            if (val.length === 0) { closeSearch(); return; }
-            if (val.length < 2) return;
+            if (val.length < 2) { toggleSearch(false); return; }
 
-            sOv.style.setProperty('display', 'block', 'important');
-            setTimeout(() => { sOv.classList.add('active'); sRes.classList.add('active'); }, 5);
-
+            toggleSearch(true);
             const r = await fetch(`https://api.themoviedb.org/3/search/${mode}?api_key=${KEY}&query=${val}`);
             const d = await r.json();
+
             sRes.innerHTML = d.results.slice(0, 8).map(m => `
-                <div class="search-item" onclick="quickView(${m.id}, '${(m.title||m.name).replace(/'/g,"\\")}', '${m.poster_path}')">
-                    <img src="https://image.tmdb.org/t/p/w92${m.poster_path}" class="w-12 h-18 rounded-lg object-cover">
+                <div class="flex gap-4 p-3 hover:bg-white/10 rounded-2xl cursor-pointer transition-all" onclick="quickView(${m.id}, '${(m.title||m.name).replace(/'/g,"\\")}', '${m.poster_path}')">
+                    <img src="https://image.tmdb.org/t/p/w92${m.poster_path}" class="w-12 h-16 rounded-lg object-cover">
                     <div class="flex flex-col justify-center">
                         <span class="text-[11px] font-black uppercase tracking-tight">${m.title || m.name}</span>
-                        <span class="text-[9px] opacity-40 uppercase font-bold">${(m.release_date || m.first_air_date || '').split('-')[0]}</span>
+                        <span class="text-[9px] opacity-40 font-bold">${(m.release_date || m.first_air_date || '').split('-')[0]}</span>
                     </div>
                 </div>`).join('');
         });
 
-        window.quickView = (id, title, poster) => { closeSearch(); openPlayer(id, title, poster); };
-        sIn.addEventListener('keypress', (e) => { if (e.key === 'Enter') { init(sIn.value); closeSearch(); } });
-        sOv.addEventListener('click', closeSearch);
+        // Close search when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!document.getElementById('search-container').contains(e.target)) toggleSearch(false);
+        });
 
-        // --- CORE ENGINE ---
+        window.quickView = (id, title, poster) => { toggleSearch(false); openPlayer(id, title, poster); };
+        sIn.addEventListener('keypress', (e) => { if (e.key === 'Enter') { init(sIn.value); toggleSearch(false); } });
+
         async function init(q = '', g = '') {
             let url = `https://api.themoviedb.org/3/trending/${mode}/week?api_key=${KEY}`;
             if(q) url = `https://api.themoviedb.org/3/search/${mode}?api_key=${KEY}&query=${q}`;
@@ -246,6 +225,12 @@
             document.getElementById('srv-menu').innerHTML = servers.map(sv => `<button onclick="setSrv('${sv.id}','${sv.n}')" class="drop-item">${sv.n}</button>`).join('');
             updPlayer();
         }
+
+        window.toggleMyList = async () => {
+            if (!currentUser) return alert("Login required");
+            const docRef = doc(db, "users", currentUser.uid, "mylist", activeItem.id.toString());
+            myList.some(x => x.id === activeItem.id) ? await deleteDoc(docRef) : await setDoc(docRef, activeItem);
+        };
 
         function updateListUI() {
             const sec = document.getElementById('my-list-section');
@@ -276,7 +261,6 @@
             document.getElementById('frame').src = s;
         }
 
-        window.onclick = (e) => { if (!e.target.closest('.relative') && !e.target.closest('#user-profile')) document.querySelectorAll('.dropdown-content').forEach(d => d.classList.remove('show')); };
         init();
     </script>
 </body>
