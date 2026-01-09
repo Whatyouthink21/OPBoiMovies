@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OPBoiMovies | Watch movies and TV Shows for free</title>
+    <title>AURA | CRYSTAL CINEMA</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;800;900&display=swap" rel="stylesheet">
     <style>
@@ -13,7 +13,7 @@
         .frost-bg { background: var(--glass); backdrop-filter: blur(40px); border: 1px solid var(--border); }
         .hero-vignette { background: linear-gradient(to top, #0a0b0d 10%, transparent 70%), linear-gradient(to right, #0a0b0d 10%, transparent 70%); }
 
-        /* The Non-Glitchy Menu */
+        /* Stable Dropdown Logic */
         .dropdown-content { 
             display: none; position: absolute; top: calc(100% + 10px); left: 0; 
             min-width: 200px; border-radius: 12px; padding: 8px; z-index: 5000;
@@ -29,11 +29,12 @@
         }
         .drop-item:hover { background: rgba(255,255,255,0.1); color: #fff; }
 
-        /* Massive Player */
+        /* Massive Player Viewport */
         #player-overlay { position: fixed; inset: 0; z-index: 4000; display: none; background: rgba(5, 6, 8, 0.98); backdrop-filter: blur(50px); overflow-y: auto; }
         .player-viewport { width: 95%; max-width: 1700px; aspect-ratio: 16 / 9; border-radius: 24px; overflow: hidden; border: 1px solid var(--border); }
         iframe { width: 100%; height: 100%; border: none; }
 
+        /* Card Transitions */
         .movie-card { border-radius: 16px; overflow: hidden; transition: 0.5s cubic-bezier(0.2, 1, 0.2, 1); cursor: pointer; border: 1px solid transparent; }
         .movie-card:hover { transform: scale(1.05); border-color: rgba(255,255,255,0.3); }
         
@@ -45,13 +46,16 @@
 
     <nav class="fixed top-0 w-full z-[100] px-8 py-4 flex items-center justify-between">
         <div class="flex items-center gap-10">
-            <h1 class="text-xl font-black italic tracking-tighter cursor-pointer" onclick="location.reload()">OPBoiMovies</h1>
+            <h1 class="text-xl font-black italic tracking-tighter cursor-pointer" onclick="location.reload()">AURA</h1>
             <div class="flex frost-bg rounded-full p-1">
                 <button onclick="setMode('movie')" id="m-btn" class="px-6 py-2 rounded-full text-[9px] font-black uppercase transition-all bg-white text-black">Cinema</button>
                 <button onclick="setMode('tv')" id="t-btn" class="px-6 py-2 rounded-full text-[9px] font-black uppercase text-white/40">Series</button>
             </div>
         </div>
         <div class="flex items-center gap-4">
+            <button id="login-btn" class="frost-bg px-6 py-2 rounded-full text-[9px] font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all">
+                GOOGLE LOGIN
+            </button>
             <div class="relative">
                 <button onclick="toggleDrop('genre-menu')" class="frost-bg px-6 py-2 rounded-full text-[9px] font-black uppercase tracking-widest">Genres ↓</button>
                 <div id="genre-menu" class="dropdown-content frost-bg max-h-80 overflow-y-auto"></div>
@@ -74,7 +78,7 @@
 
     <main class="px-10 lg:px-24 py-16 relative z-20">
         <div id="my-list-section" class="mb-20 hidden">
-            <h3 class="text-[10px] font-black uppercase tracking-[0.4em] opacity-30 mb-8">Collection</h3>
+            <h3 class="text-[10px] font-black uppercase tracking-[0.4em] opacity-30 mb-8">Your Collection</h3>
             <div id="my-list-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8"></div>
         </div>
 
@@ -91,7 +95,7 @@
                     <button id="modal-add-btn" onclick="toggleMyList()" class="frost-bg px-8 py-3 rounded-xl text-[9px] font-black uppercase tracking-widest"></button>
                     
                     <div class="relative">
-                        <button onclick="toggleDrop('srv-menu')" class="frost-bg px-8 py-3 rounded-xl text-[9px] font-black uppercase">Server: <span id="active-srv">1</span></button>
+                        <button onclick="toggleDrop('srv-menu')" class="frost-bg px-8 py-3 rounded-xl text-[9px] font-black uppercase">Server: <span id="active-srv">Primary</span></button>
                         <div id="srv-menu" class="dropdown-content frost-bg"></div>
                     </div>
 
@@ -118,28 +122,77 @@
                     <p id="p-desc" class="text-white/40 text-base font-light leading-relaxed max-w-3xl"></p>
                 </div>
                 <div class="frost-bg p-8 rounded-[32px] h-fit">
-                    <h3 class="text-[9px] font-black uppercase tracking-[0.4em] opacity-30 mb-8">Cast</h3>
+                    <h3 class="text-[9px] font-black uppercase tracking-[0.4em] opacity-30 mb-8">Featured Cast</h3>
                     <div id="p-cast" class="space-y-6"></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // Your specific Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyDFDQG_-vhIYXWtRUW5dXOvP_BCsCIhLJI",
+            authDomain: "opboimovies.firebaseapp.com",
+            projectId: "opboimovies",
+            storageBucket: "opboimovies.firebasestorage.app",
+            messagingSenderId: "436070860394",
+            appId: "1:436070860394:web:c3443eba4bba154a14ec13",
+            measurementId: "G-5C425WE7H6"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const provider = new GoogleAuthProvider();
+
+        // App Globals
         const KEY = 'a45420333457411e78d5ad35d6c51a2d';
         let mode = 'movie', activeID = null, currentSrv = 'cinemaos', s = 1, e = 1, activeItem = null;
-        let myList = JSON.parse(localStorage.getItem('aura_list_v3')) || [];
-        const servers = [{id:'cinemaos', n:'Aura Primary'}, {id:'vidsrcto', n:'Aura Mirror'}, {id:'vidsrcme', n:'Aura Speed'}];
+        let myList = [];
+        let currentUser = null;
+        const servers = [{id:'cinemaos', n:'Aura Primary'}, {id:'vidsrcto', n:'Aura Mirror'}];
 
-        function toggleDrop(id) {
-            const el = document.getElementById(id);
-            const isShow = el.classList.contains('show');
-            document.querySelectorAll('.dropdown-content').forEach(d => d.classList.remove('show'));
-            if(!isShow) el.classList.add('show');
+        // Auth Logic
+        window.login = async () => { try { await signInWithPopup(auth, provider); } catch(e) { console.error(e); } };
+        window.logout = () => signOut(auth);
+
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+            const loginBtn = document.getElementById('login-btn');
+            if (user) {
+                loginBtn.innerText = `LOGOUT (${user.displayName.split(' ')[0].toUpperCase()})`;
+                loginBtn.onclick = logout;
+                syncCloudList(user.uid);
+            } else {
+                loginBtn.innerText = 'GOOGLE LOGIN';
+                loginBtn.onclick = login;
+                myList = [];
+                updateListUI();
+            }
+        });
+
+        // Database Sync
+        function syncCloudList(uid) {
+            onSnapshot(collection(db, "users", uid, "mylist"), (snap) => {
+                myList = snap.docs.map(d => d.data());
+                updateListUI();
+                updateBtnStates();
+            });
         }
 
-        window.onclick = (e) => { if (!e.target.closest('.relative')) document.querySelectorAll('.dropdown-content').forEach(d => d.classList.remove('show')); };
+        window.toggleMyList = async () => {
+            if (!currentUser) return alert("Login to save to collection");
+            const docRef = doc(db, "users", currentUser.uid, "mylist", activeItem.id.toString());
+            const exists = myList.some(x => x.id === activeItem.id);
+            exists ? await deleteDoc(docRef) : await setDoc(docRef, activeItem);
+        };
 
+        // Movie Engine
         async function init(q = '', g = '') {
             let url = `https://api.themoviedb.org/3/trending/${mode}/week?api_key=${KEY}`;
             if(q) url = `https://api.themoviedb.org/3/search/${mode}?api_key=${KEY}&query=${q}`;
@@ -148,14 +201,7 @@
             const d = await r.json();
             if(!q && !g && d.results[0]) setupHero(d.results[0]);
             renderGrid(d.results, 'grid');
-            updateListUI();
             loadGenres();
-        }
-
-        async function loadGenres() {
-            const r = await fetch(`https://api.themoviedb.org/3/genre/${mode}/list?api_key=${KEY}`);
-            const d = await r.json();
-            document.getElementById('genre-menu').innerHTML = d.genres.map(g => `<button onclick="init('','${g.id}')" class="drop-item">${g.name}</button>`).join('');
         }
 
         function setupHero(m) {
@@ -174,7 +220,7 @@
                 </div>`).join('');
         }
 
-        async function openPlayer(id, title, poster) {
+        window.openPlayer = async (id, title, poster) => {
             activeID = id; activeItem = { id, title, poster_path: poster, mode };
             document.getElementById('p-title').innerText = title;
             document.getElementById('player-overlay').style.display = 'block';
@@ -195,13 +241,7 @@
             } else { document.getElementById('tv-controls').classList.add('hidden'); updPlayer(); }
         }
 
-        function toggleMyList() {
-            const idx = myList.findIndex(x => x.id === activeItem.id);
-            if(idx > -1) myList.splice(idx, 1); else myList.unshift(activeItem);
-            localStorage.setItem('aura_list_v3', JSON.stringify(myList));
-            updateListUI(); updateBtnStates();
-        }
-
+        // Logic Helpers
         function updateListUI() {
             const sec = document.getElementById('my-list-section');
             if(myList.length > 0) { sec.classList.remove('hidden'); renderGrid(myList, 'my-list-grid'); }
@@ -209,9 +249,35 @@
         }
 
         function updateBtnStates() {
+            if(!activeItem) return;
             const exists = myList.some(x => x.id === activeItem.id);
             if(document.getElementById('modal-add-btn')) document.getElementById('modal-add-btn').innerText = exists ? '✓ SAVED' : '+ SAVE';
             if(document.getElementById('hero-add')) document.getElementById('hero-add').innerText = exists ? '✓ COLLECTED' : 'ADD TO LIST';
+        }
+
+        window.toggleDrop = (id) => {
+            const el = document.getElementById(id);
+            const isShow = el.classList.contains('show');
+            document.querySelectorAll('.dropdown-content').forEach(d => d.classList.remove('show'));
+            if(!isShow) el.classList.add('show');
+        };
+
+        window.setSrv = (id, n) => { currentSrv = id; document.getElementById('active-srv').innerText = n.split(' ')[1]; updPlayer(); toggleDrop('srv-menu'); }
+        window.setS = (val) => { s = val; e = 1; document.getElementById('s-val').innerText = val; loadEpisodes(); toggleDrop('s-menu'); }
+        window.setE = (val) => { e = val; document.getElementById('e-val').innerText = val; updPlayer(); toggleDrop('e-menu'); }
+        window.closePlayer = () => { document.getElementById('player-overlay').style.display = 'none'; document.getElementById('frame').src = ''; document.body.style.overflow = 'auto'; }
+        window.setMode = (m) => { 
+            mode = m; 
+            document.getElementById('m-btn').className = m === 'movie' ? 'px-6 py-2 rounded-full text-[9px] font-black uppercase transition-all bg-white text-black' : 'px-6 py-2 rounded-full text-[9px] font-black uppercase text-white/40';
+            document.getElementById('t-btn').className = m === 'tv' ? 'px-6 py-2 rounded-full text-[9px] font-black uppercase transition-all bg-white text-black' : 'px-6 py-2 rounded-full text-[9px] font-black uppercase text-white/40';
+            init(); 
+        }
+
+        function updPlayer() {
+            let src = mode === 'movie' 
+                ? (currentSrv==='cinemaos' ? `https://cinemaos.tech/player/${activeID}` : `https://vidsrc.to/embed/movie/${activeID}`)
+                : (currentSrv==='cinemaos' ? `https://cinemaos.tech/player/${activeID}/${s}/${e}` : `https://vidsrc.to/embed/tv/${activeID}/${s}/${e}`);
+            document.getElementById('frame').src = src;
         }
 
         async function loadEpisodes() {
@@ -220,36 +286,16 @@
             updPlayer();
         }
 
-        function setSrv(id, n) { currentSrv = id; document.getElementById('active-srv').innerText = n.split(' ')[1]; updPlayer(); toggleDrop('srv-menu'); }
-        function setS(val) { s = val; e = 1; document.getElementById('s-val').innerText = val; loadEpisodes(); toggleDrop('s-menu'); }
-        function setE(val) { e = val; document.getElementById('e-val').innerText = val; updPlayer(); toggleDrop('e-menu'); }
-
-        function updPlayer() {
-            let src = '';
-            if(mode === 'movie') {
-                if(currentSrv==='cinemaos') src=`https://cinemaos.tech/player/${activeID}`;
-                else if(currentSrv==='vidsrcto') src=`https://vidsrc.to/embed/movie/${activeID}`;
-                else src=`https://vidsrc.me/embed/movie?tmdb=${activeID}`;
-            } else {
-                if(currentSrv==='cinemaos') src=`https://cinemaos.tech/player/${activeID}/${s}/${e}`;
-                else if(currentSrv==='vidsrcto') src=`https://vidsrc.to/embed/tv/${activeID}/${s}/${e}`;
-                else src=`https://vidsrc.me/embed/tv?tmdb=${activeID}&sea=${s}&epi=${e}`;
-            }
-            document.getElementById('frame').src = src;
+        async function loadGenres() {
+            const r = await fetch(`https://api.themoviedb.org/3/genre/${mode}/list?api_key=${KEY}`);
+            const d = await r.json();
+            document.getElementById('genre-menu').innerHTML = d.genres.map(g => `<button onclick="init('','${g.id}')" class="drop-item">${g.name}</button>`).join('');
         }
 
-        function closePlayer() { document.getElementById('player-overlay').style.display = 'none'; document.getElementById('frame').src = ''; document.body.style.overflow = 'auto'; }
-        
-        function setMode(m) { 
-            mode = m; 
-            document.getElementById('m-btn').className = m === 'movie' ? 'px-6 py-2 rounded-full text-[9px] font-black uppercase transition-all bg-white text-black' : 'px-6 py-2 rounded-full text-[9px] font-black uppercase text-white/40';
-            document.getElementById('t-btn').className = m === 'tv' ? 'px-6 py-2 rounded-full text-[9px] font-black uppercase transition-all bg-white text-black' : 'px-6 py-2 rounded-full text-[9px] font-black uppercase text-white/40';
-            init(); 
-        }
-
+        window.onclick = (e) => { if (!e.target.closest('.relative')) document.querySelectorAll('.dropdown-content').forEach(d => d.classList.remove('show')); };
         document.getElementById('search').addEventListener('input', ev => { if(ev.target.value.length > 2) init(ev.target.value); });
+        
         init();
     </script>
 </body>
 </html>
-
