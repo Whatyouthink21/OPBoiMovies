@@ -3,50 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StreamVault | Movies & TV</title>
+    <title>OP BOI MOVIES | Premium</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: white; }
+        body { font-family: 'Poppins', sans-serif; background-color: #050505; color: white; }
+        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
         .video-container { position: relative; padding-bottom: 56.25%; height: 0; }
-        .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 8px; }
-        .active-tab { border-bottom: 4px solid #ef4444; color: #ef4444; }
+        .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 12px; }
+        select { appearance: none; background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 0.5rem center; background-size: 1em; }
     </style>
 </head>
 <body>
 
-    <nav class="flex items-center justify-between px-8 py-4 bg-slate-900/80 backdrop-blur-md sticky top-0 z-40">
-        <h1 class="text-2xl font-black text-red-600 tracking-tighter">STREAM<span class="text-white">VAULT</span></h1>
-        
-        <div class="flex gap-6 font-bold uppercase text-sm tracking-widest">
-            <button id="movie-tab" onclick="switchMode('movie')" class="active-tab pb-1">Movies</button>
-            <button id="tv-tab" onclick="switchMode('tv')" class="pb-1 text-gray-400">TV Shows</button>
+    <nav class="flex items-center justify-between px-6 py-4 sticky top-0 z-50 glass mb-4">
+        <h1 class="text-xl font-black tracking-tighter uppercase">OP BOI <span class="text-red-600">MOVIES</span></h1>
+        <div class="flex gap-6 font-bold text-xs uppercase">
+            <button onclick="switchMode('movie')" id="m-btn" class="text-red-600">Movies</button>
+            <button onclick="switchMode('tv')" id="t-btn" class="text-gray-400">TV Shows</button>
         </div>
-
-        <div class="flex-1 max-w-md mx-8">
-            <input type="text" id="search" placeholder="Search..." 
-                class="w-full bg-slate-800 border-none rounded-full px-5 py-2 focus:ring-2 focus:ring-red-600 outline-none text-sm">
-        </div>
+        <input type="text" id="search" placeholder="Search..." class="bg-white/10 rounded-full px-4 py-1 text-sm outline-none focus:ring-1 focus:ring-red-600">
     </nav>
 
-    <div class="px-8 py-10">
-        <h3 id="grid-title" class="text-xl font-semibold mb-6 flex items-center">
-            <span class="w-1 h-6 bg-red-600 mr-3"></span>Trending Movies
-        </h3>
-        <div id="movie-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6"></div>
-    </div>
+    <main class="px-6">
+        <div id="movie-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6"></div>
+    </main>
 
-    <div id="player-modal" class="fixed inset-0 bg-black/95 z-50 hidden items-center justify-center p-4">
+    <div id="player-modal" class="fixed inset-0 bg-black/95 z-[100] hidden flex-col items-center justify-center p-4">
         <div class="w-full max-w-5xl">
-            <div class="flex justify-between items-center mb-4">
-                <h2 id="now-playing-title" class="text-xl font-bold truncate">Watching</h2>
-                <div id="tv-controls" class="hidden flex gap-2">
-                    <input type="number" id="season-input" value="1" class="w-16 bg-gray-800 p-1 rounded text-center" title="Season">
-                    <input type="number" id="episode-input" value="1" class="w-16 bg-gray-800 p-1 rounded text-center" title="Episode">
-                    <button onclick="updateTVSource()" class="bg-blue-600 px-3 py-1 rounded text-xs font-bold">GO</button>
+            <div class="flex flex-wrap justify-between items-end mb-4 gap-4">
+                <div>
+                    <h2 id="now-playing-title" class="text-xl font-bold truncate">Watching</h2>
+                    <div class="flex gap-2 mt-2">
+                        <button onclick="changeServer('cinemaos')" class="text-[10px] bg-white/10 px-2 py-1 rounded hover:bg-red-600">SERVER 1</button>
+                        <button onclick="changeServer('vidsrc')" class="text-[10px] bg-white/10 px-2 py-1 rounded hover:bg-red-600">SERVER 2</button>
+                    </div>
                 </div>
-                <button onclick="closePlayer()" class="bg-red-600 hover:bg-red-700 px-4 py-1 rounded text-sm font-bold transition">Close</button>
+
+                <div id="tv-controls" class="hidden flex gap-3 items-center glass p-3 rounded-xl">
+                    <div class="flex flex-col">
+                        <label class="text-[10px] font-bold text-gray-400 mb-1">SEASON</label>
+                        <select id="season-select" onchange="loadEpisodes()" class="bg-gray-800 text-sm px-3 py-2 rounded-lg pr-8 outline-none border border-white/10"></select>
+                    </div>
+                    <div class="flex flex-col">
+                        <label class="text-[10px] font-bold text-gray-400 mb-1">EPISODE</label>
+                        <select id="episode-select" onchange="updateSource()" class="bg-gray-800 text-sm px-3 py-2 rounded-lg pr-8 outline-none border border-white/10"></select>
+                    </div>
+                </div>
+
+                <button onclick="closePlayer()" class="text-3xl">&times;</button>
             </div>
+
             <div class="video-container shadow-2xl">
                 <iframe id="video-iframe" src="" allowfullscreen frameborder="0"></iframe>
             </div>
@@ -54,81 +61,87 @@
     </div>
 
     <script>
-        const API_KEY = 'a45420333457411e78d5ad35d6c51a2d'; 
-        let currentMode = 'movie'; // can be 'movie' or 'tv'
+        const API_KEY = 'YOUR_TMDB_API_KEY'; 
+        let currentMode = 'movie';
         let currentId = null;
+        let currentServer = 'cinemaos';
 
         async function fetchData(query = '') {
-            let url;
-            if(query) {
-                url = `https://api.themoviedb.org/3/search/${currentMode}?api_key=${API_KEY}&query=${query}`;
-            } else {
-                url = `https://api.themoviedb.org/3/trending/${currentMode}/week?api_key=${API_KEY}`;
-            }
-            
+            const url = query ? `https://api.themoviedb.org/3/search/${currentMode}?api_key=${API_KEY}&query=${query}` : `https://api.themoviedb.org/3/trending/${currentMode}/week?api_key=${API_KEY}`;
             const res = await fetch(url);
             const data = await res.json();
-            renderItems(data.results);
+            render(data.results);
         }
 
-        function renderItems(items) {
-            const grid = document.getElementById('movie-grid');
-            grid.innerHTML = items.map(item => {
+        function render(items) {
+            document.getElementById('movie-grid').innerHTML = items.map(item => {
                 if(!item.poster_path) return '';
-                const title = item.title || item.name; // TV uses 'name', Movies use 'title'
-                return `
-                <div class="cursor-pointer group" onclick="openPlayer(${item.id}, '${title.replace(/'/g, "\\'")}')">
-                    <div class="overflow-hidden rounded-lg">
-                        <img src="https://image.tmdb.org/t/p/w500${item.poster_path}" class="w-full group-hover:scale-110 transition duration-500">
-                    </div>
-                    <p class="mt-2 text-sm font-bold truncate">${title}</p>
+                const title = item.title || item.name;
+                return `<div class="cursor-pointer group" onclick="openPlayer(${item.id}, '${title.replace(/'/g, "\\'")}')">
+                    <img src="https://image.tmdb.org/t/p/w500${item.poster_path}" class="rounded-xl group-hover:scale-105 transition duration-300 shadow-lg">
+                    <p class="mt-2 text-xs font-bold truncate">${title}</p>
                 </div>`;
             }).join('');
         }
 
-        function openPlayer(id, title) {
+        async function openPlayer(id, title) {
             currentId = id;
             document.getElementById('now-playing-title').innerText = title;
-            const iframe = document.getElementById('video-iframe');
-            const tvControls = document.getElementById('tv-controls');
-
-            if (currentMode === 'movie') {
-                iframe.src = `https://cinemaos.tech/player/${id}`;
-                tvControls.classList.add('hidden');
-            } else {
-                tvControls.classList.remove('hidden');
-                updateTVSource(); // Load S1 E1 by default
-            }
-
             document.getElementById('player-modal').style.display = 'flex';
+            
+            if (currentMode === 'tv') {
+                document.getElementById('tv-controls').classList.remove('hidden');
+                await loadSeasons(id);
+            } else {
+                document.getElementById('tv-controls').classList.add('hidden');
+                updateSource();
+            }
         }
 
-        function updateTVSource() {
-            const s = document.getElementById('season-input').value;
-            const e = document.getElementById('episode-input').value;
-            document.getElementById('video-iframe').src = `https://cinemaos.tech/player/${currentId}/${s}/${e}`;
+        // FETCH SEASONS FROM TMDB
+        async function loadSeasons(id) {
+            const res = await fetch(`https://api.themoviedb.org/3/tv/${id}?api_key=${API_KEY}`);
+            const data = await res.json();
+            const select = document.getElementById('season-select');
+            select.innerHTML = data.seasons
+                .filter(s => s.season_number > 0) // Hide specials
+                .map(s => `<option value="${s.season_number}">Season ${s.season_number}</option>`).join('');
+            await loadEpisodes();
         }
 
-        function switchMode(mode) {
-            currentMode = mode;
-            document.getElementById('movie-tab').className = mode === 'movie' ? 'active-tab pb-1' : 'text-gray-400 pb-1';
-            document.getElementById('tv-tab').className = mode === 'tv' ? 'active-tab pb-1' : 'text-gray-400 pb-1';
-            document.getElementById('grid-title').innerText = mode === 'movie' ? 'Trending Movies' : 'Trending TV Shows';
-            fetchData();
+        // FETCH EPISODES FOR SELECTED SEASON
+        async function loadEpisodes() {
+            const seasonNum = document.getElementById('season-select').value;
+            const res = await fetch(`https://api.themoviedb.org/3/tv/${currentId}/season/${seasonNum}?api_key=${API_KEY}`);
+            const data = await res.json();
+            const select = document.getElementById('episode-select');
+            select.innerHTML = data.episodes.map(e => `<option value="${e.episode_number}">Ep ${e.episode_number}: ${e.name}</option>`).join('');
+            updateSource();
         }
 
-        function closePlayer() {
-            document.getElementById('player-modal').style.display = 'none';
-            document.getElementById('video-iframe').src = '';
+        function updateSource() {
+            const iframe = document.getElementById('video-iframe');
+            const s = document.getElementById('season-select').value || 1;
+            const e = document.getElementById('episode-select').value || 1;
+            
+            if (currentMode === 'movie') {
+                iframe.src = currentServer === 'cinemaos' ? `https://cinemaos.tech/player/${currentId}` : `https://vidsrc.to/embed/movie/${currentId}`;
+            } else {
+                iframe.src = currentServer === 'cinemaos' ? `https://cinemaos.tech/player/${currentId}/${s}/${e}` : `https://vidsrc.to/embed/tv/${currentId}/${s}/${e}`;
+            }
         }
 
-        document.getElementById('search').addEventListener('input', (e) => {
-            if(e.target.value.length > 2) fetchData(e.target.value);
-            if(e.target.value.length === 0) fetchData();
-        });
+        function changeServer(srv) { currentServer = srv; updateSource(); }
+        function closePlayer() { document.getElementById('player-modal').style.display = 'none'; document.getElementById('video-iframe').src = ''; }
+        function switchMode(m) { 
+            currentMode = m; 
+            document.getElementById('m-btn').className = m === 'movie' ? 'text-red-600' : 'text-gray-400';
+            document.getElementById('t-btn').className = m === 'tv' ? 'text-red-600' : 'text-gray-400';
+            fetchData(); 
+        }
 
+        document.getElementById('search').addEventListener('input', e => fetchData(e.target.value));
         fetchData();
     </script>
 </body>
 </html>
-
