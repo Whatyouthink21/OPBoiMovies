@@ -3,121 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AURA | ZENITH EDITION</title>
+    <title>AURA | CRYSTAL</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Outfit:wght@700;900&display=swap" rel="stylesheet">
     <style>
-        :root { --accent: #3b82f6; --bg: #030303; --glass: rgba(255, 255, 255, 0.05); }
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: white; overflow-x: hidden; }
-        h1, h2, .font-heading { font-family: 'Outfit', sans-serif; }
+        :root { --bg: #08080a; --glass: rgba(255, 255, 255, 0.03); --border: rgba(255, 255, 255, 0.08); }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: #e0e0e0; overflow-x: hidden; }
+        h1, h2, .font-heading { font-family: 'Outfit', sans-serif; color: #fff; }
 
-        /* --- THE GLITCH-FREE DROPDOWN SYSTEM --- */
+        /* Pure Glass Dropdowns */
         .custom-drop { position: relative; display: inline-block; }
         .drop-trigger { 
-            background: var(--glass); backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1); padding: 10px 20px;
-            border-radius: 12px; font-size: 11px; font-weight: 800;
+            background: var(--glass); backdrop-filter: blur(15px);
+            border: 1px solid var(--border); padding: 10px 20px;
+            border-radius: 10px; font-size: 11px; font-weight: 700;
             text-transform: uppercase; letter-spacing: 1px; transition: 0.3s;
+            color: rgba(255,255,255,0.7);
         }
-        .drop-trigger:hover { border-color: var(--accent); background: rgba(59, 130, 246, 0.1); }
+        .drop-trigger:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.3); color: #fff; }
 
         .drop-menu { 
-            display: none; position: absolute; top: calc(100% + 8px); left: 0; 
-            min-width: 200px; background: #0a0a0a; border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 14px; padding: 8px; z-index: 2000;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.9);
+            display: none; position: absolute; top: calc(100% + 10px); left: 0; 
+            min-width: 220px; background: rgba(15, 15, 20, 0.95); backdrop-filter: blur(20px);
+            border: 1px solid var(--border); border-radius: 12px; padding: 8px; z-index: 2000;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.6);
         }
-        /* The Bridge: Prevents glitching when moving mouse from trigger to menu */
-        .custom-drop::after { content: ''; position: absolute; top: 100%; left: 0; width: 100%; height: 10px; }
-        .custom-drop:hover .drop-menu { display: block; animation: menuFade 0.2s ease-out forwards; }
+        .custom-drop::after { content: ''; position: absolute; top: 100%; left: 0; width: 100%; height: 12px; }
+        .custom-drop:hover .drop-menu { display: block; animation: auraFade 0.3s ease-out; }
 
         .drop-item {
             width: 100%; text-align: left; padding: 10px 14px; border-radius: 8px;
-            font-size: 11px; font-weight: 600; text-transform: uppercase;
-            transition: 0.2s; color: rgba(255,255,255,0.6);
+            font-size: 11px; font-weight: 500; text-transform: uppercase;
+            transition: 0.2s; color: rgba(255,255,255,0.5);
         }
-        .drop-item:hover { background: var(--accent); color: white; }
+        .drop-item:hover { background: rgba(255,255,255,0.1); color: #fff; }
 
-        @keyframes menuFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes auraFade { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- UI ELEMENTS --- */
-        .glass-nav { background: rgba(3, 3, 3, 0.8); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .movie-card { transition: 0.4s cubic-bezier(0.2, 1, 0.2, 1); cursor: pointer; border-radius: 16px; overflow: hidden; }
-        .movie-card:hover { transform: scale(1.05); box-shadow: 0 0 30px rgba(59, 130, 246, 0.2); }
+        /* Content UI */
+        .nav-aura { background: rgba(8, 8, 10, 0.7); backdrop-filter: blur(25px); border-bottom: 1px solid var(--border); }
+        .movie-card { transition: 0.5s cubic-bezier(0.2, 1, 0.2, 1); cursor: pointer; border-radius: 14px; overflow: hidden; border: 1px solid transparent; }
+        .movie-card:hover { transform: scale(1.04); border-color: rgba(255,255,255,0.2); box-shadow: 0 0 40px rgba(255,255,255,0.05); }
         
         #player-overlay { position: fixed; inset: 0; z-index: 1500; background: var(--bg); display: none; overflow-y: auto; }
-        .video-box { width: 100%; aspect-ratio: 16 / 9; max-height: 80vh; background: #000; border-radius: 24px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05); }
-        iframe { width: 100%; height: 100%; border: none; }
+        .video-box { width: 100%; aspect-ratio: 16 / 9; max-height: 75vh; background: #000; border-radius: 20px; overflow: hidden; border: 1px solid var(--border); }
+        
+        .list-badge { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); padding: 4px 8px; border-radius: 6px; font-size: 9px; font-weight: 800; border: 1px solid var(--border); }
     </style>
 </head>
 <body>
 
-    <nav class="fixed top-0 w-full z-[100] px-6 py-5 glass-nav flex items-center justify-between">
+    <nav class="fixed top-0 w-full z-[100] px-8 py-5 nav-aura flex items-center justify-between">
         <div class="flex items-center gap-10">
-            <h1 class="text-2xl font-black italic tracking-tighter" onclick="location.reload()">AURA</h1>
-            <div class="flex bg-white/5 rounded-full p-1">
-                <button onclick="setMode('movie')" id="m-btn" class="px-6 py-2 rounded-full text-[10px] font-black uppercase bg-blue-600">Movies</button>
-                <button onclick="setMode('tv')" id="t-btn" class="px-6 py-2 rounded-full text-[10px] font-black uppercase text-white/40">Series</button>
+            <h1 class="text-2xl font-black italic tracking-tighter cursor-pointer opacity-90" onclick="location.reload()">AURA</h1>
+            <div class="flex bg-white/5 rounded-xl p-1 border border-white/5">
+                <button onclick="setMode('movie')" id="m-btn" class="px-6 py-2 rounded-lg text-[10px] font-bold uppercase transition-all bg-white/10 text-white">Movies</button>
+                <button onclick="setMode('tv')" id="t-btn" class="px-6 py-2 rounded-lg text-[10px] font-bold uppercase text-white/40 hover:text-white transition-all">Series</button>
             </div>
         </div>
 
-        <div class="flex items-center gap-4">
+        <div class="flex items-center gap-5">
             <div class="custom-drop">
-                <button class="drop-trigger">Explore Genres</button>
+                <button class="drop-trigger">Genres</button>
                 <div id="genre-menu" class="drop-menu max-h-80 overflow-y-auto"></div>
             </div>
-            <input type="text" id="search" placeholder="Search..." class="bg-white/5 border border-white/10 px-6 py-2 rounded-full text-sm w-64 outline-none focus:border-blue-500 transition">
+            <input type="text" id="search" placeholder="Search..." class="bg-white/5 border border-white/5 px-6 py-2 rounded-xl text-sm w-72 outline-none focus:border-white/20 transition">
         </div>
     </nav>
 
-    <header class="relative h-[85vh] flex items-end pb-24 px-8 lg:px-20 overflow-hidden">
-        <div id="hero-bg" class="absolute inset-0 bg-cover bg-center scale-105 transition-transform duration-[5s]"></div>
-        <div class="absolute inset-0 bg-gradient-to-t from-[#030303] via-transparent"></div>
-        <div class="relative z-10 max-w-4xl">
-            <h2 id="hero-title" class="text-7xl lg:text-9xl font-black mb-8 leading-none tracking-tighter uppercase italic">...</h2>
-            <button id="hero-play" class="bg-white text-black px-12 py-5 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-blue-600 hover:text-white transition-all transform hover:scale-105">Play Experience</button>
+    <main class="pt-32 px-8 lg:px-20 pb-20">
+        <div id="my-list-container" class="mb-16 hidden">
+            <div class="flex items-center gap-4 mb-8">
+                <h2 class="text-sm font-black uppercase tracking-[0.3em] opacity-40">My Collection</h2>
+                <div class="h-px bg-white/5 flex-1"></div>
+            </div>
+            <div id="my-list-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8"></div>
         </div>
-    </header>
 
-    <main class="px-8 lg:px-20 py-20">
+        <div class="flex items-center gap-4 mb-8">
+            <h2 class="text-sm font-black uppercase tracking-[0.3em] opacity-40">Trending Now</h2>
+            <div class="h-px bg-white/5 flex-1"></div>
+        </div>
         <div id="grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8"></div>
     </main>
 
     <div id="player-overlay">
-        <div class="max-w-7xl mx-auto py-10 px-6">
+        <div class="max-w-7xl mx-auto py-10 px-8">
             <div class="flex justify-between items-center mb-8">
-                <button onclick="closePlayer()" class="drop-trigger">← Back</button>
+                <button onclick="closePlayer()" class="drop-trigger">← Close</button>
                 
                 <div class="flex gap-4">
+                    <button id="add-list-btn" onclick="toggleMyList()" class="drop-trigger border-white/20">+ Add to List</button>
                     <div class="custom-drop">
-                        <button class="drop-trigger text-blue-500">Node: <span id="active-srv">Primary</span></button>
+                        <button class="drop-trigger"><span id="active-srv">Server</span></button>
                         <div id="srv-menu" class="drop-menu"></div>
                     </div>
-                    
                     <div id="tv-ui" class="hidden flex gap-4">
                         <div class="custom-drop">
-                            <button class="drop-trigger">S: <span id="s-num">1</span></button>
+                            <button class="drop-trigger">S <span id="s-num">1</span></button>
                             <div id="s-menu" class="drop-menu max-h-60 overflow-y-auto"></div>
                         </div>
                         <div class="custom-drop">
-                            <button class="drop-trigger">E: <span id="e-num">1</span></button>
+                            <button class="drop-trigger">E <span id="e-num">1</span></button>
                             <div id="e-menu" class="drop-menu max-h-60 overflow-y-auto"></div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="video-box shadow-2xl mb-12">
+            <div class="video-box shadow-2xl mb-12 bg-black">
                 <iframe id="frame" src="" allowfullscreen></iframe>
             </div>
 
-            <div class="grid lg:grid-cols-3 gap-12">
+            <div class="grid lg:grid-cols-3 gap-16">
                 <div class="lg:col-span-2">
-                    <h2 id="p-title" class="text-6xl font-black uppercase mb-6 tracking-tighter">...</h2>
-                    <p id="p-desc" class="text-white/50 text-xl font-light leading-relaxed"></p>
+                    <h2 id="p-title" class="text-6xl font-black uppercase mb-6 tracking-tighter leading-tight">...</h2>
+                    <p id="p-desc" class="text-white/40 text-lg font-light leading-relaxed"></p>
                 </div>
-                <div class="bg-white/5 rounded-3xl p-8 border border-white/10 h-fit">
-                    <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-white/30 mb-8">Top Casting</h3>
+                <div>
+                    <h3 class="text-[10px] font-black uppercase tracking-[0.4em] opacity-30 mb-8">Cast Members</h3>
                     <div id="p-cast" class="space-y-6"></div>
                 </div>
             </div>
@@ -126,12 +130,10 @@
 
     <script>
         const KEY = 'a45420333457411e78d5ad35d6c51a2d';
-        let mode = 'movie', activeID = null, currentSrv = 'cinemaos', s = 1, e = 1;
+        let mode = 'movie', activeID = null, currentSrv = 'cinemaos', s = 1, e = 1, currentItem = null;
+        let myData = JSON.parse(localStorage.getItem('aura_list')) || [];
         
-        const servers = [
-            {id:'cinemaos', n:'Aura Primary'}, {id:'vidsrcto', n:'Mirror Node 1'},
-            {id:'vidsrcme', n:'Mirror Node 2'}, {id:'embedsu', n:'Ultra Stream'}
-        ];
+        const servers = [{id:'cinemaos', n:'Aura One'}, {id:'vidsrcto', n:'Aura Two'}, {id:'vidsrcme', n:'Aura Three'}];
 
         async function init(q = '', g = '') {
             let url = `https://api.themoviedb.org/3/trending/${mode}/week?api_key=${KEY}`;
@@ -140,52 +142,56 @@
             
             const r = await fetch(url);
             const d = await r.json();
-            if(!q && !g && d.results[0]) setupHero(d.results[0]);
-            renderGrid(d.results);
+            renderGrid(d.results, 'grid');
+            renderMyList();
             loadGenres();
         }
 
         async function loadGenres() {
             const r = await fetch(`https://api.themoviedb.org/3/genre/${mode}/list?api_key=${KEY}`);
             const d = await r.json();
-            document.getElementById('genre-menu').innerHTML = d.genres.map(g => 
-                `<button onclick="init('','${g.id}')" class="drop-item">${g.name}</button>`).join('');
+            document.getElementById('genre-menu').innerHTML = d.genres.map(g => `<button onclick="init('','${g.id}')" class="drop-item">${g.name}</button>`).join('');
         }
 
-        function setupHero(m) {
-            document.getElementById('hero-bg').style.backgroundImage = `url(https://image.tmdb.org/t/p/original${m.backdrop_path})`;
-            document.getElementById('hero-title').innerText = m.title || m.name;
-            document.getElementById('hero-play').onclick = () => openPlayer(m.id, m.title || m.name);
-        }
-
-        function renderGrid(list) {
-            document.getElementById('grid').innerHTML = list.map(m => !m.poster_path ? '' : `
-                <div class="movie-card" onclick="openPlayer(${m.id}, '${(m.title||m.name).replace(/'/g,"\\")}')">
-                    <img src="https://image.tmdb.org/t/p/w500${m.poster_path}" class="w-full">
+        function renderGrid(list, target) {
+            document.getElementById(target).innerHTML = list.map(m => !m.poster_path ? '' : `
+                <div class="movie-card" onclick="openPlayer(${m.id}, '${(m.title||m.name).replace(/'/g,"\\")}', '${m.poster_path}')">
+                    <img src="https://image.tmdb.org/t/p/w500${m.poster_path}" class="w-full h-full object-cover">
                 </div>`).join('');
         }
 
-        async function openPlayer(id, title) {
+        function renderMyList() {
+            const container = document.getElementById('my-list-container');
+            if(myData.length > 0) {
+                container.classList.remove('hidden');
+                renderGrid(myData, 'my-list-grid');
+            } else {
+                container.classList.add('hidden');
+            }
+        }
+
+        async function openPlayer(id, title, poster) {
             activeID = id; s = 1; e = 1;
+            currentItem = { id, title, poster_path: poster, mode };
             document.getElementById('p-title').innerText = title;
             document.getElementById('player-overlay').style.display = 'block';
             document.body.style.overflow = 'hidden';
+            
+            updateListButton();
 
             const res = await fetch(`https://api.themoviedb.org/3/${mode}/${id}?api_key=${KEY}&append_to_response=credits`).then(r => r.json());
             document.getElementById('p-desc').innerText = res.overview;
             document.getElementById('p-cast').innerHTML = res.credits.cast.slice(0, 4).map(c => `
-                <div class="flex items-center gap-4">
-                    <img src="https://image.tmdb.org/t/p/w185${c.profile_path}" class="w-10 h-10 rounded-full object-cover border border-white/20">
-                    <p class="text-xs font-bold">${c.name}</p>
+                <div class="flex items-center gap-4 opacity-70">
+                    <img src="https://image.tmdb.org/t/p/w185${c.profile_path}" class="w-10 h-10 rounded-full grayscale border border-white/10">
+                    <p class="text-xs font-bold uppercase tracking-widest">${c.name}</p>
                 </div>`).join('');
             
-            document.getElementById('srv-menu').innerHTML = servers.map(sv => 
-                `<button onclick="setSrv('${sv.id}','${sv.n}')" class="drop-item">${sv.n}</button>`).join('');
+            document.getElementById('srv-menu').innerHTML = servers.map(sv => `<button onclick="setSrv('${sv.id}','${sv.n}')" class="drop-item">${sv.n}</button>`).join('');
 
             if(mode === 'tv') {
                 document.getElementById('tv-ui').classList.remove('hidden');
-                document.getElementById('s-menu').innerHTML = res.seasons.filter(sea => sea.season_number > 0).map(sea => 
-                    `<button onclick="setS(${sea.season_number})" class="drop-item">Season ${sea.season_number}</button>`).join('');
+                document.getElementById('s-menu').innerHTML = res.seasons.filter(sea => sea.season_number > 0).map(sea => `<button onclick="setS(${sea.season_number})" class="drop-item">Season ${sea.season_number}</button>`).join('');
                 loadEpisodes();
             } else {
                 document.getElementById('tv-ui').classList.add('hidden');
@@ -193,14 +199,32 @@
             }
         }
 
+        function toggleMyList() {
+            const index = myData.findIndex(x => x.id === currentItem.id);
+            if(index > -1) {
+                myData.splice(index, 1);
+            } else {
+                myData.unshift(currentItem);
+            }
+            localStorage.setItem('aura_list', JSON.stringify(myData));
+            updateListButton();
+            renderMyList();
+        }
+
+        function updateListButton() {
+            const btn = document.getElementById('add-list-btn');
+            const exists = myData.some(x => x.id === currentItem.id);
+            btn.innerText = exists ? '✓ In My List' : '+ Add to List';
+            btn.style.opacity = exists ? '1' : '0.6';
+        }
+
         async function loadEpisodes() {
             const d = await fetch(`https://api.themoviedb.org/3/tv/${activeID}/season/${s}?api_key=${KEY}`).then(r => r.json());
-            document.getElementById('e-menu').innerHTML = d.episodes.map(ep => 
-                `<button onclick="setE(${ep.episode_number})" class="drop-item">Episode ${ep.episode_number}</button>`).join('');
+            document.getElementById('e-menu').innerHTML = d.episodes.map(ep => `<button onclick="setE(${ep.episode_number})" class="drop-item">Episode ${ep.episode_number}</button>`).join('');
             updPlayer();
         }
 
-        function setSrv(id, n) { currentSrv = id; document.getElementById('active-srv').innerText = n.split(' ')[0]; updPlayer(); }
+        function setSrv(id, n) { currentSrv = id; document.getElementById('active-srv').innerText = n; updPlayer(); }
         function setS(val) { s = val; e = 1; document.getElementById('s-num').innerText = val; loadEpisodes(); }
         function setE(val) { e = val; document.getElementById('e-num').innerText = val; updPlayer(); }
 
@@ -209,13 +233,11 @@
             if(mode === 'movie') {
                 if(currentSrv==='cinemaos') src=`https://cinemaos.tech/player/${activeID}`;
                 else if(currentSrv==='vidsrcto') src=`https://vidsrc.to/embed/movie/${activeID}`;
-                else if(currentSrv==='vidsrcme') src=`https://vidsrc.me/embed/movie?tmdb=${activeID}`;
-                else src=`https://embed.su/embed/movie/${activeID}`;
+                else src=`https://vidsrc.me/embed/movie?tmdb=${activeID}`;
             } else {
                 if(currentSrv==='cinemaos') src=`https://cinemaos.tech/player/${activeID}/${s}/${e}`;
                 else if(currentSrv==='vidsrcto') src=`https://vidsrc.to/embed/tv/${activeID}/${s}/${e}`;
-                else if(currentSrv==='vidsrcme') src=`https://vidsrc.me/embed/tv?tmdb=${activeID}&sea=${s}&epi=${e}`;
-                else src=`https://embed.su/embed/tv/${activeID}/${s}/${e}`;
+                else src=`https://vidsrc.me/embed/tv?tmdb=${activeID}&sea=${s}&epi=${e}`;
             }
             document.getElementById('frame').src = src;
         }
@@ -228,8 +250,8 @@
 
         function setMode(m) { 
             mode = m; 
-            document.getElementById('m-btn').className = m === 'movie' ? 'px-6 py-2 rounded-full text-[10px] font-black uppercase bg-blue-600' : 'px-6 py-2 rounded-full text-[10px] font-black uppercase text-white/40';
-            document.getElementById('t-btn').className = m === 'tv' ? 'px-6 py-2 rounded-full text-[10px] font-black uppercase bg-blue-600' : 'px-6 py-2 rounded-full text-[10px] font-black uppercase text-white/40';
+            document.getElementById('m-btn').className = m === 'movie' ? 'px-6 py-2 rounded-lg text-[10px] font-bold uppercase transition-all bg-white/10 text-white' : 'px-6 py-2 rounded-lg text-[10px] font-bold uppercase text-white/40 hover:text-white transition-all';
+            document.getElementById('t-btn').className = m === 'tv' ? 'px-6 py-2 rounded-lg text-[10px] font-bold uppercase transition-all bg-white/10 text-white' : 'px-6 py-2 rounded-lg text-[10px] font-bold uppercase text-white/40 hover:text-white transition-all';
             init(); 
         }
 
