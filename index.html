@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OP BOI MOVIES | TITAN FIXED</title>
+    <title>OP BOI MOVIES | CINEMATIC</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;900&display=swap" rel="stylesheet">
     <style>
@@ -12,38 +12,36 @@
         
         .glass-nav { background: rgba(2, 2, 5, 0.9); backdrop-filter: blur(30px); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
 
-        /* FIXED DROPDOWN LOGIC */
-        .dropdown { position: relative; padding-bottom: 10px; } /* The bridge */
+        /* FIXED DROPDOWN BRIDGE */
+        .dropdown { position: relative; }
         .dropdown-content { 
             display: none; 
             position: absolute;
             top: 100%;
             left: 0;
-            min-width: 220px;
-            background: #0a0a0f;
+            min-width: 240px;
+            background: #0f0f15;
             border: 1px solid rgba(255,255,255,0.1);
             border-radius: 16px;
-            padding: 8px;
+            padding: 10px;
             z-index: 500;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
-            transform: translateY(10px);
-            animation: menuFade 0.2s ease-out forwards;
+            box-shadow: 0 20px 50px rgba(0,0,0,1);
+            margin-top: 5px; /* Tiny gap */
         }
+        /* Hover Bridge Trick */
+        .dropdown::after { content: ''; position: absolute; bottom: -10px; left: 0; width: 100%; height: 10px; }
+        .dropdown:hover .dropdown-content { display: block; animation: menuFade 0.2s ease-out; }
         @keyframes menuFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .dropdown:hover .dropdown-content { display: block; }
 
-        /* Movie Card & Animations */
-        .movie-card { transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1); }
-        .movie-card:hover { transform: translateY(-10px) scale(1.05); z-index: 20; }
-        .movie-card img { border-radius: 20px; border: 1px solid transparent; transition: 0.3s; }
+        /* Modal Scroll Fix */
+        .modal-open { overflow: hidden !important; }
+        #player-modal { overflow-y: auto; scrollbar-width: none; }
+        #player-modal::-webkit-scrollbar { display: none; }
+
+        .cast-card { min-width: 100px; transition: 0.3s; }
+        .cast-card:hover { transform: scale(1.1); }
+        
         .movie-card:hover img { border-color: var(--accent); box-shadow: 0 0 30px rgba(255, 0, 0, 0.3); }
-
-        /* Cinematic Hero Glow */
-        .hero-glow { position: absolute; top: 50%; left: 0; width: 40%; height: 40%; background: radial-gradient(circle, rgba(255,0,0,0.15) 0%, transparent 70%); z-index: 1; transform: translateY(-50%); pointer-events: none; }
-        
-        .video-wrapper { position: relative; padding-bottom: 56.25%; height: 0; border-radius: 24px; overflow: hidden; background: #000; box-shadow: 0 0 100px rgba(0,0,0,0.5); }
-        .video-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
-        
         .no-scrollbar::-webkit-scrollbar { display: none; }
     </style>
 </head>
@@ -55,151 +53,143 @@
         <div class="hidden lg:flex items-center gap-12 font-bold text-[11px] uppercase tracking-[0.2em]">
             <button onclick="changeMode('movie')" id="m-nav" class="text-red-600">Cinema</button>
             <button onclick="changeMode('tv')" id="t-nav" class="text-gray-400 hover:text-white transition">TV Library</button>
-            <button onclick="document.getElementById('watchlist-section').scrollIntoView({behavior:'smooth'})" class="text-gray-400 hover:text-yellow-500 transition">Saved</button>
         </div>
 
         <div class="relative flex items-center bg-white/5 border border-white/10 rounded-full px-5 py-2 group focus-within:border-red-600 transition">
-            <span class="opacity-40 mr-3">🔍</span>
             <input type="text" id="search" placeholder="Search universe..." class="bg-transparent text-sm w-48 lg:w-72 outline-none">
         </div>
     </nav>
 
-    <section id="hero" class="relative h-[95vh] w-full flex items-center overflow-hidden">
+    <section id="hero" class="relative h-[90vh] w-full flex items-center overflow-hidden">
         <div id="hero-bg" class="absolute inset-0 bg-cover bg-center transition-transform duration-[2s] scale-105"></div>
         <div class="absolute inset-0 bg-gradient-to-r from-[#020205] via-[#020205]/70 to-transparent"></div>
         <div class="absolute inset-0 bg-gradient-to-t from-[#020205] via-transparent to-transparent"></div>
-        <div class="hero-glow"></div>
         
         <div class="relative z-10 px-16 max-w-5xl opacity-0 translate-y-10 transition-all duration-1000" id="hero-content">
-            <div class="flex items-center gap-4 mb-6">
-                <span class="bg-red-600 px-5 py-1.5 rounded-full text-[10px] font-black tracking-[0.3em] uppercase shadow-lg shadow-red-600/30">Top Choice</span>
-                <span id="hero-year" class="text-lg font-semibold opacity-60">2026</span>
-            </div>
             <h2 id="hero-title" class="text-8xl font-black italic uppercase mb-6 leading-[0.9] tracking-tighter">Title</h2>
-            <p id="hero-desc" class="text-gray-300 text-xl mb-12 max-w-2xl line-clamp-3 font-light leading-relaxed"></p>
-            
             <div class="flex gap-6">
-                <button id="hero-play" class="bg-white text-black px-12 py-5 rounded-2xl font-black hover:bg-red-600 hover:text-white transition-all transform hover:scale-105 flex items-center gap-3 shadow-xl">
-                    <span class="text-xl">▶</span> WATCH NOW
-                </button>
-                <button id="hero-list" class="bg-white/5 border border-white/10 backdrop-blur-md px-10 py-5 rounded-2xl font-black hover:bg-white/10 transition-all">+ LIST</button>
+                <button id="hero-play" class="bg-white text-black px-12 py-5 rounded-2xl font-black hover:bg-red-600 hover:text-white transition-all transform hover:scale-105">▶ WATCH NOW</button>
             </div>
         </div>
     </section>
 
-    <section id="watchlist-section" class="px-16 mb-24 hidden">
-        <h3 class="text-2xl font-black italic mb-10 uppercase tracking-widest text-red-600 flex items-center gap-4">
-            <span class="w-12 h-0.5 bg-red-600"></span> Your Collection
-        </h3>
-        <div id="watchlist-grid" class="flex gap-10 overflow-x-auto no-scrollbar pb-10"></div>
-    </section>
-
-    <main class="px-16">
-        <div class="flex items-center justify-between mb-16">
-            <h3 class="text-4xl font-black italic uppercase tracking-tighter">Trending Now</h3>
-            <div class="flex-1 h-px bg-white/5 ml-10"></div>
-        </div>
-        <div id="grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-12"></div>
+    <main class="px-16 mt-10">
+        <h3 class="text-4xl font-black italic uppercase tracking-tighter mb-16">Trending Now</h3>
+        <div id="grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-10"></div>
     </main>
 
-    <div id="player-modal" class="fixed inset-0 bg-black/98 z-[200] hidden flex-col items-center justify-center p-8 backdrop-blur-3xl">
-        <div class="w-full max-w-6xl animate-in zoom-in-95 duration-300">
-            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-10 gap-8">
-                <div class="flex-1">
-                    <h2 id="p-title" class="text-4xl font-black italic tracking-tighter uppercase mb-6">Loading Title...</h2>
-                    
-                    <div class="flex flex-wrap gap-5">
-                        <div class="dropdown">
-                            <button class="bg-white/10 border border-white/10 px-8 py-4 rounded-2xl text-xs font-black uppercase tracking-widest flex items-center gap-3">
-                                <span class="text-red-600">📡</span> SERVER: <span id="active-srv" class="text-red-500">CINEMAOS</span>
-                            </button>
-                            <div class="dropdown-content">
-                                <button onclick="setServer('cinemaos', 'CinemaOS')" class="w-full text-left px-5 py-4 rounded-xl hover:bg-red-600 transition-all text-xs font-black mb-1">SERVER 1 (ULTRA HD)</button>
-                                <button onclick="setServer('vidsrcto', 'VidSrc.to')" class="w-full text-left px-5 py-4 rounded-xl hover:bg-red-600 transition-all text-xs font-black mb-1">SERVER 2 (FAST)</button>
-                                <button onclick="setServer('vidsrcme', 'VidSrc.me')" class="w-full text-left px-5 py-4 rounded-xl hover:bg-red-600 transition-all text-xs font-black mb-1">SERVER 3 (STABLE)</button>
-                                <button onclick="setServer('vidsrccc', 'VidSrc.cc')" class="w-full text-left px-5 py-4 rounded-xl hover:bg-red-600 transition-all text-xs font-black mb-1">SERVER 4 (DIRECT)</button>
-                                <button onclick="setServer('embedsu', 'Embed.su')" class="w-full text-left px-5 py-4 rounded-xl hover:bg-red-600 transition-all text-xs font-black">SERVER 5 (MULTI)</button>
-                            </div>
+    <div id="player-modal" class="fixed inset-0 bg-black/98 z-[200] hidden flex-col items-center p-8 backdrop-blur-3xl">
+        <div class="w-full max-w-6xl mt-10">
+            <div class="flex justify-between items-center mb-8">
+                <button onclick="closeP()" class="text-xl font-bold bg-white/10 px-6 py-2 rounded-full hover:bg-red-600 transition">← BACK</button>
+                <div class="flex gap-4">
+                    <div class="dropdown">
+                        <button class="bg-white/10 px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest">Server: <span id="active-srv" class="text-red-500">CinemaOS</span></button>
+                        <div class="dropdown-content">
+                            <button onclick="setServer('cinemaos', 'CinemaOS')" class="w-full text-left p-3 rounded-lg hover:bg-red-600 text-[10px] font-black mb-1">SERVER 1 (HD)</button>
+                            <button onclick="setServer('vidsrcto', 'VidSrc.to')" class="w-full text-left p-3 rounded-lg hover:bg-red-600 text-[10px] font-black mb-1">SERVER 2 (FAST)</button>
+                            <button onclick="setServer('vidsrcme', 'VidSrc.me')" class="w-full text-left p-3 rounded-lg hover:bg-red-600 text-[10px] font-black mb-1">SERVER 3 (STABLE)</button>
+                            <button onclick="setServer('vidsrccc', 'VidSrc.cc')" class="w-full text-left p-3 rounded-lg hover:bg-red-600 text-[10px] font-black mb-1">SERVER 4 (DIRECT)</button>
+                            <button onclick="setServer('embedsu', 'Embed.su')" class="w-full text-left p-3 rounded-lg hover:bg-red-600 text-[10px] font-black">SERVER 5 (ULTRA)</button>
                         </div>
-
-                        <div id="tv-ui" class="hidden flex gap-5">
-                            <div class="dropdown">
-                                <button class="bg-white/10 border border-white/10 px-8 py-4 rounded-2xl text-xs font-black uppercase">Season <span id="cur-s">1</span></button>
-                                <div id="s-drop" class="dropdown-content max-h-64 overflow-y-auto"></div>
-                            </div>
-                            <div class="dropdown">
-                                <button class="bg-white/10 border border-white/10 px-8 py-4 rounded-2xl text-xs font-black uppercase">Episode <span id="cur-e">1</span></button>
-                                <div id="e-drop" class="dropdown-content max-h-64 overflow-y-auto"></div>
-                            </div>
+                    </div>
+                    <div id="tv-ui" class="hidden flex gap-2">
+                        <div class="dropdown">
+                            <button class="bg-white/10 px-6 py-3 rounded-xl text-xs font-black uppercase">Season <span id="cur-s">1</span></button>
+                            <div id="s-drop" class="dropdown-content max-h-60 overflow-y-auto"></div>
+                        </div>
+                        <div class="dropdown">
+                            <button class="bg-white/10 px-6 py-3 rounded-xl text-xs font-black uppercase">Episode <span id="cur-e">1</span></button>
+                            <div id="e-drop" class="dropdown-content max-h-60 overflow-y-auto"></div>
                         </div>
                     </div>
                 </div>
-                <button onclick="closeP()" class="text-7xl font-thin hover:text-red-600 transition-transform hover:rotate-90">&times;</button>
             </div>
-            <div class="video-wrapper"><iframe id="v-frame" src="" allowfullscreen></iframe></div>
+
+            <div class="video-wrapper mb-12 shadow-2xl shadow-red-600/10"><iframe id="v-frame" src="" allowfullscreen></iframe></div>
+
+            <div class="grid lg:grid-cols-3 gap-12 mb-20 animate-in fade-in slide-in-from-bottom-10 duration-700">
+                <div class="lg:col-span-2">
+                    <h2 id="p-title" class="text-6xl font-black uppercase italic mb-4">Loading...</h2>
+                    <div class="flex gap-4 items-center mb-6">
+                        <span id="p-date" class="text-red-500 font-bold">2026</span>
+                        <span class="w-1 h-1 bg-white/20 rounded-full"></span>
+                        <span id="p-rating" class="bg-white/10 px-3 py-1 rounded text-xs font-bold uppercase">Rating: 0.0</span>
+                    </div>
+                    <p id="p-desc" class="text-gray-400 text-lg leading-relaxed font-light"></p>
+                </div>
+                <div>
+                    <h3 class="text-xs font-black uppercase tracking-[0.3em] mb-6 text-red-500">Star Cast</h3>
+                    <div id="p-cast" class="flex gap-4 overflow-x-auto no-scrollbar pb-4">
+                        </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
         const KEY = 'a45420333457411e78d5ad35d6c51a2d';
-        let mode = 'movie', curId = null, srv = 'cinemaos', curS = 1, curE = 1, watchlist = JSON.parse(localStorage.getItem('op_titan_v4') || '[]');
+        let mode = 'movie', curId = null, srv = 'cinemaos', curS = 1, curE = 1;
 
         async function init(query = '') {
             let url = `https://api.themoviedb.org/3/trending/${mode}/week?api_key=${KEY}`;
             if(query) url = `https://api.themoviedb.org/3/search/${mode}?api_key=${KEY}&query=${query}`;
             const res = await fetch(url);
             const data = await res.json();
-            
             if(!query && data.results[0]) setupHero(data.results[0]);
-            renderGrid(data.results, 'grid');
-            renderWatchlist();
+            renderGrid(data.results);
         }
 
         function setupHero(m) {
-            const hero = document.getElementById('hero-content');
-            hero.style.opacity = '0';
-            setTimeout(() => {
-                document.getElementById('hero-bg').style.backgroundImage = `url(https://image.tmdb.org/t/p/original${m.backdrop_path})`;
-                document.getElementById('hero-title').innerText = m.title || m.name;
-                document.getElementById('hero-desc').innerText = m.overview;
-                document.getElementById('hero-year').innerText = (m.release_date || m.first_air_date || '2026').split('-')[0];
-                document.getElementById('hero-play').onclick = () => openP(m.id, m.title || m.name, m.poster_path);
-                document.getElementById('hero-list').onclick = () => toggleWL(m.id, m.title || m.name, m.poster_path);
-                hero.style.opacity = '1';
-                hero.style.transform = 'translateY(0)';
-            }, 500);
+            document.getElementById('hero-bg').style.backgroundImage = `url(https://image.tmdb.org/t/p/original${m.backdrop_path})`;
+            document.getElementById('hero-title').innerText = m.title || m.name;
+            document.getElementById('hero-play').onclick = () => openP(m.id, m.title || m.name);
+            document.getElementById('hero-content').style.opacity = '1';
+            document.getElementById('hero-content').style.transform = 'translateY(0)';
         }
 
-        function renderGrid(items, targetId) {
-            document.getElementById(targetId).innerHTML = items.map(m => {
-                if(!m.poster_path) return '';
-                return `
-                <div class="movie-card group cursor-pointer" onclick="openP(${m.id}, '${(m.title||m.name).replace(/'/g,"\\")}', '${m.poster_path}')">
-                    <img src="https://image.tmdb.org/t/p/w500${m.poster_path}" class="w-full aspect-[2/3] object-cover mb-4 shadow-2xl">
-                    <h4 class="font-bold text-[13px] uppercase tracking-tighter text-gray-400 group-hover:text-white transition-colors">${m.title || m.name}</h4>
-                </div>`;
-            }).join('');
+        function renderGrid(items) {
+            document.getElementById('grid').innerHTML = items.map(m => `
+                <div class="cursor-pointer group" onclick="openP(${m.id}, '${(m.title||m.name).replace(/'/g,"\\")}')">
+                    <img src="https://image.tmdb.org/t/p/w500${m.poster_path}" class="rounded-2xl transition duration-500 group-hover:scale-105 group-hover:border-red-600 border border-transparent">
+                    <h4 class="mt-4 font-bold text-xs uppercase tracking-widest text-gray-400 group-hover:text-white">${m.title || m.name}</h4>
+                </div>`).join('');
         }
 
-        async function openP(id, title, poster) {
+        async function openP(id, title) {
             curId = id; curS = 1; curE = 1;
             document.getElementById('p-title').innerText = title;
             document.getElementById('player-modal').style.display = 'flex';
-            document.body.style.overflow = 'hidden';
+            document.body.classList.add('modal-open');
+            
+            // Fetch Details & Cast
+            const detailsRes = await fetch(`https://api.themoviedb.org/3/${mode}/${id}?api_key=${KEY}&append_to_response=credits`);
+            const d = await detailsRes.json();
+            
+            document.getElementById('p-desc').innerText = d.overview;
+            document.getElementById('p-date').innerText = (d.release_date || d.first_air_date || '').split('-')[0];
+            document.getElementById('p-rating').innerText = `Rating: ${d.vote_average.toFixed(1)}`;
+            
+            // Render Cast Photos
+            document.getElementById('p-cast').innerHTML = d.credits.cast.slice(0, 8).map(c => `
+                <div class="cast-card">
+                    <img src="${c.profile_path ? 'https://image.tmdb.org/t/p/w185' + c.profile_path : 'https://via.placeholder.com/185x278'}" class="w-20 h-28 object-cover rounded-xl mb-2">
+                    <p class="text-[9px] font-black uppercase truncate w-20">${c.name}</p>
+                </div>
+            `).join('');
+
             if (mode === 'tv') {
                 document.getElementById('tv-ui').classList.remove('hidden');
-                await loadTVData(id);
+                await loadTVData(d);
             } else {
                 document.getElementById('tv-ui').classList.add('hidden');
                 updSrc();
             }
         }
 
-        async function loadTVData(id) {
-            const res = await fetch(`https://api.themoviedb.org/3/tv/${id}?api_key=${KEY}`);
-            const data = await res.json();
-            document.getElementById('s-drop').innerHTML = data.seasons.filter(s => s.season_number > 0).map(s => 
-                `<button onclick="setS(${s.season_number})" class="w-full text-left px-5 py-3 hover:bg-red-600 rounded-xl text-xs font-black transition mb-1">SEASON ${s.season_number}</button>`
+        async function loadTVData(d) {
+            document.getElementById('s-drop').innerHTML = d.seasons.filter(s => s.season_number > 0).map(s => 
+                `<button onclick="setS(${s.season_number})" class="w-full text-left p-3 hover:bg-red-600 rounded-lg text-[10px] font-black mb-1">SEASON ${s.season_number}</button>`
             ).join('');
             await loadEps();
         }
@@ -208,47 +198,31 @@
             const res = await fetch(`https://api.themoviedb.org/3/tv/${curId}/season/${curS}?api_key=${KEY}`);
             const data = await res.json();
             document.getElementById('e-drop').innerHTML = data.episodes.map(e => 
-                `<button onclick="setE(${e.episode_number})" class="w-full text-left px-5 py-3 hover:bg-red-600 rounded-xl text-xs font-black transition mb-1 truncate">EP ${e.episode_number}: ${e.name}</button>`
+                `<button onclick="setE(${e.episode_number})" class="w-full text-left p-3 hover:bg-red-600 rounded-lg text-[10px] font-black mb-1 truncate">EP ${e.episode_number}: ${e.name}</button>`
             ).join('');
             updSrc();
         }
 
-        function setServer(id, name) { srv = id; document.getElementById('active-srv').innerText = name.toUpperCase(); updSrc(); }
+        function setServer(id, name) { srv = id; document.getElementById('active-srv').innerText = name; updSrc(); }
         function setS(s) { curS = s; curE = 1; document.getElementById('cur-s').innerText = s; loadEps(); }
         function setE(e) { curE = e; document.getElementById('cur-e').innerText = e; updSrc(); }
 
         function updSrc() {
             let url = '';
-            const t = curId, s = curS, e = curE;
             if(mode === 'movie') {
-                if(srv === 'cinemaos') url = `https://cinemaos.tech/player/${t}`;
-                if(srv === 'vidsrcto') url = `https://vidsrc.to/embed/movie/${t}`;
-                if(srv === 'vidsrcme') url = `https://vidsrc.me/embed/movie?tmdb=${t}`;
-                if(srv === 'vidsrccc') url = `https://vidsrc.cc/v2/embed/movie/${t}`;
-                if(srv === 'embedsu')  url = `https://embed.su/embed/movie/${t}`;
+                if(srv === 'cinemaos') url = `https://cinemaos.tech/player/${curId}`;
+                if(srv === 'vidsrcto') url = `https://vidsrc.to/embed/movie/${curId}`;
+                if(srv === 'vidsrcme') url = `https://vidsrc.me/embed/movie?tmdb=${curId}`;
+                if(srv === 'vidsrccc') url = `https://vidsrc.cc/v2/embed/movie/${curId}`;
+                if(srv === 'embedsu')  url = `https://embed.su/embed/movie/${curId}`;
             } else {
-                if(srv === 'cinemaos') url = `https://cinemaos.tech/player/${t}/${s}/${e}`;
-                if(srv === 'vidsrcto') url = `https://vidsrc.to/embed/tv/${t}/${s}/${e}`;
-                if(srv === 'vidsrcme') url = `https://vidsrc.me/embed/tv?tmdb=${t}&sea=${s}&epi=${e}`;
-                if(srv === 'vidsrccc') url = `https://vidsrc.cc/v2/embed/tv/${t}/${s}/${e}`;
-                if(srv === 'embedsu')  url = `https://embed.su/embed/tv/${t}/${s}/${e}`;
+                if(srv === 'cinemaos') url = `https://cinemaos.tech/player/${curId}/${curS}/${curE}`;
+                if(srv === 'vidsrcto') url = `https://vidsrc.to/embed/tv/${curId}/${curS}/${curE}`;
+                if(srv === 'vidsrcme') url = `https://vidsrc.me/embed/tv?tmdb=${curId}&sea=${curS}&epi=${curE}`;
+                if(srv === 'vidsrccc') url = `https://vidsrc.cc/v2/embed/tv/${curId}/${curS}/${curE}`;
+                if(srv === 'embedsu')  url = `https://embed.su/embed/tv/${curId}/${curS}/${curE}`;
             }
             document.getElementById('v-frame').src = url;
-        }
-
-        function toggleWL(id, title, poster) {
-            const idx = watchlist.findIndex(x => x.id === id);
-            if(idx > -1) watchlist.splice(idx, 1);
-            else watchlist.push({id, title, poster_path: poster});
-            localStorage.setItem('op_titan_v4', JSON.stringify(watchlist));
-            renderWatchlist();
-        }
-
-        function renderWatchlist() {
-            const sec = document.getElementById('watchlist-section');
-            if(watchlist.length === 0) { sec.classList.add('hidden'); return; }
-            sec.classList.remove('hidden');
-            renderGrid(watchlist, 'watchlist-grid');
         }
 
         function changeMode(m) {
@@ -258,9 +232,13 @@
             init();
         }
 
-        function closeP() { document.getElementById('player-modal').style.display='none'; document.getElementById('v-frame').src=''; document.body.style.overflow='auto'; }
-        document.getElementById('search').addEventListener('input', e => { if(e.target.value.length > 2) init(e.target.value); else if(e.target.value == '') init(); });
-
+        function closeP() { 
+            document.getElementById('player-modal').style.display='none'; 
+            document.getElementById('v-frame').src=''; 
+            document.body.classList.remove('modal-open');
+        }
+        
+        document.getElementById('search').addEventListener('input', e => init(e.target.value));
         init();
     </script>
 </body>
