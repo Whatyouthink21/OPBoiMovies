@@ -3,142 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PROTOCOL | MEDIA INTERFACE</title>
+    <title>OP BOI | PREMIUM</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;800;900&display=swap" rel="stylesheet">
     <style>
-        :root { --neon: #00f2ff; --crimson: #ff003c; --void: #050507; --panel: #0d0e12; }
-        body { font-family: 'Space Grotesk', sans-serif; background: var(--void); color: white; overflow-x: hidden; }
+        :root { --accent: #ff0000; --bg: #050505; --card: #111111; }
+        body { font-family: 'Outfit', sans-serif; background: var(--bg); color: white; margin: 0; }
         
-        /* Sidebar Nav */
-        .sidebar { background: var(--panel); border-right: 1px solid rgba(0, 242, 255, 0.1); z-index: 100; }
-        .nav-link { transition: 0.3s; position: relative; }
-        .nav-link.active { color: var(--neon); }
-        .nav-link.active::before { content: ''; position: absolute; left: -24px; height: 100%; width: 4px; background: var(--neon); box-shadow: 0 0 15px var(--neon); }
+        /* Smooth Top Nav */
+        nav { background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent); z-index: 100; transition: 0.3s; }
+        .nav-scrolled { background: #000; border-bottom: 1px solid #222; }
 
-        /* Futuro Cards */
-        .card-frame { 
-            position: relative; overflow: hidden; border-radius: 4px; 
-            clip-path: polygon(0 0, 100% 0, 100% 90%, 90% 100%, 0 100%);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            transition: 0.4s cubic-bezier(0.2, 1, 0.2, 1);
+        /* Hero Image */
+        .hero-vignette { background: linear-gradient(to top, var(--bg) 10%, transparent 50%), linear-gradient(to right, var(--bg) 20%, transparent 60%); }
+
+        /* The Player Fix - True Cinema Scale */
+        .player-container { 
+            width: 100%; 
+            aspect-ratio: 16 / 9; 
+            max-height: 80vh; 
+            background: #000; 
+            border-radius: 20px; 
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            border: 1px solid #222;
         }
-        .card-frame:hover { transform: translateY(-5px); border-color: var(--neon); box-shadow: 0 0 30px rgba(0, 242, 255, 0.2); }
-        .card-meta { background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); }
+        iframe { width: 100%; height: 100%; border: none; }
 
-        /* Cinematic Theatre Modal */
-        #theatre-modal { background: rgba(2, 2, 4, 0.98); backdrop-filter: blur(20px); display: none; }
-        .theatre-viewport { 
-            width: 100%; aspect-ratio: 21 / 9; background: #000; 
-            box-shadow: 0 0 100px rgba(0, 242, 255, 0.1);
-            border: 1px solid rgba(0, 242, 255, 0.2);
-        }
-
-        /* Scanline Effect */
-        .scanlines::after {
-            content: " "; display: block; position: absolute; top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 118, 0.06));
-            z-index: 2; background-size: 100% 2px, 3px 100%; pointer-events: none;
+        /* Modal / Player View */
+        #player-modal { 
+            display: none; position: fixed; inset: 0; 
+            background: var(--bg); z-index: 200; 
+            overflow-y: auto; padding: 20px;
         }
 
-        /* Custom Dropdowns */
-        .drop-zone { background: #16181d; border: 1px solid #2a2d35; border-radius: 4px; cursor: pointer; }
-        .drop-menu { background: #16181d; border: 1px solid #2a2d35; display: none; position: absolute; width: 100%; z-index: 50; }
-        .drop-zone:hover .drop-menu { display: block; }
+        /* Solid UI Elements */
+        .bento-card { background: var(--card); border-radius: 24px; padding: 30px; border: 1px solid #222; }
+        .cast-bubble { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #333; }
         
+        /* Grid */
+        .poster-card { transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); cursor: pointer; }
+        .poster-card:hover { transform: scale(1.05); z-index: 10; }
+        .poster-card img { border-radius: 16px; border: 2px solid transparent; }
+        .poster-card:hover img { border-color: var(--accent); }
+
         .no-scroll { overflow: hidden; }
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-thumb { background: var(--neon); }
+        select { appearance: none; cursor: pointer; }
     </style>
 </head>
-<body class="flex min-h-screen">
+<body>
 
-    <aside class="sidebar fixed h-screen w-20 lg:w-64 flex flex-col items-center lg:items-start p-6">
-        <div class="mb-12">
-            <h1 class="hidden lg:block text-2xl font-bold tracking-tighter text-white">OPBOI <span class="text-[#00f2ff]">PRTCL</span></h1>
-            <div class="lg:hidden w-10 h-10 bg-[#00f2ff] rounded-sm"></div>
+    <nav id="navbar" class="fixed top-0 w-full px-6 lg:px-16 py-6 flex items-center justify-between">
+        <div class="flex items-center gap-12">
+            <h1 class="text-3xl font-black tracking-tighter cursor-pointer" onclick="location.reload()">OP BOI <span class="text-red-600">MOVIES</span></h1>
+            <div class="hidden md:flex gap-8 text-[11px] font-bold uppercase tracking-widest">
+                <button onclick="setMode('movie')" id="m-nav" class="text-red-600">Cinema</button>
+                <button onclick="setMode('tv')" id="t-nav" class="text-gray-400 hover:text-white transition">TV Shows</button>
+            </div>
         </div>
-
-        <nav class="flex-1 space-y-8">
-            <div class="space-y-4">
-                <p class="hidden lg:block text-[10px] uppercase tracking-[0.3em] text-gray-500 font-bold">Library</p>
-                <button onclick="setMode('movie')" id="nav-movie" class="nav-link active flex items-center gap-4 text-sm font-medium">
-                    <span class="p-2 bg-white/5 rounded">MV</span> <span class="hidden lg:block">Cinema Core</span>
-                </button>
-                <button onclick="setMode('tv')" id="nav-tv" class="nav-link flex items-center gap-4 text-sm font-medium text-gray-400">
-                    <span class="p-2 bg-white/5 rounded">TV</span> <span class="hidden lg:block">Serial Feed</span>
-                </button>
-            </div>
-            
-            <div class="space-y-4">
-                <p class="hidden lg:block text-[10px] uppercase tracking-[0.3em] text-gray-500 font-bold">Sort</p>
-                <select id="genre-filter" onchange="runGenre()" class="bg-transparent border-none text-xs font-bold text-[#00f2ff] outline-none w-full cursor-pointer"></select>
-            </div>
-        </nav>
-
-        <div class="mt-auto w-full">
-            <input type="text" id="search-bar" placeholder="SEARCH_" class="w-full bg-white/5 border border-white/10 p-3 text-xs outline-none focus:border-[#00f2ff] transition">
+        <div class="flex items-center gap-4">
+            <select id="genre-select" onchange="applyGenre()" class="bg-white/5 border border-white/10 rounded-full px-6 py-2 text-[10px] font-black uppercase text-red-500 outline-none"></select>
+            <input type="text" id="search" placeholder="Search universe..." class="bg-white/5 border border-white/10 rounded-full px-6 py-2 text-sm w-64 outline-none focus:ring-1 focus:ring-red-600 transition">
         </div>
-    </aside>
+    </nav>
 
-    <main class="ml-20 lg:ml-64 flex-1 p-8 lg:p-12">
-        <header id="hero-unit" class="relative h-[60vh] mb-16 group rounded-sm overflow-hidden border border-white/5">
-            <div id="hero-bg" class="absolute inset-0 bg-cover bg-center scanlines grayscale hover:grayscale-0 transition-all duration-1000"></div>
-            <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
-            
-            <div class="absolute bottom-12 left-12 max-w-3xl">
-                <div class="flex items-center gap-3 mb-4">
-                    <span class="w-2 h-2 bg-[#00f2ff] animate-pulse"></span>
-                    <span class="text-[10px] tracking-[0.5em] uppercase text-[#00f2ff]">Data Fragment Identified</span>
-                </div>
-                <h2 id="hero-title" class="text-6xl lg:text-8xl font-bold mb-6 tracking-tighter uppercase italic">PROTOCOL_LOAD</h2>
-                <p id="hero-desc" class="text-gray-400 text-sm leading-relaxed mb-8 line-clamp-2 font-light"></p>
-                <button id="hero-play" class="bg-[#00f2ff] text-black px-10 py-4 text-xs font-bold uppercase tracking-widest hover:bg-white transition-all">Execute Stream</button>
-            </div>
-        </header>
+    <header class="relative h-screen flex items-center px-6 lg:px-16 overflow-hidden">
+        <div id="hero-img" class="absolute inset-0 bg-cover bg-center transition-transform duration-[5s] scale-105"></div>
+        <div class="absolute inset-0 hero-vignette"></div>
+        
+        <div class="relative z-10 max-w-4xl">
+            <span class="bg-red-600 px-3 py-1 rounded text-[10px] font-black uppercase tracking-widest">Trending Now</span>
+            <h2 id="hero-title" class="text-7xl lg:text-9xl font-black uppercase leading-none mt-6 mb-8 tracking-tighter">TITLE</h2>
+            <p id="hero-desc" class="text-gray-300 text-lg lg:text-xl mb-10 line-clamp-3 font-light max-w-2xl leading-relaxed"></p>
+            <button id="hero-play" class="bg-white text-black px-12 py-5 rounded-2xl font-black hover:bg-red-600 hover:text-white transition-all transform hover:scale-105 flex items-center gap-3">
+                <span class="text-2xl">▶</span> WATCH NOW
+            </button>
+        </div>
+    </header>
 
-        <section>
-            <div class="flex items-center justify-between mb-10">
-                <h3 class="text-xs font-bold tracking-[0.4em] uppercase text-gray-500 italic">Retrieved Entities</h3>
-                <div class="h-[1px] flex-1 mx-8 bg-white/5"></div>
-            </div>
-            <div id="main-grid" class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-6"></div>
-        </section>
+    <main class="px-6 lg:px-16 -mt-20 relative z-20 pb-20">
+        <h3 class="text-xl font-black uppercase tracking-widest mb-10 text-white/50">Discovery Feed</h3>
+        <div id="grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8"></div>
     </main>
 
-    <div id="theatre-modal" class="fixed inset-0 z-[200] overflow-y-auto p-4 lg:p-12">
-        <div class="max-w-[1600px] mx-auto">
-            <div class="flex items-center justify-between mb-8">
-                <button onclick="closeTheatre()" class="text-[#ff003c] text-[10px] font-bold tracking-[0.4em] uppercase border border-[#ff003c]/30 px-6 py-2 hover:bg-[#ff003c] hover:text-white transition">Terminate_Session</button>
+    <div id="player-modal">
+        <div class="max-w-7xl mx-auto pt-6">
+            <div class="flex justify-between items-center mb-8">
+                <button onclick="closeModal()" class="bg-white/10 hover:bg-red-600 px-8 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition">Back to browse</button>
                 
-                <div class="flex gap-4">
-                    <div class="drop-zone relative px-6 py-3 min-w-[180px]">
-                        <span class="text-[10px] font-bold uppercase tracking-widest text-[#00f2ff]">Srv: <span id="active-srv">CinemaOS</span></span>
-                        <div class="drop-menu p-2 space-y-1" id="srv-options"></div>
-                    </div>
-                    
-                    <div id="tv-meta" class="hidden flex gap-4">
-                        <div class="drop-zone relative px-6 py-3"><span class="text-[10px] font-bold uppercase">S: <span id="s-val">1</span></span><div id="s-menu" class="drop-menu p-2 max-h-48 overflow-y-auto"></div></div>
-                        <div class="drop-zone relative px-6 py-3"><span class="text-[10px] font-bold uppercase">E: <span id="e-val">1</span></span><div id="e-menu" class="drop-menu p-2 max-h-48 overflow-y-auto"></div></div>
+                <div class="flex gap-3">
+                    <select id="srv-select" onchange="updateSource()" class="bg-white/5 border border-white/10 px-6 py-3 rounded-xl text-[10px] font-black uppercase outline-none text-red-500"></select>
+                    <div id="tv-controls" class="hidden flex gap-3">
+                        <select id="s-select" onchange="changeS()" class="bg-white/5 border border-white/10 px-6 py-3 rounded-xl text-[10px] font-black uppercase outline-none"></select>
+                        <select id="e-select" onchange="changeE()" class="bg-white/5 border border-white/10 px-6 py-3 rounded-xl text-[10px] font-black uppercase outline-none"></select>
                     </div>
                 </div>
             </div>
 
-            <div class="theatre-viewport mb-12"><iframe id="stream-frame" src="" allowfullscreen></iframe></div>
+            <div class="player-container mb-12 shadow-2xl">
+                <iframe id="player-frame" src="" allowfullscreen></iframe>
+            </div>
 
-            <div class="grid lg:grid-cols-4 gap-8">
-                <div class="lg:col-span-3 bg-[#0d0e12] p-10 border-l-2 border-[#00f2ff]">
-                    <div class="flex items-center gap-6 mb-8 text-[#00f2ff]">
-                        <span id="p-year" class="text-2xl font-bold">2026</span>
-                        <div id="p-tags" class="flex gap-2"></div>
+            <div class="grid lg:grid-cols-3 gap-8 pb-20">
+                <div class="lg:col-span-2 bento-card">
+                    <div class="flex items-center gap-4 mb-6">
+                        <span id="p-year" class="text-red-600 font-black text-3xl">2026</span>
+                        <div id="p-genres" class="flex gap-2"></div>
                     </div>
-                    <h2 id="p-title" class="text-6xl font-bold mb-8 uppercase tracking-tighter italic">Title</h2>
-                    <p id="p-desc" class="text-gray-500 text-lg leading-relaxed font-light"></p>
+                    <h2 id="p-title" class="text-5xl lg:text-7xl font-black uppercase mb-6 tracking-tighter">Title</h2>
+                    <p id="p-desc" class="text-gray-400 text-lg font-light leading-relaxed"></p>
                 </div>
-                
-                <div class="bg-[#0d0e12] p-10 border-r-2 border-[#ff003c]">
-                    <p class="text-[10px] uppercase tracking-[0.3em] text-[#ff003c] mb-10 text-center">Cast Identified</p>
-                    <div id="p-cast" class="grid grid-cols-2 gap-6"></div>
+                <div class="bento-card">
+                    <h3 class="text-white/30 text-[10px] font-black uppercase tracking-[0.4em] mb-10">Lead Cast</h3>
+                    <div id="p-cast" class="grid grid-cols-2 gap-y-8"></div>
                 </div>
             </div>
         </div>
@@ -148,9 +125,9 @@
         const KEY = 'a45420333457411e78d5ad35d6c51a2d';
         let mode = 'movie', activeId = null, srv = 'cinemaos', s = 1, e = 1;
         
-        const nodes = [
-            {id:'cinemaos', n:'CinemaOS'}, {id:'vidsrcto', n:'Protocol-2'},
-            {id:'vidsrcme', n:'Stable-X'}, {id:'vidsrccc', n:'Direct-Link'}, {id:'embedsu', n:'Ultra-Node'}
+        const servers = [
+            {id:'cinemaos', n:'Main Server'}, {id:'vidsrcto', n:'Server 2'},
+            {id:'vidsrcme', n:'Server 3'}, {id:'vidsrccc', n:'Server 4'}, {id:'embedsu', n:'Server 5'}
         ];
 
         async function init(q = '', g = '') {
@@ -162,100 +139,99 @@
             const data = await res.json();
             if(!q && !g && data.results[0]) setupHero(data.results[0]);
             renderGrid(data.results);
-            fetchGenres();
+            loadGenres();
         }
 
-        async function fetchGenres() {
+        async function loadGenres() {
             const res = await fetch(`https://api.themoviedb.org/3/genre/${mode}/list?api_key=${KEY}`);
             const data = await res.json();
-            document.getElementById('genre-filter').innerHTML = `<option value="">ALL_PROTOCOLS</option>` + 
-                data.genres.map(g => `<option value="${g.id}">${g.name.toUpperCase()}</option>`).join('');
+            document.getElementById('genre-select').innerHTML = `<option value="">All Genres</option>` + 
+                data.genres.map(g => `<option value="${g.id}">${g.name}</option>`).join('');
         }
 
         function setupHero(m) {
-            document.getElementById('hero-bg').style.backgroundImage = `url(https://image.tmdb.org/t/p/original${m.backdrop_path})`;
+            document.getElementById('hero-img').style.backgroundImage = `url(https://image.tmdb.org/t/p/original${m.backdrop_path})`;
             document.getElementById('hero-title').innerText = m.title || m.name;
             document.getElementById('hero-desc').innerText = m.overview;
-            document.getElementById('hero-play').onclick = () => openTheatre(m.id, m.title || m.name);
+            document.getElementById('hero-play').onclick = () => openModal(m.id, m.title || m.name);
         }
 
         function renderGrid(items) {
-            document.getElementById('main-grid').innerHTML = items.map(m => !m.poster_path ? '' : `
-                <div class="card-frame group cursor-pointer" onclick="openTheatre(${m.id}, '${(m.title||m.name).replace(/'/g,"\\")}')">
-                    <img src="https://image.tmdb.org/t/p/w500${m.poster_path}" class="w-full grayscale group-hover:grayscale-0 transition-all duration-500">
-                    <div class="card-meta absolute inset-0 flex flex-col justify-end p-4">
-                        <h4 class="font-bold text-[10px] uppercase tracking-widest mb-1">${m.title || m.name}</h4>
-                        <div class="h-0.5 w-0 group-hover:w-full bg-[#00f2ff] transition-all"></div>
-                    </div>
+            document.getElementById('grid').innerHTML = items.map(m => !m.poster_path ? '' : `
+                <div class="poster-card" onclick="openModal(${m.id}, '${(m.title||m.name).replace(/'/g,"\\")}')">
+                    <img src="https://image.tmdb.org/t/p/w500${m.poster_path}" class="w-full shadow-2xl">
+                    <h4 class="mt-4 font-bold text-[10px] uppercase tracking-widest text-gray-500">${m.title || m.name}</h4>
                 </div>`).join('');
         }
 
-        async function openTheatre(id, title) {
+        async function openModal(id, title) {
             activeId = id; s = 1; e = 1;
             document.getElementById('p-title').innerText = title;
-            document.getElementById('theatre-modal').style.display = 'block';
+            document.getElementById('player-modal').style.display = 'block';
             document.body.classList.add('no-scroll');
             
             const d = await fetch(`https://api.themoviedb.org/3/${mode}/${id}?api_key=${KEY}&append_to_response=credits`).then(r => r.json());
             document.getElementById('p-desc').innerText = d.overview;
             document.getElementById('p-year').innerText = (d.release_date || d.first_air_date || '2026').split('-')[0];
-            document.getElementById('p-tags').innerHTML = d.genres.map(g => `<span class="text-[9px] border border-[#00f2ff]/30 px-3 py-1 font-bold">${g.name.toUpperCase()}</span>`).join('');
+            document.getElementById('p-genres').innerHTML = d.genres.map(g => `<span class="bg-red-600/10 text-red-500 px-3 py-1 rounded-lg text-[10px] font-black uppercase">${g.name}</span>`).join('');
             
-            document.getElementById('p-cast').innerHTML = d.credits.cast.slice(0, 4).map(c => `
-                <div class="text-center">
-                    <img src="${c.profile_path ? 'https://image.tmdb.org/t/p/w185' + c.profile_path : 'https://via.placeholder.com/185x185'}" class="w-12 h-12 rounded-full mx-auto mb-2 grayscale">
-                    <p class="text-[8px] font-bold uppercase text-gray-500">${c.name.split(' ')[0]}</p>
+            document.getElementById('p-cast').innerHTML = d.credits.cast.slice(0, 6).map(c => `
+                <div class="flex flex-col items-center">
+                    <img src="${c.profile_path ? 'https://image.tmdb.org/t/p/w185' + c.profile_path : 'https://via.placeholder.com/185x185'}" class="cast-bubble mb-3">
+                    <p class="text-[9px] font-bold uppercase text-gray-500 text-center">${c.name}</p>
                 </div>`).join('');
 
-            document.getElementById('srv-options').innerHTML = nodes.map(n => `<button onclick="setNode('${n.id}', '${n.n}')" class="w-full text-left p-2 hover:bg-[#00f2ff] hover:text-black text-[9px] font-bold uppercase">${n.n}</button>`).join('');
+            document.getElementById('srv-select').innerHTML = servers.map(s => `<option value="${s.id}">${s.n}</option>`).join('');
 
             if (mode === 'tv') {
-                document.getElementById('tv-meta').classList.remove('hidden');
-                document.getElementById('s-menu').innerHTML = d.seasons.filter(sea => sea.season_number > 0).map(sea => `<button onclick="setS(${sea.season_number})" class="w-full text-left p-2 hover:bg-[#00f2ff] hover:text-black text-[9px] font-bold uppercase">SEA_${sea.season_number}</button>`).join('');
+                document.getElementById('tv-controls').classList.remove('hidden');
+                document.getElementById('s-select').innerHTML = d.seasons.filter(sea => sea.season_number > 0).map(sea => `<option value="${sea.season_number}">Season ${sea.season_number}</option>`).join('');
                 loadEpisodes();
             } else {
-                document.getElementById('tv-meta').classList.add('hidden');
-                updateFrame();
+                document.getElementById('tv-controls').classList.add('hidden');
+                updateSource();
             }
         }
 
         async function loadEpisodes() {
             const data = await fetch(`https://api.themoviedb.org/3/tv/${activeId}/season/${s}?api_key=${KEY}`).then(r => r.json());
-            document.getElementById('e-menu').innerHTML = data.episodes.map(eps => `<button onclick="setE(${eps.episode_number})" class="w-full text-left p-2 hover:bg-[#00f2ff] hover:text-black text-[9px] font-bold uppercase truncate">EP_${eps.episode_number}</button>`).join('');
-            updateFrame();
+            document.getElementById('e-select').innerHTML = data.episodes.map(eps => `<option value="${eps.episode_number}">Episode ${eps.episode_number}</option>`).join('');
+            updateSource();
         }
 
-        function setNode(id, n) { srv = id; document.getElementById('active-srv').innerText = n; updateFrame(); }
-        function setS(val) { s = val; e = 1; document.getElementById('s-val').innerText = val; loadEpisodes(); }
-        function setE(val) { e = val; document.getElementById('e-val').innerText = val; updateFrame(); }
-        function runGenre() { init('', document.getElementById('genre-filter').value); }
-        
-        function updateFrame() {
+        function updateSource() {
+            srv = document.getElementById('srv-select').value;
             let src = '';
+            const t = activeId;
             if(mode === 'movie') {
-                if(srv==='cinemaos') src=`https://cinemaos.tech/player/${activeId}`;
-                else if(srv==='vidsrcto') src=`https://vidsrc.to/embed/movie/${activeId}`;
-                else if(srv==='vidsrcme') src=`https://vidsrc.me/embed/movie?tmdb=${activeId}`;
-                else if(srv==='vidsrccc') src=`https://vidsrc.cc/v2/embed/movie/${activeId}`;
-                else src=`https://embed.su/embed/movie/${activeId}`;
+                if(srv==='cinemaos') src=`https://cinemaos.tech/player/${t}`;
+                else if(srv==='vidsrcto') src=`https://vidsrc.to/embed/movie/${t}`;
+                else if(srv==='vidsrcme') src=`https://vidsrc.me/embed/movie?tmdb=${t}`;
+                else if(srv==='vidsrccc') src=`https://vidsrc.cc/v2/embed/movie/${t}`;
+                else src=`https://embed.su/embed/movie/${t}`;
             } else {
-                if(srv==='cinemaos') src=`https://cinemaos.tech/player/${activeId}/${s}/${e}`;
-                else if(srv==='vidsrcto') src=`https://vidsrc.to/embed/tv/${activeId}/${s}/${e}`;
-                else if(srv==='vidsrcme') src=`https://vidsrc.me/embed/tv?tmdb=${activeId}&sea=${s}&epi=${e}`;
-                else if(srv==='vidsrccc') src=`https://vidsrc.cc/v2/embed/tv/${activeId}/${s}/${e}`;
-                else src=`https://embed.su/embed/tv/${activeId}/${s}/${e}`;
+                if(srv==='cinemaos') src=`https://cinemaos.tech/player/${t}/${s}/${e}`;
+                else if(srv==='vidsrcto') src=`https://vidsrc.to/embed/tv/${t}/${s}/${e}`;
+                else if(srv==='vidsrcme') src=`https://vidsrc.me/embed/tv?tmdb=${t}&sea=${s}&epi=${e}`;
+                else if(srv==='vidsrccc') src=`https://vidsrc.cc/v2/embed/tv/${t}/${s}/${e}`;
+                else src=`https://embed.su/embed/tv/${t}/${s}/${e}`;
             }
-            document.getElementById('stream-frame').src = src;
+            document.getElementById('player-frame').src = src;
         }
 
-        function closeTheatre() { document.getElementById('theatre-modal').style.display='none'; document.getElementById('stream-frame').src=''; document.body.classList.remove('no-scroll'); }
+        function closeModal() { document.getElementById('player-modal').style.display='none'; document.getElementById('player-frame').src=''; document.body.classList.remove('no-scroll'); }
         function setMode(m) { 
             mode = m; 
-            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-            document.getElementById(`nav-${m}`).classList.add('active');
+            document.getElementById('m-nav').className = m === 'movie' ? 'text-red-600' : 'text-gray-400 hover:text-white transition';
+            document.getElementById('t-nav').className = m === 'tv' ? 'text-red-600' : 'text-gray-400 hover:text-white transition';
             init(); 
         }
-        document.getElementById('search-bar').addEventListener('input', e => { if(e.target.value.length > 2) init(e.target.value); });
+        function applyGenre() { init('', document.getElementById('genre-select').value); }
+        function changeS() { s = document.getElementById('s-select').value; loadEpisodes(); }
+        function changeE() { e = document.getElementById('e-select').value; updateSource(); }
+        
+        document.getElementById('search').addEventListener('input', e => { if(e.target.value.length > 2) init(e.target.value); });
+        window.onscroll = () => { if(window.scrollY > 50) document.getElementById('navbar').classList.add('nav-scrolled'); else document.getElementById('navbar').classList.remove('nav-scrolled'); };
         init();
     </script>
 </body>
