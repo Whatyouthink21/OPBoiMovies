@@ -13,7 +13,7 @@
         .frost-bg { background: var(--glass); backdrop-filter: blur(40px); border: 1px solid var(--border); }
         .hero-vignette { background: linear-gradient(to top, #0a0b0d 10%, transparent 70%), linear-gradient(to right, #0a0b0d 10%, transparent 70%); }
 
-        /* Search Dropdown Specifics */
+        /* Enhanced Search UI */
         #search-results { 
             display: none; position: absolute; top: calc(100% + 15px); right: 0; 
             width: 400px; max-height: 500px; border-radius: 20px; padding: 12px; 
@@ -28,15 +28,15 @@
         }
         .search-item:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.1); }
 
+        #search-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(15px); z-index: 5500; display: none; opacity: 0; transition: 0.3s; }
+        #search-overlay.active { opacity: 1; }
+
         .dropdown-content { 
             display: none; position: absolute; top: calc(100% + 10px); right: 0; 
             min-width: 200px; border-radius: 12px; padding: 8px; z-index: 5000;
             box-shadow: 0 20px 50px rgba(0,0,0,0.5);
         }
         .dropdown-content.show { display: block; }
-
-        #search-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); z-index: 5500; display: none; opacity: 0; transition: 0.3s; pointer-events: none; }
-        #search-overlay.active { display: block; opacity: 1; pointer-events: all; }
 
         .drop-item { width: 100%; text-align: left; padding: 10px 14px; border-radius: 8px; font-size: 10px; font-weight: 700; text-transform: uppercase; color: rgba(255,255,255,0.6); transition: 0.2s; }
         .drop-item:hover { background: rgba(255,255,255,0.1); color: #fff; }
@@ -71,7 +71,7 @@
 
         <div class="flex items-center gap-6">
             <div class="relative z-[6001]">
-                <input type="text" id="search" autocomplete="off" placeholder="SEARCH TITLES..." class="frost-bg px-6 py-2 rounded-full text-[11px] w-80 outline-none focus:border-white/40 transition uppercase font-bold focus:w-96">
+                <input type="text" id="search" autocomplete="off" placeholder="SEARCH TITLES..." class="frost-bg px-6 py-2 rounded-full text-[11px] w-64 outline-none focus:border-white/40 transition uppercase font-bold focus:w-80">
                 <div id="search-results" class="frost-bg"></div>
             </div>
             
@@ -134,16 +134,6 @@
             <div class="player-viewport bg-black mb-12 shadow-2xl">
                 <iframe id="frame" src="" allowfullscreen></iframe>
             </div>
-            <div class="w-[95%] max-w-[1700px] grid lg:grid-cols-3 gap-16 pb-16">
-                <div class="lg:col-span-2">
-                    <h2 id="p-title" class="text-4xl font-black uppercase mb-4 tracking-tighter italic">...</h2>
-                    <p id="p-desc" class="text-white/40 text-base font-light leading-relaxed max-w-3xl"></p>
-                </div>
-                <div class="frost-bg p-8 rounded-[32px] h-fit">
-                    <h3 class="text-[9px] font-black uppercase tracking-[0.4em] opacity-30 mb-8">Featured Cast</h3>
-                    <div id="p-cast" class="space-y-6"></div>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -180,88 +170,71 @@
             {id:'2embed', n:'Aura Cloud'}
         ];
 
+        // --- AUTH ---
         window.login = async () => { try { await signInWithPopup(auth, provider); } catch(e) { console.error(e); } };
         window.logout = () => signOut(auth);
 
         onAuthStateChanged(auth, (user) => {
             currentUser = user;
+            const lb = document.getElementById('login-btn');
+            const up = document.getElementById('user-profile');
             if (user) {
-                document.getElementById('login-btn').classList.add('hidden');
-                document.getElementById('user-profile').classList.remove('hidden');
+                lb.classList.add('hidden'); up.classList.remove('hidden');
                 document.getElementById('user-name').innerText = user.displayName.split(' ')[0];
                 document.getElementById('user-pic').src = user.photoURL;
                 syncCloudList(user.uid);
             } else {
-                document.getElementById('login-btn').classList.remove('hidden');
-                document.getElementById('user-profile').classList.add('hidden');
-                myList = [];
-                updateListUI();
+                lb.classList.remove('hidden'); up.classList.add('hidden');
+                myList = []; updateListUI();
             }
         });
 
         function syncCloudList(uid) {
             onSnapshot(collection(db, "users", uid, "mylist"), (snap) => {
                 myList = snap.docs.map(d => d.data());
-                updateListUI();
-                updateBtnStates();
+                updateListUI(); updateBtnStates();
             });
         }
 
         window.toggleMyList = async () => {
-            if (!currentUser) return alert("Login to save to collection");
+            if (!currentUser) return alert("Login to save");
             const docRef = doc(db, "users", currentUser.uid, "mylist", activeItem.id.toString());
             const exists = myList.some(x => x.id === activeItem.id);
             exists ? await deleteDoc(docRef) : await setDoc(docRef, activeItem);
         };
 
-        // --- ENHANCED SEARCH LOGIC ---
-        const searchInput = document.getElementById('search');
-        const searchResults = document.getElementById('search-results');
-        const searchOverlay = document.getElementById('search-overlay');
-
-        searchInput.addEventListener('input', async (e) => {
-            const val = e.target.value;
-            if (val.length < 2) {
-                closeSearch();
-                return;
-            }
-
-            searchResults.classList.add('active');
-            searchOverlay.classList.add('active');
-
-            const r = await fetch(`https://api.themoviedb.org/3/search/${mode}?api_key=${KEY}&query=${val}`);
-            const d = await r.json();
-            
-            searchResults.innerHTML = d.results.slice(0, 6).map(m => `
-                <div class="search-item" onclick="quickView(${m.id}, '${(m.title||m.name).replace(/'/g,"\\")}', '${m.poster_path}')">
-                    <img src="https://image.tmdb.org/t/p/w92${m.poster_path}" class="w-12 h-18 rounded-md object-cover bg-neutral-800">
-                    <div class="flex flex-col justify-center">
-                        <span class="text-[11px] font-black uppercase tracking-tight line-clamp-1">${m.title || m.name}</span>
-                        <span class="text-[9px] opacity-40 uppercase font-bold">${(m.release_date || m.first_air_date || '').split('-')[0]}</span>
-                    </div>
-                </div>
-            `).join('');
-        });
+        // --- FIXED SEARCH ---
+        const sIn = document.getElementById('search');
+        const sRes = document.getElementById('search-results');
+        const sOv = document.getElementById('search-overlay');
 
         window.closeSearch = () => {
-            searchResults.classList.remove('active');
-            searchOverlay.classList.remove('active');
+            sRes.classList.remove('active');
+            sOv.classList.remove('active');
+            setTimeout(() => sOv.style.display = 'none', 300);
         };
 
-        window.quickView = (id, title, poster) => {
-            closeSearch();
-            openPlayer(id, title, poster);
-        };
-
-        searchInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                init(searchInput.value);
-                closeSearch();
-                document.getElementById('feed-title').innerText = `Results for: ${searchInput.value}`;
-            }
+        sIn.addEventListener('input', async (e) => {
+            const val = e.target.value;
+            if (val.length < 2) { closeSearch(); return; }
+            sOv.style.display = 'block';
+            setTimeout(() => { sOv.classList.add('active'); sRes.classList.add('active'); }, 10);
+            const r = await fetch(`https://api.themoviedb.org/3/search/${mode}?api_key=${KEY}&query=${val}`);
+            const d = await r.json();
+            sRes.innerHTML = d.results.slice(0, 6).map(m => `
+                <div class="search-item" onclick="quickView(${m.id}, '${(m.title||m.name).replace(/'/g,"\\")}', '${m.poster_path}')">
+                    <img src="https://image.tmdb.org/t/p/w92${m.poster_path}" class="w-12 h-18 rounded-md object-cover">
+                    <div class="flex flex-col justify-center">
+                        <span class="text-[11px] font-black uppercase tracking-tight">${m.title || m.name}</span>
+                        <span class="text-[9px] opacity-40 uppercase font-bold">${(m.release_date || m.first_air_date || '').split('-')[0]}</span>
+                    </div>
+                </div>`).join('');
         });
 
-        // --- CORE ENGINE ---
+        window.quickView = (id, title, poster) => { closeSearch(); openPlayer(id, title, poster); };
+        sIn.addEventListener('keypress', (e) => { if (e.key === 'Enter') { init(sIn.value); closeSearch(); } });
+
+        // --- ENGINE ---
         async function init(q = '', g = '') {
             let url = `https://api.themoviedb.org/3/trending/${mode}/week?api_key=${KEY}`;
             if(q) url = `https://api.themoviedb.org/3/search/${mode}?api_key=${KEY}&query=${q}`;
@@ -291,20 +264,11 @@
 
         window.openPlayer = async (id, title, poster) => {
             activeID = id; activeItem = { id, title, poster_path: poster, mode };
-            document.getElementById('p-title').innerText = title;
             document.getElementById('player-overlay').style.display = 'block';
             document.body.style.overflow = 'hidden';
             updateBtnStates();
-            const res = await fetch(`https://api.themoviedb.org/3/${mode}/${id}?api_key=${KEY}&append_to_response=credits`).then(r => r.json());
-            document.getElementById('p-desc').innerText = res.overview;
-            document.getElementById('p-cast').innerHTML = res.credits.cast.slice(0, 5).map(c => `
-                <div class="flex items-center gap-4">
-                    <img src="https://image.tmdb.org/t/p/w185${c.profile_path}" class="w-10 h-10 rounded-lg object-cover">
-                    <p class="text-[11px] font-black uppercase tracking-wider">${c.name}</p>
-                </div>`).join('');
-            
+            const res = await fetch(`https://api.themoviedb.org/3/${mode}/${id}?api_key=${KEY}`).then(r => r.json());
             document.getElementById('srv-menu').innerHTML = servers.map(sv => `<button onclick="setSrv('${sv.id}','${sv.n}')" class="drop-item">${sv.n}</button>`).join('');
-            
             if(mode === 'tv') {
                 document.getElementById('tv-controls').classList.remove('hidden');
                 document.getElementById('s-menu').innerHTML = res.seasons.filter(sea => sea.season_number > 0).map(sea => `<button onclick="setS(${sea.season_number})" class="drop-item">Season ${sea.season_number}</button>`).join('');
@@ -328,59 +292,3 @@
         window.toggleDrop = (id) => {
             const el = document.getElementById(id);
             const isShow = el.classList.contains('show');
-            document.querySelectorAll('.dropdown-content').forEach(d => d.classList.remove('show'));
-            if(!isShow) el.classList.add('show');
-        };
-
-        window.setSrv = (id, n) => { currentSrv = id; document.getElementById('active-srv').innerText = n; updPlayer(); toggleDrop('srv-menu'); }
-        window.setS = (val) => { s = val; e = 1; document.getElementById('s-val').innerText = val; loadEpisodes(); toggleDrop('s-menu'); }
-        window.setE = (val) => { e = val; document.getElementById('e-val').innerText = val; updPlayer(); toggleDrop('e-menu'); }
-        window.closePlayer = () => { document.getElementById('player-overlay').style.display = 'none'; document.getElementById('frame').src = ''; document.body.style.overflow = 'auto'; }
-        
-        window.setMode = (m) => { 
-            mode = m; 
-            document.getElementById('m-btn').className = m === 'movie' ? 'px-6 py-2 rounded-full text-[9px] font-black uppercase transition-all bg-white text-black' : 'px-6 py-2 rounded-full text-[9px] font-black uppercase text-white/40';
-            document.getElementById('t-btn').className = m === 'tv' ? 'px-6 py-2 rounded-full text-[9px] font-black uppercase transition-all bg-white text-black' : 'px-6 py-2 rounded-full text-[9px] font-black uppercase text-white/40';
-            init(); 
-        }
-
-        function updPlayer() {
-            let src = '';
-            if(mode === 'movie') {
-                if(currentSrv === 'cinemaos') src = `https://cinemaos.tech/player/${activeID}`;
-                else if(currentSrv === 'vidsrcto') src = `https://vidsrc.to/embed/movie/${activeID}`;
-                else if(currentSrv === 'vidsrcme') src = `https://vidsrc.me/embed/movie?tmdb=${activeID}`;
-                else if(currentSrv === 'vidsrcicu') src = `https://vidsrc.icu/embed/movie/${activeID}`;
-                else if(currentSrv === '2embed') src = `https://www.2embed.cc/embed/${activeID}`;
-            } else {
-                if(currentSrv === 'cinemaos') src = `https://cinemaos.tech/player/${activeID}/${s}/${e}`;
-                else if(currentSrv === 'vidsrcto') src = `https://vidsrc.to/embed/tv/${activeID}/${s}/${e}`;
-                else if(currentSrv === 'vidsrcme') src = `https://vidsrc.me/embed/tv?tmdb=${activeID}&sea=${s}&epi=${e}`;
-                else if(currentSrv === 'vidsrcicu') src = `https://vidsrc.icu/embed/tv/${activeID}/${s}/${e}`;
-                else if(currentSrv === '2embed') src = `https://www.2embed.cc/embedtv/${activeID}&s=${s}&e=${e}`;
-            }
-            document.getElementById('frame').src = src;
-        }
-
-        async function loadEpisodes() {
-            const d = await fetch(`https://api.themoviedb.org/3/tv/${activeID}/season/${s}?api_key=${KEY}`).then(r => r.json());
-            document.getElementById('e-menu').innerHTML = d.episodes.map(ep => `<button onclick="setE(${ep.episode_number})" class="drop-item">Episode ${ep.episode_number}</button>`).join('');
-            updPlayer();
-        }
-
-        async function loadGenres() {
-            const r = await fetch(`https://api.themoviedb.org/3/genre/${mode}/list?api_key=${KEY}`);
-            const d = await r.json();
-            document.getElementById('genre-menu').innerHTML = d.genres.map(g => `<button onclick="init('','${g.id}')" class="drop-item">${g.name}</button>`).join('');
-        }
-
-        window.onclick = (e) => { 
-            if (!e.target.closest('.relative') && !e.target.closest('#user-profile')) {
-                document.querySelectorAll('.dropdown-content').forEach(d => d.classList.remove('show'));
-            }
-        };
-        
-        init();
-    </script>
-</body>
-</html>
