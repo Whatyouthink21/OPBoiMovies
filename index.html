@@ -3,126 +3,156 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AURA | CRYSTAL</title>
+    <title>AURA CRYSTAL | FROSTED</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Outfit:wght@700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;900&display=swap" rel="stylesheet">
     <style>
-        :root { --bg: #08080a; --glass: rgba(255, 255, 255, 0.03); --border: rgba(255, 255, 255, 0.08); }
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: #e0e0e0; overflow-x: hidden; }
-        h1, h2, .font-heading { font-family: 'Outfit', sans-serif; color: #fff; }
-
-        /* Pure Glass Dropdowns */
-        .custom-drop { position: relative; display: inline-block; }
-        .drop-trigger { 
-            background: var(--glass); backdrop-filter: blur(15px);
-            border: 1px solid var(--border); padding: 10px 20px;
-            border-radius: 10px; font-size: 11px; font-weight: 700;
-            text-transform: uppercase; letter-spacing: 1px; transition: 0.3s;
-            color: rgba(255,255,255,0.7);
+        :root { 
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --blur: blur(30px);
         }
-        .drop-trigger:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.3); color: #fff; }
 
+        body { 
+            font-family: 'Outfit', sans-serif; 
+            background: radial-gradient(circle at top right, #1a1c22, #0a0b0d);
+            background-attachment: fixed;
+            color: #ffffff; 
+            min-height: 100vh;
+        }
+
+        /* --- THE TRUE FROSTED GLASS CORE --- */
+        .aura-glass {
+            background: var(--glass-bg);
+            backdrop-filter: var(--blur);
+            -webkit-backdrop-filter: var(--blur);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+
+        /* Nav & Menus */
+        .nav-aura { background: rgba(10, 11, 13, 0.5); backdrop-filter: blur(40px); border-bottom: 1px solid var(--glass-border); }
+        
+        .custom-drop { position: relative; }
         .drop-menu { 
-            display: none; position: absolute; top: calc(100% + 10px); left: 0; 
-            min-width: 220px; background: rgba(15, 15, 20, 0.95); backdrop-filter: blur(20px);
-            border: 1px solid var(--border); border-radius: 12px; padding: 8px; z-index: 2000;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+            display: none; position: absolute; top: calc(100% + 12px); left: 0; 
+            min-width: 240px; border-radius: 16px; padding: 10px; z-index: 2000;
         }
-        .custom-drop::after { content: ''; position: absolute; top: 100%; left: 0; width: 100%; height: 12px; }
-        .custom-drop:hover .drop-menu { display: block; animation: auraFade 0.3s ease-out; }
-
+        .custom-drop:hover .drop-menu { display: block; animation: glassFade 0.3s ease; }
         .drop-item {
-            width: 100%; text-align: left; padding: 10px 14px; border-radius: 8px;
-            font-size: 11px; font-weight: 500; text-transform: uppercase;
-            transition: 0.2s; color: rgba(255,255,255,0.5);
+            width: 100%; text-align: left; padding: 12px 16px; border-radius: 10px;
+            font-size: 11px; font-weight: 600; text-transform: uppercase;
+            color: rgba(255,255,255,0.6); transition: 0.2s;
         }
         .drop-item:hover { background: rgba(255,255,255,0.1); color: #fff; }
 
-        @keyframes auraFade { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes glassFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Content UI */
-        .nav-aura { background: rgba(8, 8, 10, 0.7); backdrop-filter: blur(25px); border-bottom: 1px solid var(--border); }
-        .movie-card { transition: 0.5s cubic-bezier(0.2, 1, 0.2, 1); cursor: pointer; border-radius: 14px; overflow: hidden; border: 1px solid transparent; }
-        .movie-card:hover { transform: scale(1.04); border-color: rgba(255,255,255,0.2); box-shadow: 0 0 40px rgba(255,255,255,0.05); }
+        /* Movie Cards */
+        .movie-card { 
+            border-radius: 20px; overflow: hidden; 
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid var(--glass-border);
+        }
+        .movie-card:hover { transform: scale(1.06); border-color: rgba(255,255,255,0.4); box-shadow: 0 0 50px rgba(255,255,255,0.05); }
+
+        /* Player Experience */
+        #player-overlay { 
+            position: fixed; inset: 0; z-index: 1500; display: none; 
+            background: rgba(10, 11, 13, 0.8); backdrop-filter: blur(50px);
+            overflow-y: auto;
+        }
+        .video-box { 
+            width: 100%; aspect-ratio: 16 / 9; max-height: 70vh; 
+            border-radius: 24px; overflow: hidden; 
+            border: 1px solid rgba(255,255,255,0.15);
+            box-shadow: 0 40px 100px rgba(0,0,0,0.8);
+        }
+
+        /* Input Fixes */
+        input::placeholder { color: rgba(255,255,255,0.3); }
+        .search-box { background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); border-radius: 100px; }
         
-        #player-overlay { position: fixed; inset: 0; z-index: 1500; background: var(--bg); display: none; overflow-y: auto; }
-        .video-box { width: 100%; aspect-ratio: 16 / 9; max-height: 75vh; background: #000; border-radius: 20px; overflow: hidden; border: 1px solid var(--border); }
-        
-        .list-badge { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); padding: 4px 8px; border-radius: 6px; font-size: 9px; font-weight: 800; border: 1px solid var(--border); }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
     </style>
 </head>
 <body>
 
     <nav class="fixed top-0 w-full z-[100] px-8 py-5 nav-aura flex items-center justify-between">
-        <div class="flex items-center gap-10">
-            <h1 class="text-2xl font-black italic tracking-tighter cursor-pointer opacity-90" onclick="location.reload()">AURA</h1>
-            <div class="flex bg-white/5 rounded-xl p-1 border border-white/5">
-                <button onclick="setMode('movie')" id="m-btn" class="px-6 py-2 rounded-lg text-[10px] font-bold uppercase transition-all bg-white/10 text-white">Movies</button>
-                <button onclick="setMode('tv')" id="t-btn" class="px-6 py-2 rounded-lg text-[10px] font-bold uppercase text-white/40 hover:text-white transition-all">Series</button>
+        <div class="flex items-center gap-12">
+            <h1 class="text-3xl font-black italic tracking-tighter opacity-80 cursor-pointer" onclick="location.reload()">AURA</h1>
+            <div class="flex aura-glass rounded-full p-1.5 p-1 border-white/5">
+                <button onclick="setMode('movie')" id="m-btn" class="px-8 py-2.5 rounded-full text-[11px] font-black uppercase transition-all bg-white/10 text-white">Cinema</button>
+                <button onclick="setMode('tv')" id="t-btn" class="px-8 py-2.5 rounded-full text-[11px] font-black uppercase text-white/40 hover:text-white transition-all">Series</button>
             </div>
         </div>
 
-        <div class="flex items-center gap-5">
+        <div class="flex items-center gap-6">
             <div class="custom-drop">
-                <button class="drop-trigger">Genres</button>
-                <div id="genre-menu" class="drop-menu max-h-80 overflow-y-auto"></div>
+                <button class="aura-glass px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest">Browse Genres</button>
+                <div id="genre-menu" class="drop-menu aura-glass max-h-96 overflow-y-auto"></div>
             </div>
-            <input type="text" id="search" placeholder="Search..." class="bg-white/5 border border-white/5 px-6 py-2 rounded-xl text-sm w-72 outline-none focus:border-white/20 transition">
+            <div class="search-box px-6 py-2.5 flex items-center">
+                <input type="text" id="search" placeholder="SEARCH UNIVERSE" class="bg-transparent text-sm w-72 outline-none font-medium">
+            </div>
         </div>
     </nav>
 
-    <main class="pt-32 px-8 lg:px-20 pb-20">
-        <div id="my-list-container" class="mb-16 hidden">
-            <div class="flex items-center gap-4 mb-8">
-                <h2 class="text-sm font-black uppercase tracking-[0.3em] opacity-40">My Collection</h2>
-                <div class="h-px bg-white/5 flex-1"></div>
+    <main class="pt-36 px-10 lg:px-24 pb-32">
+        <div id="my-list-container" class="mb-20 hidden">
+            <div class="flex items-center gap-6 mb-10">
+                <h2 class="text-xs font-black uppercase tracking-[0.4em] opacity-30">Your Collection</h2>
+                <div class="h-px bg-white/10 flex-1"></div>
             </div>
-            <div id="my-list-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8"></div>
+            <div id="my-list-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-10"></div>
         </div>
 
-        <div class="flex items-center gap-4 mb-8">
-            <h2 class="text-sm font-black uppercase tracking-[0.3em] opacity-40">Trending Now</h2>
-            <div class="h-px bg-white/5 flex-1"></div>
+        <div class="flex items-center gap-6 mb-10">
+            <h2 class="text-xs font-black uppercase tracking-[0.4em] opacity-30">Trending Content</h2>
+            <div class="h-px bg-white/10 flex-1"></div>
         </div>
-        <div id="grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8"></div>
+        <div id="grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-10"></div>
     </main>
 
     <div id="player-overlay">
-        <div class="max-w-7xl mx-auto py-10 px-8">
-            <div class="flex justify-between items-center mb-8">
-                <button onclick="closePlayer()" class="drop-trigger">← Close</button>
+        <div class="max-w-7xl mx-auto py-12 px-10">
+            <div class="flex justify-between items-center mb-10">
+                <button onclick="closePlayer()" class="aura-glass px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition">← Exit Cinema</button>
                 
                 <div class="flex gap-4">
-                    <button id="add-list-btn" onclick="toggleMyList()" class="drop-trigger border-white/20">+ Add to List</button>
+                    <button id="add-list-btn" onclick="toggleMyList()" class="aura-glass px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest border-white/20 transition"></button>
+                    
                     <div class="custom-drop">
-                        <button class="drop-trigger"><span id="active-srv">Server</span></button>
-                        <div id="srv-menu" class="drop-menu"></div>
+                        <button class="aura-glass px-8 py-3 rounded-xl text-[10px] font-black uppercase text-white/80"><span id="active-srv">Aura Server</span></button>
+                        <div id="srv-menu" class="drop-menu aura-glass"></div>
                     </div>
+
                     <div id="tv-ui" class="hidden flex gap-4">
                         <div class="custom-drop">
-                            <button class="drop-trigger">S <span id="s-num">1</span></button>
-                            <div id="s-menu" class="drop-menu max-h-60 overflow-y-auto"></div>
+                            <button class="aura-glass px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-tighter">S <span id="s-num">1</span></button>
+                            <div id="s-menu" class="drop-menu aura-glass max-h-60 overflow-y-auto"></div>
                         </div>
                         <div class="custom-drop">
-                            <button class="drop-trigger">E <span id="e-num">1</span></button>
-                            <div id="e-menu" class="drop-menu max-h-60 overflow-y-auto"></div>
+                            <button class="aura-glass px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-tighter">E <span id="e-num">1</span></button>
+                            <div id="e-menu" class="drop-menu aura-glass max-h-60 overflow-y-auto"></div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="video-box shadow-2xl mb-12 bg-black">
+            <div class="video-box aura-glass mb-16 bg-black">
                 <iframe id="frame" src="" allowfullscreen></iframe>
             </div>
 
-            <div class="grid lg:grid-cols-3 gap-16">
+            <div class="grid lg:grid-cols-3 gap-20">
                 <div class="lg:col-span-2">
-                    <h2 id="p-title" class="text-6xl font-black uppercase mb-6 tracking-tighter leading-tight">...</h2>
-                    <p id="p-desc" class="text-white/40 text-lg font-light leading-relaxed"></p>
+                    <h2 id="p-title" class="text-7xl font-black uppercase mb-8 tracking-tighter leading-none">...</h2>
+                    <p id="p-desc" class="text-white/40 text-xl font-light leading-relaxed max-w-3xl"></p>
                 </div>
-                <div>
-                    <h3 class="text-[10px] font-black uppercase tracking-[0.4em] opacity-30 mb-8">Cast Members</h3>
-                    <div id="p-cast" class="space-y-6"></div>
+                <div class="aura-glass p-10 rounded-[32px]">
+                    <h3 class="text-[11px] font-black uppercase tracking-[0.4em] opacity-30 mb-10">Featured Cast</h3>
+                    <div id="p-cast" class="space-y-8"></div>
                 </div>
             </div>
         </div>
@@ -132,7 +162,6 @@
         const KEY = 'a45420333457411e78d5ad35d6c51a2d';
         let mode = 'movie', activeID = null, currentSrv = 'cinemaos', s = 1, e = 1, currentItem = null;
         let myData = JSON.parse(localStorage.getItem('aura_list')) || [];
-        
         const servers = [{id:'cinemaos', n:'Aura One'}, {id:'vidsrcto', n:'Aura Two'}, {id:'vidsrcme', n:'Aura Three'}];
 
         async function init(q = '', g = '') {
@@ -176,15 +205,14 @@
             document.getElementById('p-title').innerText = title;
             document.getElementById('player-overlay').style.display = 'block';
             document.body.style.overflow = 'hidden';
-            
             updateListButton();
 
             const res = await fetch(`https://api.themoviedb.org/3/${mode}/${id}?api_key=${KEY}&append_to_response=credits`).then(r => r.json());
             document.getElementById('p-desc').innerText = res.overview;
             document.getElementById('p-cast').innerHTML = res.credits.cast.slice(0, 4).map(c => `
-                <div class="flex items-center gap-4 opacity-70">
-                    <img src="https://image.tmdb.org/t/p/w185${c.profile_path}" class="w-10 h-10 rounded-full grayscale border border-white/10">
-                    <p class="text-xs font-bold uppercase tracking-widest">${c.name}</p>
+                <div class="flex items-center gap-5 opacity-80">
+                    <img src="https://image.tmdb.org/t/p/w185${c.profile_path}" class="w-12 h-12 rounded-2xl object-cover border border-white/10 grayscale hover:grayscale-0 transition">
+                    <p class="text-xs font-black uppercase tracking-tighter">${c.name}</p>
                 </div>`).join('');
             
             document.getElementById('srv-menu').innerHTML = servers.map(sv => `<button onclick="setSrv('${sv.id}','${sv.n}')" class="drop-item">${sv.n}</button>`).join('');
@@ -201,11 +229,8 @@
 
         function toggleMyList() {
             const index = myData.findIndex(x => x.id === currentItem.id);
-            if(index > -1) {
-                myData.splice(index, 1);
-            } else {
-                myData.unshift(currentItem);
-            }
+            if(index > -1) myData.splice(index, 1);
+            else myData.unshift(currentItem);
             localStorage.setItem('aura_list', JSON.stringify(myData));
             updateListButton();
             renderMyList();
@@ -214,8 +239,8 @@
         function updateListButton() {
             const btn = document.getElementById('add-list-btn');
             const exists = myData.some(x => x.id === currentItem.id);
-            btn.innerText = exists ? '✓ In My List' : '+ Add to List';
-            btn.style.opacity = exists ? '1' : '0.6';
+            btn.innerText = exists ? '✓ COLLECTED' : '+ ADD TO LIST';
+            btn.style.background = exists ? 'rgba(255,255,255,0.1)' : 'var(--glass-bg)';
         }
 
         async function loadEpisodes() {
@@ -250,8 +275,8 @@
 
         function setMode(m) { 
             mode = m; 
-            document.getElementById('m-btn').className = m === 'movie' ? 'px-6 py-2 rounded-lg text-[10px] font-bold uppercase transition-all bg-white/10 text-white' : 'px-6 py-2 rounded-lg text-[10px] font-bold uppercase text-white/40 hover:text-white transition-all';
-            document.getElementById('t-btn').className = m === 'tv' ? 'px-6 py-2 rounded-lg text-[10px] font-bold uppercase transition-all bg-white/10 text-white' : 'px-6 py-2 rounded-lg text-[10px] font-bold uppercase text-white/40 hover:text-white transition-all';
+            document.getElementById('m-btn').className = m === 'movie' ? 'px-8 py-2.5 rounded-full text-[11px] font-black uppercase transition-all bg-white/10 text-white' : 'px-8 py-2.5 rounded-full text-[11px] font-black uppercase text-white/40 hover:text-white transition-all';
+            document.getElementById('t-btn').className = m === 'tv' ? 'px-8 py-2.5 rounded-full text-[11px] font-black uppercase transition-all bg-white/10 text-white' : 'px-8 py-2.5 rounded-full text-[11px] font-black uppercase text-white/40 hover:text-white transition-all';
             init(); 
         }
 
