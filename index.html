@@ -22,11 +22,12 @@
         .dropdown-content { display: none; position: absolute; top: 100%; right: 0; min-width: 200px; border-radius: 12px; padding: 8px; z-index: 5000; margin-top: 10px; }
         .dropdown-content.show { display: block; }
 
+        /* Massive Immersive Player */
         #player-overlay { position: fixed; inset: 0; z-index: 11000; display: none; background: #050608; overflow-y: auto; }
         .player-viewport { 
             width: 96%; 
             max-width: 1800px; 
-            height: 88vh; 
+            height: 85vh; 
             border-radius: 24px; 
             overflow: hidden; 
             border: 1px solid var(--border);
@@ -37,6 +38,9 @@
         .movie-card { border-radius: 16px; overflow: hidden; transition: 0.4s cubic-bezier(0.2, 1, 0.2, 1); cursor: pointer; background: #1a1a1a; }
         .movie-card:hover { transform: translateY(-8px); filter: brightness(1.1); }
         
+        .cast-card { flex: 0 0 100px; text-align: center; }
+        .cast-img { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; margin: 0 auto 8px; border: 2px solid var(--border); }
+
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
     </style>
@@ -78,15 +82,15 @@
         <div class="relative z-10 max-w-3xl">
             <h2 id="hero-title" class="text-6xl lg:text-8xl font-black uppercase tracking-tighter leading-none italic mb-8"></h2>
             <div class="flex gap-4">
-                <button id="hero-play" class="bg-white text-black px-12 py-4 rounded-2xl font-black uppercase text-[11px] tracking-widest">Play</button>
-                <button id="hero-add" onclick="toggleMyList()" class="frost-bg px-12 py-4 rounded-2xl font-black uppercase text-[11px] tracking-widest">Watchlist</button>
+                <button id="hero-play" class="bg-white text-black px-12 py-4 rounded-2xl font-black uppercase text-[11px] tracking-widest">Play Now</button>
+                <button id="hero-add" onclick="toggleMyList()" class="frost-bg px-12 py-4 rounded-2xl font-black uppercase text-[11px] tracking-widest">+ Watchlist</button>
             </div>
         </div>
     </header>
 
     <main class="px-10 lg:px-24 py-12 relative z-20">
         <div id="my-list-section" class="mb-16 hidden">
-            <h3 class="text-[11px] font-black uppercase tracking-[0.4em] opacity-40 mb-8">Watchlist</h3>
+            <h3 class="text-[11px] font-black uppercase tracking-[0.4em] opacity-40 mb-8">My Collection</h3>
             <div id="my-list-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8"></div>
         </div>
         <h3 id="feed-title" class="text-[11px] font-black uppercase tracking-[0.4em] opacity-40 mb-8">Trending</h3>
@@ -97,15 +101,22 @@
         <div class="flex flex-col items-center py-6">
             <div class="w-[96%] flex justify-between items-center mb-6">
                 <button onclick="closePlayer()" class="frost-bg px-10 py-3 rounded-xl text-[10px] font-bold uppercase">Back</button>
-                <div class="relative">
-                    <button onclick="toggleDrop('srv-menu')" class="frost-bg px-8 py-3 rounded-xl text-[10px] font-bold uppercase">
-                        <span id="active-srv">Aura Primary</span>
-                    </button>
-                    <div id="srv-menu" class="dropdown-content frost-bg"></div>
+                <div class="flex gap-4 items-center">
+                    <button id="modal-add-btn" onclick="toggleMyList()" class="frost-bg px-8 py-3 rounded-xl text-[10px] font-bold uppercase">+ Watchlist</button>
+                    <div class="relative">
+                        <button onclick="toggleDrop('srv-menu')" class="frost-bg px-8 py-3 rounded-xl text-[10px] font-bold uppercase">
+                            <span id="active-srv">Aura Primary</span>
+                        </button>
+                        <div id="srv-menu" class="dropdown-content frost-bg"></div>
+                    </div>
                 </div>
             </div>
             <div class="player-viewport">
                 <iframe id="frame" src="" allowfullscreen></iframe>
+            </div>
+            <div class="w-[96%] mt-12 pb-20">
+                <h4 class="text-[11px] font-black uppercase tracking-[0.3em] opacity-40 mb-8">Starring Cast</h4>
+                <div id="cast-list" class="flex gap-8 overflow-x-auto pb-4"></div>
             </div>
         </div>
     </div>
@@ -141,16 +152,20 @@
 
         onAuthStateChanged(auth, (user) => {
             currentUser = user;
-            const lb = document.getElementById('login-btn'), up = document.getElementById('user-profile');
             if (user) {
-                lb.classList.add('hidden'); up.classList.remove('hidden');
+                document.getElementById('login-btn').classList.add('hidden');
+                document.getElementById('user-profile').classList.remove('hidden');
                 document.getElementById('user-name').innerText = user.displayName.split(' ')[0];
                 document.getElementById('user-pic').src = user.photoURL;
                 onSnapshot(collection(db, "users", user.uid, "mylist"), (s) => { 
                     myList = s.docs.map(d => d.data()); 
                     updateListUI(); updateBtnStates();
                 });
-            } else { lb.classList.remove('hidden'); up.classList.add('hidden'); myList = []; updateListUI(); }
+            } else {
+                document.getElementById('login-btn').classList.remove('hidden');
+                document.getElementById('user-profile').classList.add('hidden');
+                myList = []; updateListUI();
+            }
         });
 
         const sIn = document.getElementById('search'), sRes = document.getElementById('search-results');
@@ -191,16 +206,25 @@
             updateBtnStates();
         }
 
-        window.openPlayer = (id, title, poster) => {
+        window.openPlayer = async (id, title, poster) => {
             activeID = id; activeItem = { id, title, poster_path: poster, mode };
             document.getElementById('player-overlay').style.display = 'block';
             document.body.style.overflow = 'hidden';
             document.getElementById('srv-menu').innerHTML = servers.map(sv => `<button onclick="setSrv('${sv.id}','${sv.n}')" class="w-full text-left p-3 text-[10px] uppercase font-bold hover:bg-white/10 rounded-lg">${sv.n}</button>`).join('');
+            
+            // Cast Fetching
+            const cr = await fetch(`https://api.themoviedb.org/3/${mode}/${id}/credits?api_key=${KEY}`).then(r => r.json());
+            document.getElementById('cast-list').innerHTML = cr.cast.slice(0, 12).map(c => `
+                <div class="cast-card">
+                    <img class="cast-img" src="${c.profile_path ? 'https://image.tmdb.org/t/p/w185'+c.profile_path : 'https://via.placeholder.com/185x185?text=No+Image'}">
+                    <p class="text-[9px] font-bold uppercase tracking-tighter">${c.name}</p>
+                </div>`).join('');
+
             updPlayer(); updateBtnStates();
         }
 
         window.toggleMyList = async () => {
-            if (!currentUser) return alert("Login required");
+            if (!currentUser) return alert("Login to save titles");
             const docRef = doc(db, "users", currentUser.uid, "mylist", activeItem.id.toString());
             myList.some(x => x.id === activeItem.id) ? await deleteDoc(docRef) : await setDoc(docRef, activeItem);
         };
@@ -216,7 +240,9 @@
         function updateBtnStates() {
             if(!activeItem) return;
             const exists = myList.some(x => x.id === activeItem.id);
-            document.getElementById('hero-add').innerText = exists ? '✓ Watchlisted' : '+ Watchlist';
+            const label = exists ? '✓ Watchlisted' : '+ Watchlist';
+            document.getElementById('hero-add').innerText = label;
+            if(document.getElementById('modal-add-btn')) document.getElementById('modal-add-btn').innerText = label;
         }
 
         window.toggleDrop = (id) => document.getElementById(id).classList.toggle('show');
