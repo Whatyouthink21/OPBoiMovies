@@ -3,32 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OP BOI MOVIES | TITAN</title>
+    <title>OP BOI MOVIES | TITAN ELITE</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;900&display=swap" rel="stylesheet">
     <style>
-        :root { --accent: #ff0000; }
-        body { font-family: 'Outfit', sans-serif; background: #020205; color: white; overflow-x: hidden; }
+        :root { --accent: #ff0000; --bg: #020205; }
+        body { font-family: 'Outfit', sans-serif; background: var(--bg); color: white; overflow-x: hidden; }
         
-        /* Glassmorphism Navigation */
-        .glass-nav { background: rgba(2, 2, 5, 0.8); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+        .glass-nav { background: rgba(2, 2, 5, 0.85); backdrop-filter: blur(25px); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
 
-        /* Hero Animation */
-        @keyframes hero-fade { from { opacity: 0; transform: scale(1.1); } to { opacity: 1; transform: scale(1); } }
-        .animate-hero { animation: hero-fade 1.5s ease-out; }
-        
+        /* Custom Dropdown Animation */
+        .dropdown-content { 
+            display: none; 
+            transform-origin: top; 
+            animation: slideDown 0.3s ease-out forwards; 
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: scaleY(0); }
+            to { opacity: 1; transform: scaleY(1); }
+        }
+        .dropdown:hover .dropdown-content { display: block; }
+
         /* Movie Card Hover */
         .movie-card { transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1); }
-        .movie-card:hover { transform: translateY(-10px) scale(1.05); z-index: 20; }
-        .movie-card:hover img { border-color: var(--accent); box-shadow: 0 0 20px rgba(255, 0, 0, 0.3); }
+        .movie-card:hover { transform: translateY(-10px) scale(1.05); }
+        .movie-card img { border: 1px solid rgba(255,255,255,0.1); transition: 0.3s; }
+        .movie-card:hover img { border-color: var(--accent); box-shadow: 0 0 30px rgba(255, 0, 0, 0.2); }
 
-        /* Custom Dropdown Styling */
-        select { background: rgba(255, 255, 255, 0.05); color: white; border: 1px solid rgba(255, 255, 255, 0.1); padding: 10px 20px; border-radius: 12px; outline: none; cursor: pointer; font-weight: 600; font-size: 13px; transition: 0.3s; }
-        select:hover { background: rgba(255, 255, 255, 0.1); border-color: var(--accent); }
-
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .video-wrapper { position: relative; padding-bottom: 56.25%; height: 0; border-radius: 24px; overflow: hidden; background: #000; box-shadow: 0 0 100px rgba(255, 0, 0, 0.15); }
+        /* Video wrapper shadow pulse */
+        @keyframes glow { 0%, 100% { box-shadow: 0 0 40px rgba(255,0,0,0.1); } 50% { box-shadow: 0 0 80px rgba(255,0,0,0.2); } }
+        .video-wrapper { position: relative; padding-bottom: 56.25%; height: 0; border-radius: 24px; overflow: hidden; background: #000; animation: glow 4s infinite; }
         .video-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
+
+        .btn-premium { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); transition: 0.3s; }
+        .btn-premium:hover { background: var(--accent); border-color: var(--accent); }
     </style>
 </head>
 <body class="pb-20">
@@ -39,70 +47,79 @@
         <div class="hidden lg:flex items-center gap-10 font-bold text-[11px] uppercase tracking-widest">
             <button onclick="changeMode('movie')" id="m-nav" class="text-red-600">Cinema</button>
             <button onclick="changeMode('tv')" id="t-nav" class="text-gray-500 hover:text-white transition">TV Series</button>
-            <button onclick="scrollToWatchlist()" class="text-gray-500 hover:text-yellow-500 transition">My List</button>
+            <button onclick="document.getElementById('watchlist-section').scrollIntoView({behavior:'smooth'})" class="text-gray-500 hover:text-yellow-500 transition">My Library</button>
         </div>
 
-        <div class="relative">
-            <input type="text" id="search" placeholder="Search for greatness..." 
-                class="bg-white/5 border border-white/10 rounded-full px-6 py-2 text-sm w-64 lg:w-96 focus:ring-1 focus:ring-red-600 outline-none transition-all">
-        </div>
+        <input type="text" id="search" placeholder="Search universe..." class="bg-white/5 border border-white/10 rounded-full px-6 py-2 text-sm w-64 lg:w-96 outline-none focus:ring-1 focus:ring-red-600">
     </nav>
 
-    <section id="hero" class="relative h-screen w-full flex items-center overflow-hidden">
-        <div id="hero-bg" class="absolute inset-0 bg-cover bg-center transition-all duration-1000 animate-hero"></div>
-        <div class="absolute inset-0 bg-gradient-to-r from-[#020205] via-[#020205]/60 to-transparent"></div>
+    <section id="hero" class="relative h-[90vh] w-full flex items-center overflow-hidden">
+        <div id="hero-bg" class="absolute inset-0 bg-cover bg-center scale-100 transition-transform duration-1000"></div>
+        <div class="absolute inset-0 bg-gradient-to-r from-[#020205] via-[#020205]/70 to-transparent"></div>
         <div class="absolute inset-0 bg-gradient-to-t from-[#020205] via-transparent to-transparent"></div>
         
-        <div class="relative z-10 px-12 mt-20 max-w-4xl">
+        <div class="relative z-10 px-12 mt-20 max-w-4xl opacity-0 translate-y-10 transition-all duration-1000" id="hero-content">
             <div class="flex items-center gap-3 mb-6">
-                <span class="bg-red-600 px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">Featured</span>
-                <span id="hero-year" class="text-sm font-bold opacity-60">2024</span>
+                <span class="bg-red-600 px-4 py-1 rounded-full text-[10px] font-black tracking-widest uppercase">Spotlight</span>
+                <span id="hero-year" class="text-sm font-bold opacity-60">2026</span>
             </div>
-            <h2 id="hero-title" class="text-8xl font-black italic uppercase mb-6 leading-tight tracking-tighter">Loading...</h2>
-            <p id="hero-desc" class="text-gray-400 text-lg mb-10 max-w-2xl line-clamp-3 font-light leading-relaxed">Please wait while we fetch the best content for you.</p>
+            <h2 id="hero-title" class="text-7xl font-black italic uppercase mb-6 leading-tight tracking-tighter">Title</h2>
+            <p id="hero-desc" class="text-gray-400 text-lg mb-10 max-w-2xl line-clamp-3">Loading content...</p>
             
             <div class="flex gap-4">
-                <button id="hero-play" class="bg-white text-black px-12 py-4 rounded-2xl font-black hover:bg-red-600 hover:text-white transition-all transform hover:scale-110 flex items-center gap-3">
-                    <span class="text-xl">▶</span> WATCH NOW
-                </button>
-                <button id="hero-list" class="bg-white/10 backdrop-blur-md border border-white/10 px-8 py-4 rounded-2xl font-black hover:bg-white/20 transition-all">+ LIST</button>
+                <button id="hero-play" class="bg-white text-black px-12 py-4 rounded-2xl font-black hover:bg-red-600 hover:text-white transition-all transform hover:scale-105">WATCH NOW</button>
+                <button id="hero-list" class="bg-white/10 border border-white/10 px-8 py-4 rounded-2xl font-black hover:bg-white/20 transition-all">+ LIST</button>
             </div>
         </div>
     </section>
 
     <section id="watchlist-section" class="px-12 mb-20 hidden">
-        <h3 class="text-2xl font-black italic mb-8 uppercase tracking-tighter flex items-center gap-4">
-            <span class="w-10 h-[2px] bg-red-600"></span> My Library
-        </h3>
+        <h3 class="text-2xl font-black italic mb-8 uppercase tracking-tighter text-red-600">In Your Collection</h3>
         <div id="watchlist-grid" class="flex gap-8 overflow-x-auto no-scrollbar pb-6"></div>
     </section>
 
     <main class="px-12">
-        <div class="flex items-center justify-between mb-12">
-            <h3 id="grid-label" class="text-3xl font-black italic uppercase tracking-tighter">New Releases</h3>
-            <div class="h-[1px] flex-1 bg-white/10 ml-8"></div>
-        </div>
+        <h3 class="text-3xl font-black italic uppercase tracking-tighter mb-10">Latest Arrivals</h3>
         <div id="grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-10"></div>
     </main>
 
     <div id="player-modal" class="fixed inset-0 bg-black/98 z-[200] hidden flex-col items-center justify-center p-6 backdrop-blur-3xl">
         <div class="w-full max-w-6xl">
-            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-end mb-8 gap-6">
-                <div>
-                    <h2 id="p-title" class="text-4xl font-black italic tracking-tighter uppercase mb-4">Watching Title</h2>
+            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 gap-6">
+                <div class="flex-1">
+                    <h2 id="p-title" class="text-3xl font-black italic tracking-tighter uppercase mb-4">Title</h2>
+                    
                     <div class="flex flex-wrap gap-4">
-                        <select id="server-select" onchange="updSrc()" title="Choose Server">
-                            <option value="cinemaos">Server 1 (CinemaOS)</option>
-                            <option value="vidsrcto">Server 2 (VidSrc.to)</option>
-                            <option value="vidsrcme">Server 3 (VidSrc.me)</option>
-                        </select>
-                        <div id="tv-ui" class="hidden flex gap-3">
-                            <select id="s-sel" onchange="loadEps()" title="Season"></select>
-                            <select id="e-sel" onchange="updSrc()" title="Episode"></select>
+                        <div class="dropdown relative">
+                            <button class="btn-premium px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-widest flex items-center gap-2">
+                                <span>🌐</span> Server: <span id="active-srv">CinemaOS</span>
+                            </button>
+                            <div class="dropdown-content absolute top-full left-0 mt-2 w-56 glass-nav rounded-xl border border-white/10 p-2 z-50">
+                                <button onclick="setServer('cinemaos', 'CinemaOS')" class="w-full text-left px-4 py-3 rounded-lg hover:bg-red-600 text-xs font-bold transition mb-1">Server 1 (High Quality)</button>
+                                <button onclick="setServer('vidsrcto', 'VidSrc.to')" class="w-full text-left px-4 py-3 rounded-lg hover:bg-red-600 text-xs font-bold transition mb-1">Server 2 (Backup)</button>
+                                <button onclick="setServer('vidsrcme', 'VidSrc.me')" class="w-full text-left px-4 py-3 rounded-lg hover:bg-red-600 text-xs font-bold transition mb-1">Server 3 (Fast)</button>
+                                <button onclick="setServer('vidsrccc', 'VidSrc.cc')" class="w-full text-left px-4 py-3 rounded-lg hover:bg-red-600 text-xs font-bold transition mb-1">Server 4 (Direct)</button>
+                                <button onclick="setServer('embedsu', 'Embed.su')" class="w-full text-left px-4 py-3 rounded-lg hover:bg-red-600 text-xs font-bold transition">Server 5 (Ultra)</button>
+                            </div>
+                        </div>
+
+                        <div id="tv-ui" class="hidden flex gap-4">
+                            <div class="dropdown relative">
+                                <button class="btn-premium px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-widest">
+                                    Season <span id="cur-s">1</span>
+                                </button>
+                                <div id="s-drop" class="dropdown-content absolute top-full left-0 mt-2 w-40 glass-nav rounded-xl border border-white/10 p-2 z-50 max-h-60 overflow-y-auto"></div>
+                            </div>
+                            <div class="dropdown relative">
+                                <button class="btn-premium px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-widest">
+                                    Episode <span id="cur-e">1</span>
+                                </button>
+                                <div id="e-drop" class="dropdown-content absolute top-full left-0 mt-2 w-64 glass-nav rounded-xl border border-white/10 p-2 z-50 max-h-60 overflow-y-auto"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <button onclick="closeP()" class="text-6xl font-thin hover:text-red-600 transition-transform hover:rotate-90">&times;</button>
+                <button onclick="closeP()" class="text-6xl font-thin hover:text-red-600 transition-all">&times;</button>
             </div>
             <div class="video-wrapper"><iframe id="v-frame" src="" allowfullscreen></iframe></div>
         </div>
@@ -110,12 +127,11 @@
 
     <script>
         const KEY = 'a45420333457411e78d5ad35d6c51a2d';
-        let mode = 'movie', curId = null, watchlist = JSON.parse(localStorage.getItem('op_titan_list') || '[]');
+        let mode = 'movie', curId = null, srv = 'cinemaos', curS = 1, curE = 1, watchlist = JSON.parse(localStorage.getItem('op_titan_v3') || '[]');
 
         async function init(query = '') {
             let url = `https://api.themoviedb.org/3/trending/${mode}/week?api_key=${KEY}`;
             if(query) url = `https://api.themoviedb.org/3/search/${mode}?api_key=${KEY}&query=${query}`;
-            
             const res = await fetch(url);
             const data = await res.json();
             
@@ -125,95 +141,97 @@
         }
 
         function setupHero(m) {
-            document.getElementById('hero-bg').style.backgroundImage = `url(https://image.tmdb.org/t/p/original${m.backdrop_path})`;
-            document.getElementById('hero-title').innerText = m.title || m.name;
-            document.getElementById('hero-desc').innerText = m.overview;
-            document.getElementById('hero-year').innerText = (m.release_date || m.first_air_date || '').split('-')[0];
-            document.getElementById('hero-play').onclick = () => openP(m.id, m.title || m.name, m.poster_path);
-            document.getElementById('hero-list').onclick = () => toggleWL(m.id, m.title || m.name, m.poster_path);
+            const hero = document.getElementById('hero-content');
+            hero.style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('hero-bg').style.backgroundImage = `url(https://image.tmdb.org/t/p/original${m.backdrop_path})`;
+                document.getElementById('hero-title').innerText = m.title || m.name;
+                document.getElementById('hero-desc').innerText = m.overview;
+                document.getElementById('hero-play').onclick = () => openP(m.id, m.title || m.name, m.poster_path);
+                document.getElementById('hero-list').onclick = () => toggleWL(m.id, m.title || m.name, m.poster_path);
+                hero.style.opacity = '1';
+                hero.style.transform = 'translateY(0)';
+            }, 300);
         }
 
         function renderGrid(items, targetId) {
-            const grid = document.getElementById(targetId);
-            grid.innerHTML = items.map(m => {
+            document.getElementById(targetId).innerHTML = items.map(m => {
                 if(!m.poster_path) return '';
-                const title = (m.title || m.name).replace(/'/g, "\\'");
                 return `
-                <div class="movie-card group cursor-pointer" onclick="openP(${m.id}, '${title}', '${m.poster_path}')">
-                    <div class="relative overflow-hidden rounded-3xl border border-white/10 shadow-2xl">
-                        <img src="https://image.tmdb.org/t/p/w500${m.poster_path}" class="w-full">
-                        <div class="absolute inset-0 bg-red-600/60 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
-                            <span class="text-white font-black">PLAY NOW</span>
-                        </div>
-                    </div>
-                    <h4 class="mt-4 font-bold text-xs truncate uppercase tracking-widest">${m.title || m.name}</h4>
+                <div class="movie-card group cursor-pointer" onclick="openP(${m.id}, '${(m.title||m.name).replace(/'/g,"\\")}', '${m.poster_path}')">
+                    <img src="https://image.tmdb.org/t/p/w500${m.poster_path}" class="rounded-3xl w-full aspect-[2/3] object-cover">
+                    <h4 class="mt-4 font-bold text-xs truncate uppercase tracking-widest opacity-60 group-hover:opacity-100">${m.title || m.name}</h4>
                 </div>`;
             }).join('');
         }
 
-        function renderWatchlist() {
-            const section = document.getElementById('watchlist-section');
-            if(watchlist.length === 0) { section.classList.add('hidden'); return; }
-            section.classList.remove('hidden');
-            renderGrid(watchlist, 'watchlist-grid');
-        }
-
         async function openP(id, title, poster) {
-            curId = id;
+            curId = id; curS = 1; curE = 1;
             document.getElementById('p-title').innerText = title;
             document.getElementById('player-modal').style.display = 'flex';
             document.body.style.overflow = 'hidden';
-
             if (mode === 'tv') {
                 document.getElementById('tv-ui').classList.remove('hidden');
-                await loadSeasons(id);
+                await loadTVData(id);
             } else {
                 document.getElementById('tv-ui').classList.add('hidden');
                 updSrc();
             }
         }
 
-        async function loadSeasons(id) {
+        async function loadTVData(id) {
             const res = await fetch(`https://api.themoviedb.org/3/tv/${id}?api_key=${KEY}`);
             const data = await res.json();
-            const sSel = document.getElementById('s-sel');
-            sSel.innerHTML = data.seasons.filter(s => s.season_number > 0).map(s => `<option value="${s.season_number}">Season ${s.season_number}</option>`).join('');
+            document.getElementById('s-drop').innerHTML = data.seasons.filter(s => s.season_number > 0).map(s => 
+                `<button onclick="setS(${s.season_number})" class="w-full text-left px-4 py-2 hover:bg-red-600 rounded-lg text-xs font-bold transition mb-1">Season ${s.season_number}</button>`
+            ).join('');
             await loadEps();
         }
 
         async function loadEps() {
-            const s = document.getElementById('s-sel').value;
-            const res = await fetch(`https://api.themoviedb.org/3/tv/${curId}/season/${s}?api_key=${KEY}`);
+            const res = await fetch(`https://api.themoviedb.org/3/tv/${curId}/season/${curS}?api_key=${KEY}`);
             const data = await res.json();
-            document.getElementById('e-sel').innerHTML = data.episodes.map(e => `<option value="${e.episode_number}">Episode ${e.episode_number}: ${e.name}</option>`).join('');
+            document.getElementById('e-drop').innerHTML = data.episodes.map(e => 
+                `<button onclick="setE(${e.episode_number})" class="w-full text-left px-4 py-2 hover:bg-red-600 rounded-lg text-xs font-bold transition mb-1 truncate">E${e.episode_number}: ${e.name}</button>`
+            ).join('');
             updSrc();
         }
 
+        function setServer(id, name) { srv = id; document.getElementById('active-srv').innerText = name; updSrc(); }
+        function setS(s) { curS = s; curE = 1; document.getElementById('cur-s').innerText = s; loadEps(); }
+        function setE(e) { curE = e; document.getElementById('cur-e').innerText = e; updSrc(); }
+
         function updSrc() {
-            const srv = document.getElementById('server-select').value;
-            const s = document.getElementById('s-sel').value || 1;
-            const e = document.getElementById('e-sel').value || 1;
-            const frame = document.getElementById('v-frame');
-            
-            let finalUrl = '';
-            if (mode === 'movie') {
-                if(srv === 'cinemaos') finalUrl = `https://cinemaos.tech/player/${curId}`;
-                if(srv === 'vidsrcto') finalUrl = `https://vidsrc.to/embed/movie/${curId}`;
-                if(srv === 'vidsrcme') finalUrl = `https://vidsrc.me/embed/movie?tmdb=${curId}`;
+            let url = '';
+            if(mode === 'movie') {
+                if(srv === 'cinemaos') url = `https://cinemaos.tech/player/${curId}`;
+                if(srv === 'vidsrcto') url = `https://vidsrc.to/embed/movie/${curId}`;
+                if(srv === 'vidsrcme') url = `https://vidsrc.me/embed/movie?tmdb=${curId}`;
+                if(srv === 'vidsrccc') url = `https://vidsrc.cc/v2/embed/movie/${curId}`;
+                if(srv === 'embedsu')  url = `https://embed.su/embed/movie/${curId}`;
             } else {
-                if(srv === 'cinemaos') finalUrl = `https://cinemaos.tech/player/${curId}/${s}/${e}`;
-                if(srv === 'vidsrcto') finalUrl = `https://vidsrc.to/embed/tv/${curId}/${s}/${e}`;
-                if(srv === 'vidsrcme') finalUrl = `https://vidsrc.me/embed/tv?tmdb=${curId}&sea=${s}&epi=${e}`;
+                if(srv === 'cinemaos') url = `https://cinemaos.tech/player/${curId}/${curS}/${curE}`;
+                if(srv === 'vidsrcto') url = `https://vidsrc.to/embed/tv/${curId}/${curS}/${curE}`;
+                if(srv === 'vidsrcme') url = `https://vidsrc.me/embed/tv?tmdb=${curId}&sea=${curS}&epi=${curE}`;
+                if(srv === 'vidsrccc') url = `https://vidsrc.cc/v2/embed/tv/${curId}/${curS}/${curE}`;
+                if(srv === 'embedsu')  url = `https://embed.su/embed/tv/${curId}/${curS}/${curE}`;
             }
-            frame.src = finalUrl;
+            document.getElementById('v-frame').src = url;
         }
 
         function toggleWL(id, title, poster) {
             const idx = watchlist.findIndex(x => x.id === id);
-            if(idx > -1) { watchlist.splice(idx, 1); alert("Removed from My List"); } 
-            else { watchlist.push({id, title, poster_path: poster}); alert("Added to My List"); }
-            localStorage.setItem('op_titan_list', JSON.stringify(watchlist));
+            if(idx > -1) watchlist.splice(idx, 1);
+            else watchlist.push({id, title, poster_path: poster});
+            localStorage.setItem('op_titan_v3', JSON.stringify(watchlist));
             renderWatchlist();
+        }
+
+        function renderWatchlist() {
+            const sec = document.getElementById('watchlist-section');
+            if(watchlist.length === 0) { sec.classList.add('hidden'); return; }
+            sec.classList.remove('hidden');
+            renderGrid(watchlist, 'watchlist-grid');
         }
 
         function changeMode(m) {
@@ -223,10 +241,8 @@
             init();
         }
 
-        function scrollToWatchlist() { document.getElementById('watchlist-section').scrollIntoView({ behavior: 'smooth' }); }
-        function closeP() { document.getElementById('player-modal').style.display = 'none'; document.getElementById('v-frame').src = ''; document.body.style.overflow = 'auto'; }
-        document.getElementById('search').addEventListener('input', e => { if(e.target.value.length > 2) init(e.target.value); else if(e.target.value == '') init(); });
-
+        function closeP() { document.getElementById('player-modal').style.display='none'; document.getElementById('v-frame').src=''; document.body.style.overflow='auto'; }
+        document.getElementById('search').addEventListener('input', e => init(e.target.value));
         init();
     </script>
 </body>
