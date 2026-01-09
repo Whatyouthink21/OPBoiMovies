@@ -3,122 +3,131 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StreamVault | Practice</title>
+    <title>StreamVault | Movies & TV</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #0f172a; }
-        .movie-card:hover .play-overlay { opacity: 1; }
+        body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: white; }
         .video-container { position: relative; padding-bottom: 56.25%; height: 0; }
         .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 8px; }
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #1e293b; }
-        ::-webkit-scrollbar-thumb { background: #ef4444; border-radius: 10px; }
+        .active-tab { border-bottom: 4px solid #ef4444; color: #ef4444; }
     </style>
 </head>
-<body class="text-gray-100">
+<body>
 
     <nav class="flex items-center justify-between px-8 py-4 bg-slate-900/80 backdrop-blur-md sticky top-0 z-40">
         <h1 class="text-2xl font-black text-red-600 tracking-tighter">STREAM<span class="text-white">VAULT</span></h1>
+        
+        <div class="flex gap-6 font-bold uppercase text-sm tracking-widest">
+            <button id="movie-tab" onclick="switchMode('movie')" class="active-tab pb-1">Movies</button>
+            <button id="tv-tab" onclick="switchMode('tv')" class="pb-1 text-gray-400">TV Shows</button>
+        </div>
+
         <div class="flex-1 max-w-md mx-8">
-            <input type="text" id="search" placeholder="Search movies..." 
-                class="w-full bg-slate-800 border-none rounded-full px-5 py-2 focus:ring-2 focus:ring-red-600 outline-none text-sm transition-all">
+            <input type="text" id="search" placeholder="Search..." 
+                class="w-full bg-slate-800 border-none rounded-full px-5 py-2 focus:ring-2 focus:ring-red-600 outline-none text-sm">
         </div>
     </nav>
 
-    <div class="relative h-[400px] w-full bg-gradient-to-b from-transparent to-slate-950 overflow-hidden mb-8">
-        <img id="hero-img" src="https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?q=80&w=2070" class="w-full h-full object-cover opacity-40">
-        <div class="absolute bottom-10 left-10 max-w-xl">
-            <h2 id="hero-title" class="text-5xl font-bold mb-4 uppercase tracking-tight">Discover Movies</h2>
-            <p class="text-gray-300 text-lg mb-6">Experience the best cinema directly in your browser. Practice project using CinemaOS and TMDB.</p>
-        </div>
-    </div>
-
-    <div class="px-8 pb-20">
-        <h3 class="text-xl font-semibold mb-6 flex items-center">
-            <span class="w-1 h-6 bg-red-600 mr-3"></span>Trending Now
+    <div class="px-8 py-10">
+        <h3 id="grid-title" class="text-xl font-semibold mb-6 flex items-center">
+            <span class="w-1 h-6 bg-red-600 mr-3"></span>Trending Movies
         </h3>
-        <div id="movie-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
-            </div>
+        <div id="movie-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6"></div>
     </div>
 
     <div id="player-modal" class="fixed inset-0 bg-black/95 z-50 hidden items-center justify-center p-4">
         <div class="w-full max-w-5xl">
             <div class="flex justify-between items-center mb-4">
-                <h2 id="now-playing-title" class="text-xl font-bold truncate">Watching Movie</h2>
-                <button onclick="closePlayer()" class="bg-red-600 hover:bg-red-700 px-4 py-1 rounded text-sm font-bold uppercase transition">Close</button>
+                <h2 id="now-playing-title" class="text-xl font-bold truncate">Watching</h2>
+                <div id="tv-controls" class="hidden flex gap-2">
+                    <input type="number" id="season-input" value="1" class="w-16 bg-gray-800 p-1 rounded text-center" title="Season">
+                    <input type="number" id="episode-input" value="1" class="w-16 bg-gray-800 p-1 rounded text-center" title="Episode">
+                    <button onclick="updateTVSource()" class="bg-blue-600 px-3 py-1 rounded text-xs font-bold">GO</button>
+                </div>
+                <button onclick="closePlayer()" class="bg-red-600 hover:bg-red-700 px-4 py-1 rounded text-sm font-bold transition">Close</button>
             </div>
-            <div class="video-container shadow-2xl shadow-red-900/20">
+            <div class="video-container shadow-2xl">
                 <iframe id="video-iframe" src="" allowfullscreen frameborder="0"></iframe>
             </div>
         </div>
     </div>
 
     <script>
-        const API_KEY = 'a45420333457411e78d5ad35d6c51a2d'; 
-        const grid = document.getElementById('movie-grid');
-        const searchInput = document.getElementById('search');
-        const modal = document.getElementById('player-modal');
-        const iframe = document.getElementById('video-iframe');
+        const API_KEY = 'YOUR_TMDB_API_KEY_HERE'; 
+        let currentMode = 'movie'; // can be 'movie' or 'tv'
+        let currentId = null;
 
-        async function fetchMovies(query = '') {
-            const url = query 
-                ? `https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${query}`
-                : `https://api.themoviedb.org/3/trending/movie/week?api_key=${API_KEY}`;
-            
-            try {
-                const res = await fetch(url);
-                const data = await res.json();
-                renderMovies(data.results);
-            } catch (err) {
-                console.error("Error fetching data:", err);
+        async function fetchData(query = '') {
+            let url;
+            if(query) {
+                url = `https://api.themoviedb.org/3/search/${currentMode}?api_key=${API_KEY}&query=${query}`;
+            } else {
+                url = `https://api.themoviedb.org/3/trending/${currentMode}/week?api_key=${API_KEY}`;
             }
+            
+            const res = await fetch(url);
+            const data = await res.json();
+            renderItems(data.results);
         }
 
-        function renderMovies(movies) {
-            grid.innerHTML = movies.map(m => {
-                if(!m.poster_path) return '';
+        function renderItems(items) {
+            const grid = document.getElementById('movie-grid');
+            grid.innerHTML = items.map(item => {
+                if(!item.poster_path) return '';
+                const title = item.title || item.name; // TV uses 'name', Movies use 'title'
                 return `
-                <div class="movie-card group cursor-pointer relative" onclick="playMovie(${m.id}, '${m.title.replace(/'/g, "\\'")}')">
-                    <div class="relative overflow-hidden rounded-lg shadow-lg">
-                        <img src="https://image.tmdb.org/t/p/w500${m.poster_path}" 
-                            class="w-full transform group-hover:scale-110 transition duration-500">
-                        <div class="play-overlay absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 transition duration-300">
-                            <div class="w-12 h-12 border-2 border-white rounded-full flex items-center justify-center">
-                                <span class="ml-1">▶</span>
-                            </div>
-                        </div>
+                <div class="cursor-pointer group" onclick="openPlayer(${item.id}, '${title.replace(/'/g, "\\'")}')">
+                    <div class="overflow-hidden rounded-lg">
+                        <img src="https://image.tmdb.org/t/p/w500${item.poster_path}" class="w-full group-hover:scale-110 transition duration-500">
                     </div>
-                    <div class="mt-3">
-                        <p class="text-sm font-bold truncate">${m.title}</p>
-                        <p class="text-xs text-gray-400">${m.release_date ? m.release_date.split('-')[0] : 'N/A'}</p>
-                    </div>
-                </div>
-                `;
+                    <p class="mt-2 text-sm font-bold truncate">${title}</p>
+                </div>`;
             }).join('');
         }
 
-        function playMovie(id, title) {
-            document.getElementById('now-playing-title').innerText = "Playing: " + title;
-            iframe.src = `https://cinemaos.tech/player/${id}`;
-            modal.style.display = 'flex';
-            document.body.style.overflow = 'hidden'; // Stop scrolling
+        function openPlayer(id, title) {
+            currentId = id;
+            document.getElementById('now-playing-title').innerText = title;
+            const iframe = document.getElementById('video-iframe');
+            const tvControls = document.getElementById('tv-controls');
+
+            if (currentMode === 'movie') {
+                iframe.src = `https://cinemaos.tech/player/${id}`;
+                tvControls.classList.add('hidden');
+            } else {
+                tvControls.classList.remove('hidden');
+                updateTVSource(); // Load S1 E1 by default
+            }
+
+            document.getElementById('player-modal').style.display = 'flex';
+        }
+
+        function updateTVSource() {
+            const s = document.getElementById('season-input').value;
+            const e = document.getElementById('episode-input').value;
+            document.getElementById('video-iframe').src = `https://cinemaos.tech/player/${currentId}/${s}/${e}`;
+        }
+
+        function switchMode(mode) {
+            currentMode = mode;
+            document.getElementById('movie-tab').className = mode === 'movie' ? 'active-tab pb-1' : 'text-gray-400 pb-1';
+            document.getElementById('tv-tab').className = mode === 'tv' ? 'active-tab pb-1' : 'text-gray-400 pb-1';
+            document.getElementById('grid-title').innerText = mode === 'movie' ? 'Trending Movies' : 'Trending TV Shows';
+            fetchData();
         }
 
         function closePlayer() {
-            modal.style.display = 'none';
-            iframe.src = '';
-            document.body.style.overflow = 'auto'; // Enable scrolling
+            document.getElementById('player-modal').style.display = 'none';
+            document.getElementById('video-iframe').src = '';
         }
 
-        searchInput.addEventListener('input', (e) => {
-            if(e.target.value.length > 2) fetchMovies(e.target.value);
-            if(e.target.value.length === 0) fetchMovies();
+        document.getElementById('search').addEventListener('input', (e) => {
+            if(e.target.value.length > 2) fetchData(e.target.value);
+            if(e.target.value.length === 0) fetchData();
         });
 
-        // Initialize
-        fetchMovies();
+        fetchData();
     </script>
 </body>
-
 </html>
