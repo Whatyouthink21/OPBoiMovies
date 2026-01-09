@@ -13,19 +13,32 @@
         .frost-bg { background: var(--glass); backdrop-filter: blur(40px); border: 1px solid var(--border); }
         .hero-vignette { background: linear-gradient(to top, #0a0b0d 10%, transparent 70%), linear-gradient(to right, #0a0b0d 10%, transparent 70%); }
 
+        /* Search Dropdown Specifics */
+        #search-results { 
+            display: none; position: absolute; top: calc(100% + 15px); right: 0; 
+            width: 400px; max-height: 500px; border-radius: 20px; padding: 12px; 
+            z-index: 6000; overflow-y: auto; border: 1px solid var(--border);
+        }
+        #search-results.active { display: block; animation: slideUp 0.3s ease-out; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .search-item { 
+            display: flex; gap: 15px; padding: 10px; border-radius: 12px; 
+            cursor: pointer; transition: 0.2s; border: 1px solid transparent;
+        }
+        .search-item:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.1); }
+
         .dropdown-content { 
             display: none; position: absolute; top: calc(100% + 10px); right: 0; 
             min-width: 200px; border-radius: 12px; padding: 8px; z-index: 5000;
             box-shadow: 0 20px 50px rgba(0,0,0,0.5);
         }
-        .dropdown-content.show { display: block; animation: popIn 0.2s ease-out; }
-        @keyframes popIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        .dropdown-content.show { display: block; }
 
-        .drop-item { 
-            width: 100%; text-align: left; padding: 10px 14px; border-radius: 8px; 
-            font-size: 10px; font-weight: 700; text-transform: uppercase; 
-            color: rgba(255,255,255,0.6); transition: 0.2s; 
-        }
+        #search-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); z-index: 5500; display: none; opacity: 0; transition: 0.3s; pointer-events: none; }
+        #search-overlay.active { display: block; opacity: 1; pointer-events: all; }
+
+        .drop-item { width: 100%; text-align: left; padding: 10px 14px; border-radius: 8px; font-size: 10px; font-weight: 700; text-transform: uppercase; color: rgba(255,255,255,0.6); transition: 0.2s; }
         .drop-item:hover { background: rgba(255,255,255,0.1); color: #fff; }
 
         #player-overlay { position: fixed; inset: 0; z-index: 4000; display: none; background: rgba(5, 6, 8, 0.98); backdrop-filter: blur(50px); overflow-y: auto; }
@@ -41,6 +54,8 @@
 </head>
 <body>
 
+    <div id="search-overlay" onclick="closeSearch()"></div>
+
     <nav class="fixed top-0 w-full z-[100] px-8 py-4 flex items-center justify-between">
         <div class="flex items-center gap-10">
             <h1 class="text-xl font-black italic tracking-tighter cursor-pointer" onclick="location.reload()">AURA</h1>
@@ -55,15 +70,16 @@
         </div>
 
         <div class="flex items-center gap-6">
-            <input type="text" id="search" placeholder="SEARCH..." class="frost-bg px-6 py-2 rounded-full text-[11px] w-64 outline-none focus:border-white/40 transition uppercase font-bold">
+            <div class="relative z-[6001]">
+                <input type="text" id="search" autocomplete="off" placeholder="SEARCH TITLES..." class="frost-bg px-6 py-2 rounded-full text-[11px] w-80 outline-none focus:border-white/40 transition uppercase font-bold focus:w-96">
+                <div id="search-results" class="frost-bg"></div>
+            </div>
             
             <div id="auth-container">
                 <button id="login-btn" class="frost-bg px-6 py-2 rounded-full text-[9px] font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all">GOOGLE LOGIN</button>
-                
                 <div id="user-profile" class="hidden flex items-center gap-3 frost-bg pl-4 pr-1 py-1 rounded-full cursor-pointer relative" onclick="toggleDrop('user-menu')">
                     <span id="user-name" class="text-[10px] font-black uppercase tracking-tighter"></span>
                     <img id="user-pic" class="w-8 h-8 rounded-full border border-white/20">
-                    
                     <div id="user-menu" class="dropdown-content frost-bg">
                         <button onclick="logout()" class="drop-item !text-red-400">Sign Out</button>
                     </div>
@@ -89,7 +105,7 @@
             <h3 class="text-[10px] font-black uppercase tracking-[0.4em] opacity-30 mb-8">Your Collection</h3>
             <div id="my-list-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8"></div>
         </div>
-        <h3 class="text-[10px] font-black uppercase tracking-[0.4em] opacity-30 mb-8">Discovery Feed</h3>
+        <h3 id="feed-title" class="text-[10px] font-black uppercase tracking-[0.4em] opacity-30 mb-8">Discovery Feed</h3>
         <div id="grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8"></div>
     </main>
 
@@ -164,23 +180,20 @@
             {id:'2embed', n:'Aura Cloud'}
         ];
 
-        window.login = async () => { try { await signInWithPopup(auth, provider); } catch(e) { console.error(e); alert("Login Error: Make sure your domain is authorized in Firebase Console."); } };
+        window.login = async () => { try { await signInWithPopup(auth, provider); } catch(e) { console.error(e); } };
         window.logout = () => signOut(auth);
 
         onAuthStateChanged(auth, (user) => {
             currentUser = user;
-            const loginBtn = document.getElementById('login-btn');
-            const userProfile = document.getElementById('user-profile');
-            
             if (user) {
-                loginBtn.classList.add('hidden');
-                userProfile.classList.remove('hidden');
+                document.getElementById('login-btn').classList.add('hidden');
+                document.getElementById('user-profile').classList.remove('hidden');
                 document.getElementById('user-name').innerText = user.displayName.split(' ')[0];
                 document.getElementById('user-pic').src = user.photoURL;
                 syncCloudList(user.uid);
             } else {
-                loginBtn.classList.remove('hidden');
-                userProfile.classList.add('hidden');
+                document.getElementById('login-btn').classList.remove('hidden');
+                document.getElementById('user-profile').classList.add('hidden');
                 myList = [];
                 updateListUI();
             }
@@ -201,6 +214,54 @@
             exists ? await deleteDoc(docRef) : await setDoc(docRef, activeItem);
         };
 
+        // --- ENHANCED SEARCH LOGIC ---
+        const searchInput = document.getElementById('search');
+        const searchResults = document.getElementById('search-results');
+        const searchOverlay = document.getElementById('search-overlay');
+
+        searchInput.addEventListener('input', async (e) => {
+            const val = e.target.value;
+            if (val.length < 2) {
+                closeSearch();
+                return;
+            }
+
+            searchResults.classList.add('active');
+            searchOverlay.classList.add('active');
+
+            const r = await fetch(`https://api.themoviedb.org/3/search/${mode}?api_key=${KEY}&query=${val}`);
+            const d = await r.json();
+            
+            searchResults.innerHTML = d.results.slice(0, 6).map(m => `
+                <div class="search-item" onclick="quickView(${m.id}, '${(m.title||m.name).replace(/'/g,"\\")}', '${m.poster_path}')">
+                    <img src="https://image.tmdb.org/t/p/w92${m.poster_path}" class="w-12 h-18 rounded-md object-cover bg-neutral-800">
+                    <div class="flex flex-col justify-center">
+                        <span class="text-[11px] font-black uppercase tracking-tight line-clamp-1">${m.title || m.name}</span>
+                        <span class="text-[9px] opacity-40 uppercase font-bold">${(m.release_date || m.first_air_date || '').split('-')[0]}</span>
+                    </div>
+                </div>
+            `).join('');
+        });
+
+        window.closeSearch = () => {
+            searchResults.classList.remove('active');
+            searchOverlay.classList.remove('active');
+        };
+
+        window.quickView = (id, title, poster) => {
+            closeSearch();
+            openPlayer(id, title, poster);
+        };
+
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                init(searchInput.value);
+                closeSearch();
+                document.getElementById('feed-title').innerText = `Results for: ${searchInput.value}`;
+            }
+        });
+
+        // --- CORE ENGINE ---
         async function init(q = '', g = '') {
             let url = `https://api.themoviedb.org/3/trending/${mode}/week?api_key=${KEY}`;
             if(q) url = `https://api.themoviedb.org/3/search/${mode}?api_key=${KEY}&query=${q}`;
@@ -313,8 +374,11 @@
             document.getElementById('genre-menu').innerHTML = d.genres.map(g => `<button onclick="init('','${g.id}')" class="drop-item">${g.name}</button>`).join('');
         }
 
-        window.onclick = (e) => { if (!e.target.closest('.relative') && !e.target.closest('#user-profile')) document.querySelectorAll('.dropdown-content').forEach(d => d.classList.remove('show')); };
-        document.getElementById('search').addEventListener('input', ev => { if(ev.target.value.length > 2) init(ev.target.value); });
+        window.onclick = (e) => { 
+            if (!e.target.closest('.relative') && !e.target.closest('#user-profile')) {
+                document.querySelectorAll('.dropdown-content').forEach(d => d.classList.remove('show'));
+            }
+        };
         
         init();
     </script>
