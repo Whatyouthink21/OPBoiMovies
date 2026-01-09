@@ -14,7 +14,7 @@
         .hero-vignette { background: linear-gradient(to top, #0a0b0d 10%, transparent 70%), linear-gradient(to right, #0a0b0d 10%, transparent 70%); }
 
         .dropdown-content { 
-            display: none; position: absolute; top: calc(100% + 10px); left: 0; 
+            display: none; position: absolute; top: calc(100% + 10px); right: 0; 
             min-width: 200px; border-radius: 12px; padding: 8px; z-index: 5000;
             box-shadow: 0 20px 50px rgba(0,0,0,0.5);
         }
@@ -48,14 +48,27 @@
                 <button onclick="setMode('movie')" id="m-btn" class="px-6 py-2 rounded-full text-[9px] font-black uppercase transition-all bg-white text-black">Cinema</button>
                 <button onclick="setMode('tv')" id="t-btn" class="px-6 py-2 rounded-full text-[9px] font-black uppercase text-white/40">Series</button>
             </div>
-        </div>
-        <div class="flex items-center gap-4">
-            <button id="login-btn" class="frost-bg px-6 py-2 rounded-full text-[9px] font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all">GOOGLE LOGIN</button>
             <div class="relative">
                 <button onclick="toggleDrop('genre-menu')" class="frost-bg px-6 py-2 rounded-full text-[9px] font-black uppercase tracking-widest">Genres ↓</button>
-                <div id="genre-menu" class="dropdown-content frost-bg max-h-80 overflow-y-auto"></div>
+                <div id="genre-menu" class="dropdown-content frost-bg max-h-80 overflow-y-auto !left-0 !right-auto"></div>
             </div>
+        </div>
+
+        <div class="flex items-center gap-6">
             <input type="text" id="search" placeholder="SEARCH..." class="frost-bg px-6 py-2 rounded-full text-[11px] w-64 outline-none focus:border-white/40 transition uppercase font-bold">
+            
+            <div id="auth-container">
+                <button id="login-btn" class="frost-bg px-6 py-2 rounded-full text-[9px] font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all">GOOGLE LOGIN</button>
+                
+                <div id="user-profile" class="hidden flex items-center gap-3 frost-bg pl-4 pr-1 py-1 rounded-full cursor-pointer relative" onclick="toggleDrop('user-menu')">
+                    <span id="user-name" class="text-[10px] font-black uppercase tracking-tighter"></span>
+                    <img id="user-pic" class="w-8 h-8 rounded-full border border-white/20">
+                    
+                    <div id="user-menu" class="dropdown-content frost-bg">
+                        <button onclick="logout()" class="drop-item !text-red-400">Sign Out</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </nav>
 
@@ -143,7 +156,6 @@
         let myList = [];
         let currentUser = null;
 
-        // 5 SERVERS LIST (NO EMBED.SU)
         const servers = [
             {id:'cinemaos', n:'Aura Primary'},
             {id:'vidsrcto', n:'Aura Mirror'},
@@ -152,19 +164,23 @@
             {id:'2embed', n:'Aura Cloud'}
         ];
 
-        window.login = async () => { try { await signInWithPopup(auth, provider); } catch(e) { console.error(e); } };
+        window.login = async () => { try { await signInWithPopup(auth, provider); } catch(e) { console.error(e); alert("Login Error: Make sure your domain is authorized in Firebase Console."); } };
         window.logout = () => signOut(auth);
 
         onAuthStateChanged(auth, (user) => {
             currentUser = user;
             const loginBtn = document.getElementById('login-btn');
+            const userProfile = document.getElementById('user-profile');
+            
             if (user) {
-                loginBtn.innerText = `LOGOUT (${user.displayName.split(' ')[0].toUpperCase()})`;
-                loginBtn.onclick = logout;
+                loginBtn.classList.add('hidden');
+                userProfile.classList.remove('hidden');
+                document.getElementById('user-name').innerText = user.displayName.split(' ')[0];
+                document.getElementById('user-pic').src = user.photoURL;
                 syncCloudList(user.uid);
             } else {
-                loginBtn.innerText = 'GOOGLE LOGIN';
-                loginBtn.onclick = login;
+                loginBtn.classList.remove('hidden');
+                userProfile.classList.add('hidden');
                 myList = [];
                 updateListUI();
             }
@@ -297,7 +313,7 @@
             document.getElementById('genre-menu').innerHTML = d.genres.map(g => `<button onclick="init('','${g.id}')" class="drop-item">${g.name}</button>`).join('');
         }
 
-        window.onclick = (e) => { if (!e.target.closest('.relative')) document.querySelectorAll('.dropdown-content').forEach(d => d.classList.remove('show')); };
+        window.onclick = (e) => { if (!e.target.closest('.relative') && !e.target.closest('#user-profile')) document.querySelectorAll('.dropdown-content').forEach(d => d.classList.remove('show')); };
         document.getElementById('search').addEventListener('input', ev => { if(ev.target.value.length > 2) init(ev.target.value); });
         
         init();
