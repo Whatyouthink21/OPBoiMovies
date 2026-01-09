@@ -13,35 +13,40 @@
         .frost-bg { background: var(--glass); backdrop-filter: blur(40px); border: 1px solid var(--border); }
         .hero-vignette { background: linear-gradient(to top, #0a0b0d 10%, transparent 70%), linear-gradient(to right, #0a0b0d 10%, transparent 70%); }
 
-        /* Enhanced Search UI */
+        /* FIXED SEARCH OVERLAY */
+        #search-overlay { 
+            position: fixed; inset: 0; background: rgba(0,0,0,0.8); 
+            backdrop-filter: blur(20px); z-index: 5500; 
+            display: none; opacity: 0; transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+        #search-overlay.active { display: block; opacity: 1; pointer-events: all; }
+
         #search-results { 
             display: none; position: absolute; top: calc(100% + 15px); right: 0; 
-            width: 400px; max-height: 500px; border-radius: 20px; padding: 12px; 
+            width: 400px; max-height: 500px; border-radius: 24px; padding: 12px; 
             z-index: 6000; overflow-y: auto; border: 1px solid var(--border);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
         #search-results.active { display: block; animation: slideUp 0.3s ease-out; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         .search-item { 
-            display: flex; gap: 15px; padding: 10px; border-radius: 12px; 
+            display: flex; gap: 15px; padding: 12px; border-radius: 16px; 
             cursor: pointer; transition: 0.2s; border: 1px solid transparent;
         }
-        .search-item:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.1); }
-
-        #search-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(15px); z-index: 5500; display: none; opacity: 0; transition: 0.3s; }
-        #search-overlay.active { opacity: 1; }
+        .search-item:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.1); }
 
         .dropdown-content { 
             display: none; position: absolute; top: calc(100% + 10px); right: 0; 
             min-width: 200px; border-radius: 12px; padding: 8px; z-index: 5000;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
         }
         .dropdown-content.show { display: block; }
 
         .drop-item { width: 100%; text-align: left; padding: 10px 14px; border-radius: 8px; font-size: 10px; font-weight: 700; text-transform: uppercase; color: rgba(255,255,255,0.6); transition: 0.2s; }
         .drop-item:hover { background: rgba(255,255,255,0.1); color: #fff; }
 
-        #player-overlay { position: fixed; inset: 0; z-index: 4000; display: none; background: rgba(5, 6, 8, 0.98); backdrop-filter: blur(50px); overflow-y: auto; }
+        #player-overlay { position: fixed; inset: 0; z-index: 4000; display: none; background: #050608; overflow-y: auto; }
         .player-viewport { width: 95%; max-width: 1700px; aspect-ratio: 16 / 9; border-radius: 24px; overflow: hidden; border: 1px solid var(--border); }
         iframe { width: 100%; height: 100%; border: none; }
 
@@ -54,7 +59,7 @@
 </head>
 <body>
 
-    <div id="search-overlay" onclick="closeSearch()"></div>
+    <div id="search-overlay"></div>
 
     <nav class="fixed top-0 w-full z-[100] px-8 py-4 flex items-center justify-between">
         <div class="flex items-center gap-10">
@@ -71,7 +76,7 @@
 
         <div class="flex items-center gap-6">
             <div class="relative z-[6001]">
-                <input type="text" id="search" autocomplete="off" placeholder="SEARCH TITLES..." class="frost-bg px-6 py-2 rounded-full text-[11px] w-64 outline-none focus:border-white/40 transition uppercase font-bold focus:w-80">
+                <input type="text" id="search" autocomplete="off" placeholder="SEARCH TITLES..." class="frost-bg px-6 py-2 rounded-full text-[11px] w-64 outline-none focus:border-white/40 transition-all uppercase font-bold focus:w-80">
                 <div id="search-results" class="frost-bg"></div>
             </div>
             
@@ -170,7 +175,6 @@
             {id:'2embed', n:'Aura Cloud'}
         ];
 
-        // --- AUTH ---
         window.login = async () => { try { await signInWithPopup(auth, provider); } catch(e) { console.error(e); } };
         window.logout = () => signOut(auth);
 
@@ -203,7 +207,7 @@
             exists ? await deleteDoc(docRef) : await setDoc(docRef, activeItem);
         };
 
-        // --- FIXED SEARCH ---
+        // --- FIXED SEARCH LOGIC ---
         const sIn = document.getElementById('search');
         const sRes = document.getElementById('search-results');
         const sOv = document.getElementById('search-overlay');
@@ -211,21 +215,26 @@
         window.closeSearch = () => {
             sRes.classList.remove('active');
             sOv.classList.remove('active');
-            setTimeout(() => sOv.style.display = 'none', 300);
+            setTimeout(() => {
+                if(!sOv.classList.contains('active')) sOv.style.display = 'none';
+            }, 300);
         };
 
         sIn.addEventListener('input', async (e) => {
             const val = e.target.value;
-            if (val.length < 2) { closeSearch(); return; }
+            if (val.trim().length === 0) { closeSearch(); return; }
+            if (val.length < 2) return;
+
             sOv.style.display = 'block';
             setTimeout(() => { sOv.classList.add('active'); sRes.classList.add('active'); }, 10);
+
             const r = await fetch(`https://api.themoviedb.org/3/search/${mode}?api_key=${KEY}&query=${val}`);
             const d = await r.json();
-            sRes.innerHTML = d.results.slice(0, 6).map(m => `
+            sRes.innerHTML = d.results.slice(0, 8).map(m => `
                 <div class="search-item" onclick="quickView(${m.id}, '${(m.title||m.name).replace(/'/g,"\\")}', '${m.poster_path}')">
-                    <img src="https://image.tmdb.org/t/p/w92${m.poster_path}" class="w-12 h-18 rounded-md object-cover">
+                    <img src="https://image.tmdb.org/t/p/w92${m.poster_path}" class="w-12 h-18 rounded-lg object-cover bg-neutral-800">
                     <div class="flex flex-col justify-center">
-                        <span class="text-[11px] font-black uppercase tracking-tight">${m.title || m.name}</span>
+                        <span class="text-[11px] font-black uppercase tracking-tight line-clamp-1">${m.title || m.name}</span>
                         <span class="text-[9px] opacity-40 uppercase font-bold">${(m.release_date || m.first_air_date || '').split('-')[0]}</span>
                     </div>
                 </div>`).join('');
@@ -233,8 +242,9 @@
 
         window.quickView = (id, title, poster) => { closeSearch(); openPlayer(id, title, poster); };
         sIn.addEventListener('keypress', (e) => { if (e.key === 'Enter') { init(sIn.value); closeSearch(); } });
+        sOv.addEventListener('click', closeSearch);
 
-        // --- ENGINE ---
+        // --- CORE ENGINE ---
         async function init(q = '', g = '') {
             let url = `https://api.themoviedb.org/3/trending/${mode}/week?api_key=${KEY}`;
             if(q) url = `https://api.themoviedb.org/3/search/${mode}?api_key=${KEY}&query=${q}`;
