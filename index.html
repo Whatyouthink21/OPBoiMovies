@@ -3,58 +3,96 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OP BOI MOVIES | Premium</title>
+    <title>OP BOI MOVIES | Ultra Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;700;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Poppins', sans-serif; background-color: #050505; color: white; }
-        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .video-container { position: relative; padding-bottom: 56.25%; height: 0; }
-        .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 12px; }
-        select { appearance: none; background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 0.5rem center; background-size: 1em; }
+        :root { --primary: #ff0000; --bg: #030712; }
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: var(--bg); 
+            color: white;
+            background-image: radial-gradient(circle at 50% -20%, #310000 0%, transparent 50%);
+            background-attachment: fixed;
+        }
+
+        /* Glassmorphism Ultra */
+        .glass-nav { background: rgba(3, 7, 18, 0.7); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+        
+        /* Card Effects */
+        .movie-card { transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .movie-card:hover { transform: translateY(-10px) scale(1.02); }
+        .card-glow { position: absolute; inset: 0; border-radius: 1rem; opacity: 0; transition: opacity 0.5s; box-shadow: 0 0 30px 5px rgba(255, 0, 0, 0.3); z-index: -1; }
+        .movie-card:hover .card-glow { opacity: 1; }
+
+        /* Animated Title */
+        .gradient-text { background: linear-gradient(to right, #ffffff, #ff4d4d); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+
+        /* Shimmer Loading Animation */
+        .shimmer { background: linear-gradient(90deg, #0f172a 25%, #1e293b 50%, #0f172a 75%); background-size: 200% 100%; animation: loading 1.5s infinite; }
+        @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+        .video-container { position: relative; padding-bottom: 56.25%; height: 0; border-radius: 20px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(255, 0, 0, 0.2); }
+        iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
     </style>
 </head>
-<body>
+<body class="antialiased">
 
-    <nav class="flex items-center justify-between px-6 py-4 sticky top-0 z-50 glass mb-4">
-        <h1 class="text-xl font-black tracking-tighter uppercase">OP BOI <span class="text-red-600">MOVIES</span></h1>
-        <div class="flex gap-6 font-bold text-xs uppercase">
-            <button onclick="switchMode('movie')" id="m-btn" class="text-red-600">Movies</button>
-            <button onclick="switchMode('tv')" id="t-btn" class="text-gray-400">TV Shows</button>
+    <nav class="flex items-center justify-between px-8 py-5 sticky top-0 z-[100] glass-nav">
+        <div class="flex items-center gap-8">
+            <h1 class="text-2xl font-extrabold tracking-tighter italic">OP BOI <span class="text-red-600">MOVIES</span></h1>
+            <div class="hidden md:flex gap-6 text-[11px] font-black uppercase tracking-[0.2em]">
+                <button onclick="switchMode('movie')" id="m-btn" class="text-red-600 transition-all hover:letter-spacing-widest">Movies</button>
+                <button onclick="switchMode('tv')" id="t-btn" class="text-gray-500 hover:text-white transition-all">TV Shows</button>
+            </div>
         </div>
-        <input type="text" id="search" placeholder="Search..." class="bg-white/10 rounded-full px-4 py-1 text-sm outline-none focus:ring-1 focus:ring-red-600">
+        
+        <div class="flex items-center gap-4">
+            <div class="relative group hidden sm:block">
+                <input type="text" id="search" placeholder="Search titles..." 
+                    class="bg-white/5 border border-white/10 rounded-xl px-10 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-600/50 w-64 transition-all group-hover:bg-white/10">
+                <span class="absolute left-3 top-2.5 opacity-30">🔍</span>
+            </div>
+        </div>
     </nav>
 
-    <main class="px-6">
-        <div id="movie-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6"></div>
+    <main class="max-w-[1600px] mx-auto px-8 py-10">
+        <div class="flex items-center gap-4 mb-10">
+            <h2 id="grid-title" class="text-3xl font-bold tracking-tight gradient-text">Trending Movies</h2>
+            <div class="h-[1px] flex-1 bg-gradient-to-r from-red-600/50 to-transparent"></div>
+        </div>
+
+        <div id="movie-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-x-6 gap-y-10">
+            </div>
     </main>
 
-    <div id="player-modal" class="fixed inset-0 bg-black/95 z-[100] hidden flex-col items-center justify-center p-4">
-        <div class="w-full max-w-5xl">
-            <div class="flex flex-wrap justify-between items-end mb-4 gap-4">
-                <div>
-                    <h2 id="now-playing-title" class="text-xl font-bold truncate">Watching</h2>
-                    <div class="flex gap-2 mt-2">
-                        <button onclick="changeServer('cinemaos')" class="text-[10px] bg-white/10 px-2 py-1 rounded hover:bg-red-600">SERVER 1</button>
-                        <button onclick="changeServer('vidsrc')" class="text-[10px] bg-white/10 px-2 py-1 rounded hover:bg-red-600">SERVER 2</button>
-                    </div>
+    <div id="player-modal" class="fixed inset-0 bg-black/95 z-[200] hidden flex-col items-center justify-center p-6 backdrop-blur-xl">
+        <div class="w-full max-w-6xl animate-in zoom-in duration-300">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                <div class="flex-1">
+                    <span class="text-[10px] text-red-600 font-bold tracking-widest uppercase mb-1 block">Now Streaming</span>
+                    <h2 id="now-playing-title" class="text-3xl font-extrabold truncate italic">Movie Title</h2>
+                </div>
+                
+                <div id="tv-controls" class="hidden flex items-center gap-3 bg-white/5 p-2 rounded-2xl border border-white/10">
+                    <select id="season-select" onchange="loadEpisodes()" class="bg-transparent text-xs font-bold px-4 py-2 outline-none cursor-pointer"></select>
+                    <div class="w-[1px] h-6 bg-white/10"></div>
+                    <select id="episode-select" onchange="updateSource()" class="bg-transparent text-xs font-bold px-4 py-2 outline-none cursor-pointer"></select>
                 </div>
 
-                <div id="tv-controls" class="hidden flex gap-3 items-center glass p-3 rounded-xl">
-                    <div class="flex flex-col">
-                        <label class="text-[10px] font-bold text-gray-400 mb-1">SEASON</label>
-                        <select id="season-select" onchange="loadEpisodes()" class="bg-gray-800 text-sm px-3 py-2 rounded-lg pr-8 outline-none border border-white/10"></select>
-                    </div>
-                    <div class="flex flex-col">
-                        <label class="text-[10px] font-bold text-gray-400 mb-1">EPISODE</label>
-                        <select id="episode-select" onchange="updateSource()" class="bg-gray-800 text-sm px-3 py-2 rounded-lg pr-8 outline-none border border-white/10"></select>
-                    </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="changeServer('cinemaos')" class="bg-red-600/10 hover:bg-red-600 text-red-500 hover:text-white px-4 py-2 rounded-xl text-[10px] font-bold transition-all">S1</button>
+                    <button onclick="changeServer('vidsrc')" class="bg-white/5 hover:bg-red-600 px-4 py-2 rounded-xl text-[10px] font-bold transition-all">S2</button>
+                    <button onclick="closePlayer()" class="ml-4 hover:rotate-90 transition-transform text-3xl font-light">&times;</button>
                 </div>
-
-                <button onclick="closePlayer()" class="text-3xl">&times;</button>
             </div>
 
-            <div class="video-container shadow-2xl">
+            <div class="video-container border border-white/10">
                 <iframe id="video-iframe" src="" allowfullscreen frameborder="0"></iframe>
             </div>
         </div>
@@ -77,9 +115,23 @@
             document.getElementById('movie-grid').innerHTML = items.map(item => {
                 if(!item.poster_path) return '';
                 const title = item.title || item.name;
-                return `<div class="cursor-pointer group" onclick="openPlayer(${item.id}, '${title.replace(/'/g, "\\'")}')">
-                    <img src="https://image.tmdb.org/t/p/w500${item.poster_path}" class="rounded-xl group-hover:scale-105 transition duration-300 shadow-lg">
-                    <p class="mt-2 text-xs font-bold truncate">${title}</p>
+                const date = (item.release_date || item.first_air_date || '????').split('-')[0];
+                return `
+                <div class="movie-card relative group cursor-pointer" onclick="openPlayer(${item.id}, '${title.replace(/'/g, "\\'")}')">
+                    <div class="card-glow"></div>
+                    <div class="relative rounded-2xl overflow-hidden aspect-[2/3] bg-slate-900 shadow-2xl">
+                        <img src="https://image.tmdb.org/t/p/w500${item.poster_path}" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex flex-col justify-end p-4">
+                            <div class="bg-red-600 w-10 h-10 rounded-full flex items-center justify-center mb-2 shadow-lg shadow-red-600/40">▶</div>
+                        </div>
+                    </div>
+                    <div class="mt-4 px-1">
+                        <h4 class="font-bold text-sm truncate">${title}</h4>
+                        <div class="flex justify-between items-center mt-1">
+                            <span class="text-[10px] text-gray-500 font-bold uppercase tracking-tighter">${currentMode}</span>
+                            <span class="text-[10px] text-red-600 font-bold">${date}</span>
+                        </div>
+                    </div>
                 </div>`;
             }).join('');
         }
@@ -88,6 +140,7 @@
             currentId = id;
             document.getElementById('now-playing-title').innerText = title;
             document.getElementById('player-modal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
             
             if (currentMode === 'tv') {
                 document.getElementById('tv-controls').classList.remove('hidden');
@@ -98,24 +151,19 @@
             }
         }
 
-        // FETCH SEASONS FROM TMDB
         async function loadSeasons(id) {
             const res = await fetch(`https://api.themoviedb.org/3/tv/${id}?api_key=${API_KEY}`);
             const data = await res.json();
             const select = document.getElementById('season-select');
-            select.innerHTML = data.seasons
-                .filter(s => s.season_number > 0) // Hide specials
-                .map(s => `<option value="${s.season_number}">Season ${s.season_number}</option>`).join('');
+            select.innerHTML = data.seasons.filter(s => s.season_number > 0).map(s => `<option value="${s.season_number}">SEASON ${s.season_number}</option>`).join('');
             await loadEpisodes();
         }
 
-        // FETCH EPISODES FOR SELECTED SEASON
         async function loadEpisodes() {
-            const seasonNum = document.getElementById('season-select').value;
-            const res = await fetch(`https://api.themoviedb.org/3/tv/${currentId}/season/${seasonNum}?api_key=${API_KEY}`);
+            const s = document.getElementById('season-select').value;
+            const res = await fetch(`https://api.themoviedb.org/3/tv/${currentId}/season/${s}?api_key=${API_KEY}`);
             const data = await res.json();
-            const select = document.getElementById('episode-select');
-            select.innerHTML = data.episodes.map(e => `<option value="${e.episode_number}">Ep ${e.episode_number}: ${e.name}</option>`).join('');
+            document.getElementById('episode-select').innerHTML = data.episodes.map(e => `<option value="${e.episode_number}">EP ${e.episode_number}: ${e.name}</option>`).join('');
             updateSource();
         }
 
@@ -123,20 +171,18 @@
             const iframe = document.getElementById('video-iframe');
             const s = document.getElementById('season-select').value || 1;
             const e = document.getElementById('episode-select').value || 1;
-            
-            if (currentMode === 'movie') {
-                iframe.src = currentServer === 'cinemaos' ? `https://cinemaos.tech/player/${currentId}` : `https://vidsrc.to/embed/movie/${currentId}`;
-            } else {
-                iframe.src = currentServer === 'cinemaos' ? `https://cinemaos.tech/player/${currentId}/${s}/${e}` : `https://vidsrc.to/embed/tv/${currentId}/${s}/${e}`;
-            }
+            iframe.src = (currentMode === 'movie') 
+                ? (currentServer === 'cinemaos' ? `https://cinemaos.tech/player/${currentId}` : `https://vidsrc.to/embed/movie/${currentId}`)
+                : (currentServer === 'cinemaos' ? `https://cinemaos.tech/player/${currentId}/${s}/${e}` : `https://vidsrc.to/embed/tv/${currentId}/${s}/${e}`);
         }
 
         function changeServer(srv) { currentServer = srv; updateSource(); }
-        function closePlayer() { document.getElementById('player-modal').style.display = 'none'; document.getElementById('video-iframe').src = ''; }
+        function closePlayer() { document.getElementById('player-modal').style.display = 'none'; document.getElementById('video-iframe').src = ''; document.body.style.overflow = 'auto'; }
         function switchMode(m) { 
             currentMode = m; 
-            document.getElementById('m-btn').className = m === 'movie' ? 'text-red-600' : 'text-gray-400';
-            document.getElementById('t-btn').className = m === 'tv' ? 'text-red-600' : 'text-gray-400';
+            document.getElementById('m-btn').className = m === 'movie' ? 'text-red-600' : 'text-gray-500';
+            document.getElementById('t-btn').className = m === 'tv' ? 'text-red-600' : 'text-gray-500';
+            document.getElementById('grid-title').innerText = m === 'movie' ? 'Trending Movies' : 'Trending TV Shows';
             fetchData(); 
         }
 
@@ -145,4 +191,3 @@
     </script>
 </body>
 </html>
-
