@@ -32,9 +32,12 @@
         .movie-card { border-radius: 16px; overflow: hidden; transition: 0.4s cubic-bezier(0.2, 1, 0.2, 1); cursor: pointer; background: #1a1a1a; }
         .movie-card:hover { transform: translateY(-8px); filter: brightness(1.1); }
         
-        .cast-grid { display: grid; grid-template-cols: repeat(auto-fill, minmax(120px, 1fr)); gap: 24px; }
-        .cast-card { text-align: center; }
-        .cast-img { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; margin: 0 auto 10px; border: 2px solid var(--border); background: #1a1a1a; }
+        /* Full TMDB Cast Style */
+        .cast-grid { display: grid; grid-template-cols: repeat(auto-fill, minmax(130px, 1fr)); gap: 20px; }
+        .cast-card { background: rgba(255,255,255,0.03); border-radius: 12px; overflow: hidden; border: 1px solid var(--border); text-align: left; transition: 0.3s; }
+        .cast-card:hover { background: rgba(255,255,255,0.07); }
+        .cast-img { width: 100%; aspect-ratio: 1/1.2; object-fit: cover; background: #1a1a1a; }
+        .cast-info { padding: 10px; }
 
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
@@ -50,19 +53,17 @@
                 <button onclick="setMode('tv')" id="t-btn" class="px-6 py-2 rounded-full text-[10px] font-bold uppercase text-white/40">Series</button>
             </div>
         </div>
-
         <div class="flex items-center gap-6">
             <div class="relative" id="search-container">
                 <input type="text" id="search" autocomplete="off" placeholder="SEARCH..." 
                        class="frost-bg px-6 py-2.5 rounded-full text-[11px] w-64 outline-none border border-white/10 focus:border-white/40 transition-all uppercase font-bold focus:w-80">
                 <div id="search-results" class="frost-bg p-2"></div>
             </div>
-            
             <div id="auth-container">
                 <button id="login-btn" onclick="login()" class="frost-bg px-6 py-2.5 rounded-full text-[10px] font-bold uppercase">LOGIN</button>
                 <div id="user-profile" class="hidden flex items-center gap-3 frost-bg pl-4 pr-1 py-1 rounded-full cursor-pointer relative" onclick="toggleDrop('user-menu')">
                     <span id="user-name" class="text-[10px] font-bold uppercase"></span>
-                    <img id="user-pic" class="w-8 h-8 rounded-full border border-white/20">
+                    <img id="user-pic" class="w-8 h-8 rounded-full">
                     <div id="user-menu" class="dropdown-content frost-bg">
                         <button onclick="logout()" class="w-full text-left p-3 text-[10px] text-red-400 font-bold uppercase">Sign Out</button>
                     </div>
@@ -79,7 +80,7 @@
             <h2 id="hero-title" class="text-6xl lg:text-8xl font-black uppercase tracking-tighter leading-none italic mb-6"></h2>
             <p id="hero-desc" class="text-sm opacity-50 max-w-xl mb-8 line-clamp-3 font-medium leading-relaxed"></p>
             <div class="flex gap-4">
-                <button id="hero-play" class="bg-white text-black px-12 py-4 rounded-2xl font-black uppercase text-[11px] tracking-widest hover:scale-105 transition">Play Now</button>
+                <button id="hero-play" class="bg-white text-black px-12 py-4 rounded-2xl font-black uppercase text-[11px] tracking-widest">Play Now</button>
                 <button id="hero-add" onclick="toggleMyList()" class="frost-bg px-12 py-4 rounded-2xl font-black uppercase text-[11px] tracking-widest">+ Watchlist</button>
             </div>
         </div>
@@ -107,16 +108,14 @@
                 </div>
             </div>
             
-            <div class="player-viewport"><iframe id="frame" src="" allowfullscreen></iframe></div>
+            <div class="player-viewport"><iframe id="frame" src="" allowfullscreen allow="autoplay; encrypted-media"></iframe></div>
 
-            <div class="w-[96%] mt-12 pb-24">
-                <div class="mb-12">
-                    <div id="modal-meta" class="flex gap-4 text-[10px] font-black uppercase tracking-widest opacity-40 mb-4"></div>
-                    <h3 id="modal-title" class="text-4xl font-black uppercase italic mb-6"></h3>
-                    <p id="modal-desc" class="text-sm opacity-50 leading-relaxed font-medium mb-10 max-w-5xl"></p>
-                </div>
+            <div class="w-[96%] mt-12 pb-32">
+                <div id="modal-meta" class="flex gap-4 text-[10px] font-black uppercase tracking-widest opacity-40 mb-4"></div>
+                <h3 id="modal-title" class="text-5xl font-black uppercase italic mb-6"></h3>
+                <p id="modal-desc" class="text-base opacity-60 leading-relaxed font-medium mb-12 max-w-5xl"></p>
                 
-                <h4 class="text-[10px] font-black uppercase tracking-[0.3em] opacity-30 mb-8">Starring Cast</h4>
+                <h4 class="text-[10px] font-black uppercase tracking-[0.3em] opacity-30 mb-8">Full Cast & Crew</h4>
                 <div id="cast-list" class="cast-grid"></div>
             </div>
         </div>
@@ -221,21 +220,24 @@
             document.getElementById('modal-title').innerText = info.title || info.name;
             document.getElementById('modal-desc').innerText = info.overview;
             const year = (info.release_date || info.first_air_date || 'TBA').split('-')[0];
-            document.getElementById('modal-meta').innerHTML = `<span>${year}</span><span>•</span><span>${info.genres.map(g => g.name).join(' / ')}</span>`;
+            document.getElementById('modal-meta').innerHTML = `<span>${year}</span><span>•</span><span>⭐ ${info.vote_average.toFixed(1)}</span><span>•</span><span>${info.genres.map(g => g.name).join(' / ')}</span>`;
 
+            // FULL CAST FETCH
             const cr = await fetch(`https://api.themoviedb.org/3/${mode}/${id}/credits?api_key=${KEY}`).then(r => r.json());
             document.getElementById('cast-list').innerHTML = cr.cast.map(c => `
                 <div class="cast-card">
-                    <img class="cast-img" src="${c.profile_path ? 'https://image.tmdb.org/t/p/w185'+c.profile_path : 'https://via.placeholder.com/185x185?text=No+Pic'}">
-                    <p class="text-[9px] font-bold uppercase tracking-tighter">${c.name}</p>
-                    <p class="text-[8px] opacity-40 uppercase font-medium mt-1 line-clamp-1">${c.character || ''}</p>
+                    <img class="cast-img" src="${c.profile_path ? 'https://image.tmdb.org/t/p/w300'+c.profile_path : 'https://via.placeholder.com/300x400?text=No+Photo'}">
+                    <div class="cast-info">
+                        <p class="text-[10px] font-black uppercase leading-tight">${c.name}</p>
+                        <p class="text-[9px] opacity-40 uppercase font-bold mt-1">${c.character || 'Actor'}</p>
+                    </div>
                 </div>`).join('');
 
             updPlayer(); updateBtnStates();
         }
 
         window.toggleMyList = async () => {
-            if (!currentUser) return alert("Login required");
+            if (!currentUser) return alert("Please Login to use Watchlist");
             const docRef = doc(db, "users", currentUser.uid, "mylist", activeItem.id.toString());
             myList.some(x => x.id === activeItem.id) ? await deleteDoc(docRef) : await setDoc(docRef, activeItem);
         };
@@ -259,12 +261,7 @@
         window.toggleDrop = (id) => document.getElementById(id).classList.toggle('show');
         window.setSrv = (id, n) => { currentSrv = id; document.getElementById('active-srv').innerText = n; updPlayer(); document.getElementById('srv-menu').classList.remove('show'); }
         window.closePlayer = () => { document.getElementById('player-overlay').style.display = 'none'; document.getElementById('frame').src = ''; document.body.style.overflow = 'auto'; }
-        window.setMode = (m) => { 
-            mode = m; 
-            document.getElementById('m-btn').className = m === 'movie' ? 'px-6 py-2 rounded-full bg-white text-black text-[10px] font-bold uppercase' : 'px-6 py-2 rounded-full text-white/40 text-[10px] font-bold uppercase'; 
-            document.getElementById('t-btn').className = m === 'tv' ? 'px-6 py-2 rounded-full bg-white text-black text-[10px] font-bold uppercase' : 'px-6 py-2 rounded-full text-white/40 text-[10px] font-bold uppercase'; 
-            init(); 
-        }
+        window.setMode = (m) => { mode = m; init(); }
 
         function updPlayer() {
             let s = `https://cinemaos.tech/embed/${mode}/${activeID}`;
