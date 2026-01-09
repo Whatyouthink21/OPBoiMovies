@@ -13,7 +13,6 @@
         .frost-bg { background: var(--glass); backdrop-filter: blur(40px); border: 1px solid var(--border); }
         .hero-vignette { background: linear-gradient(to top, #0a0b0d 10%, transparent 70%), linear-gradient(to right, #0a0b0d 10%, transparent 70%); }
 
-        /* Stable Dropdown Logic */
         .dropdown-content { 
             display: none; position: absolute; top: calc(100% + 10px); left: 0; 
             min-width: 200px; border-radius: 12px; padding: 8px; z-index: 5000;
@@ -29,12 +28,10 @@
         }
         .drop-item:hover { background: rgba(255,255,255,0.1); color: #fff; }
 
-        /* Massive Player Viewport */
         #player-overlay { position: fixed; inset: 0; z-index: 4000; display: none; background: rgba(5, 6, 8, 0.98); backdrop-filter: blur(50px); overflow-y: auto; }
         .player-viewport { width: 95%; max-width: 1700px; aspect-ratio: 16 / 9; border-radius: 24px; overflow: hidden; border: 1px solid var(--border); }
         iframe { width: 100%; height: 100%; border: none; }
 
-        /* Card Transitions */
         .movie-card { border-radius: 16px; overflow: hidden; transition: 0.5s cubic-bezier(0.2, 1, 0.2, 1); cursor: pointer; border: 1px solid transparent; }
         .movie-card:hover { transform: scale(1.05); border-color: rgba(255,255,255,0.3); }
         
@@ -53,9 +50,7 @@
             </div>
         </div>
         <div class="flex items-center gap-4">
-            <button id="login-btn" class="frost-bg px-6 py-2 rounded-full text-[9px] font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all">
-                GOOGLE LOGIN
-            </button>
+            <button id="login-btn" class="frost-bg px-6 py-2 rounded-full text-[9px] font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all">GOOGLE LOGIN</button>
             <div class="relative">
                 <button onclick="toggleDrop('genre-menu')" class="frost-bg px-6 py-2 rounded-full text-[9px] font-black uppercase tracking-widest">Genres ↓</button>
                 <div id="genre-menu" class="dropdown-content frost-bg max-h-80 overflow-y-auto"></div>
@@ -81,7 +76,6 @@
             <h3 class="text-[10px] font-black uppercase tracking-[0.4em] opacity-30 mb-8">Your Collection</h3>
             <div id="my-list-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8"></div>
         </div>
-
         <h3 class="text-[10px] font-black uppercase tracking-[0.4em] opacity-30 mb-8">Discovery Feed</h3>
         <div id="grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8"></div>
     </main>
@@ -90,15 +84,12 @@
         <div class="flex flex-col items-center py-10">
             <div class="w-[95%] max-w-[1700px] flex justify-between items-center mb-8">
                 <button onclick="closePlayer()" class="frost-bg px-8 py-3 rounded-xl text-[9px] font-black uppercase tracking-widest">← Exit</button>
-                
                 <div class="flex gap-3">
                     <button id="modal-add-btn" onclick="toggleMyList()" class="frost-bg px-8 py-3 rounded-xl text-[9px] font-black uppercase tracking-widest"></button>
-                    
                     <div class="relative">
-                        <button onclick="toggleDrop('srv-menu')" class="frost-bg px-8 py-3 rounded-xl text-[9px] font-black uppercase">Server: <span id="active-srv">Primary</span></button>
+                        <button onclick="toggleDrop('srv-menu')" class="frost-bg px-8 py-3 rounded-xl text-[9px] font-black uppercase"><span id="active-srv">Aura Primary</span></button>
                         <div id="srv-menu" class="dropdown-content frost-bg"></div>
                     </div>
-
                     <div id="tv-controls" class="hidden flex gap-3">
                         <div class="relative">
                             <button onclick="toggleDrop('s-menu')" class="frost-bg px-6 py-3 rounded-xl text-[9px] font-black uppercase">S <span id="s-val">1</span></button>
@@ -111,11 +102,9 @@
                     </div>
                 </div>
             </div>
-
             <div class="player-viewport bg-black mb-12 shadow-2xl">
                 <iframe id="frame" src="" allowfullscreen></iframe>
             </div>
-
             <div class="w-[95%] max-w-[1700px] grid lg:grid-cols-3 gap-16 pb-16">
                 <div class="lg:col-span-2">
                     <h2 id="p-title" class="text-4xl font-black uppercase mb-4 tracking-tighter italic">...</h2>
@@ -134,7 +123,6 @@
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // Your specific Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyDFDQG_-vhIYXWtRUW5dXOvP_BCsCIhLJI",
             authDomain: "opboimovies.firebaseapp.com",
@@ -150,14 +138,20 @@
         const db = getFirestore(app);
         const provider = new GoogleAuthProvider();
 
-        // App Globals
         const KEY = 'a45420333457411e78d5ad35d6c51a2d';
         let mode = 'movie', activeID = null, currentSrv = 'cinemaos', s = 1, e = 1, activeItem = null;
         let myList = [];
         let currentUser = null;
-        const servers = [{id:'cinemaos', n:'Aura Primary'}, {id:'vidsrcto', n:'Aura Mirror'}];
 
-        // Auth Logic
+        // 5 SERVERS LIST (NO EMBED.SU)
+        const servers = [
+            {id:'cinemaos', n:'Aura Primary'},
+            {id:'vidsrcto', n:'Aura Mirror'},
+            {id:'vidsrcme', n:'Aura Legacy'},
+            {id:'vidsrcicu', n:'Aura Stream'},
+            {id:'2embed', n:'Aura Cloud'}
+        ];
+
         window.login = async () => { try { await signInWithPopup(auth, provider); } catch(e) { console.error(e); } };
         window.logout = () => signOut(auth);
 
@@ -176,7 +170,6 @@
             }
         });
 
-        // Database Sync
         function syncCloudList(uid) {
             onSnapshot(collection(db, "users", uid, "mylist"), (snap) => {
                 myList = snap.docs.map(d => d.data());
@@ -192,7 +185,6 @@
             exists ? await deleteDoc(docRef) : await setDoc(docRef, activeItem);
         };
 
-        // Movie Engine
         async function init(q = '', g = '') {
             let url = `https://api.themoviedb.org/3/trending/${mode}/week?api_key=${KEY}`;
             if(q) url = `https://api.themoviedb.org/3/search/${mode}?api_key=${KEY}&query=${q}`;
@@ -233,7 +225,9 @@
                     <img src="https://image.tmdb.org/t/p/w185${c.profile_path}" class="w-10 h-10 rounded-lg object-cover">
                     <p class="text-[11px] font-black uppercase tracking-wider">${c.name}</p>
                 </div>`).join('');
+            
             document.getElementById('srv-menu').innerHTML = servers.map(sv => `<button onclick="setSrv('${sv.id}','${sv.n}')" class="drop-item">${sv.n}</button>`).join('');
+            
             if(mode === 'tv') {
                 document.getElementById('tv-controls').classList.remove('hidden');
                 document.getElementById('s-menu').innerHTML = res.seasons.filter(sea => sea.season_number > 0).map(sea => `<button onclick="setS(${sea.season_number})" class="drop-item">Season ${sea.season_number}</button>`).join('');
@@ -241,7 +235,6 @@
             } else { document.getElementById('tv-controls').classList.add('hidden'); updPlayer(); }
         }
 
-        // Logic Helpers
         function updateListUI() {
             const sec = document.getElementById('my-list-section');
             if(myList.length > 0) { sec.classList.remove('hidden'); renderGrid(myList, 'my-list-grid'); }
@@ -262,10 +255,11 @@
             if(!isShow) el.classList.add('show');
         };
 
-        window.setSrv = (id, n) => { currentSrv = id; document.getElementById('active-srv').innerText = n.split(' ')[1]; updPlayer(); toggleDrop('srv-menu'); }
+        window.setSrv = (id, n) => { currentSrv = id; document.getElementById('active-srv').innerText = n; updPlayer(); toggleDrop('srv-menu'); }
         window.setS = (val) => { s = val; e = 1; document.getElementById('s-val').innerText = val; loadEpisodes(); toggleDrop('s-menu'); }
         window.setE = (val) => { e = val; document.getElementById('e-val').innerText = val; updPlayer(); toggleDrop('e-menu'); }
         window.closePlayer = () => { document.getElementById('player-overlay').style.display = 'none'; document.getElementById('frame').src = ''; document.body.style.overflow = 'auto'; }
+        
         window.setMode = (m) => { 
             mode = m; 
             document.getElementById('m-btn').className = m === 'movie' ? 'px-6 py-2 rounded-full text-[9px] font-black uppercase transition-all bg-white text-black' : 'px-6 py-2 rounded-full text-[9px] font-black uppercase text-white/40';
@@ -274,9 +268,20 @@
         }
 
         function updPlayer() {
-            let src = mode === 'movie' 
-                ? (currentSrv==='cinemaos' ? `https://cinemaos.tech/player/${activeID}` : `https://vidsrc.to/embed/movie/${activeID}`)
-                : (currentSrv==='cinemaos' ? `https://cinemaos.tech/player/${activeID}/${s}/${e}` : `https://vidsrc.to/embed/tv/${activeID}/${s}/${e}`);
+            let src = '';
+            if(mode === 'movie') {
+                if(currentSrv === 'cinemaos') src = `https://cinemaos.tech/player/${activeID}`;
+                else if(currentSrv === 'vidsrcto') src = `https://vidsrc.to/embed/movie/${activeID}`;
+                else if(currentSrv === 'vidsrcme') src = `https://vidsrc.me/embed/movie?tmdb=${activeID}`;
+                else if(currentSrv === 'vidsrcicu') src = `https://vidsrc.icu/embed/movie/${activeID}`;
+                else if(currentSrv === '2embed') src = `https://www.2embed.cc/embed/${activeID}`;
+            } else {
+                if(currentSrv === 'cinemaos') src = `https://cinemaos.tech/player/${activeID}/${s}/${e}`;
+                else if(currentSrv === 'vidsrcto') src = `https://vidsrc.to/embed/tv/${activeID}/${s}/${e}`;
+                else if(currentSrv === 'vidsrcme') src = `https://vidsrc.me/embed/tv?tmdb=${activeID}&sea=${s}&epi=${e}`;
+                else if(currentSrv === 'vidsrcicu') src = `https://vidsrc.icu/embed/tv/${activeID}/${s}/${e}`;
+                else if(currentSrv === '2embed') src = `https://www.2embed.cc/embedtv/${activeID}&s=${s}&e=${e}`;
+            }
             document.getElementById('frame').src = src;
         }
 
