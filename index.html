@@ -37,10 +37,8 @@
         .movie-card { border-radius: 16px; overflow: hidden; transition: 0.4s cubic-bezier(0.2, 1, 0.2, 1); cursor: pointer; background: #1a1a1a; }
         .movie-card:hover { transform: translateY(-8px); filter: brightness(1.1); }
         
-        /* Full Cast Styling */
-        .cast-grid { display: grid; grid-template-cols: repeat(auto-fill, minmax(100px, 1fr)); gap: 20px; }
-        .cast-card { text-align: center; }
-        .cast-img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin: 0 auto 8px; border: 2px solid var(--border); background: #1a1a1a; }
+        .cast-card { flex: 0 0 90px; text-align: center; }
+        .cast-img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; margin: 0 auto 8px; border: 1px solid var(--border); }
 
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
@@ -59,7 +57,7 @@
 
         <div class="flex items-center gap-6">
             <div class="relative" id="search-container">
-                <input type="text" id="search" autocomplete="off" placeholder="SEARCH TITLES..." 
+                <input type="text" id="search" autocomplete="off" placeholder="SEARCH..." 
                        class="frost-bg px-6 py-2.5 rounded-full text-[11px] w-64 outline-none border border-white/10 focus:border-white/40 transition-all uppercase font-bold focus:w-80">
                 <div id="search-results" class="frost-bg p-2"></div>
             </div>
@@ -85,7 +83,7 @@
             <h2 id="hero-title" class="text-6xl lg:text-8xl font-black uppercase tracking-tighter leading-none italic mb-6"></h2>
             <p id="hero-desc" class="text-sm opacity-50 max-w-xl mb-8 line-clamp-3 font-medium leading-relaxed"></p>
             <div class="flex gap-4">
-                <button id="hero-play" class="bg-white text-black px-12 py-4 rounded-2xl font-black uppercase text-[11px] tracking-widest">Play Now</button>
+                <button id="hero-play" class="bg-white text-black px-12 py-4 rounded-2xl font-black uppercase text-[11px] tracking-widest hover:scale-105 transition">Play Now</button>
                 <button id="hero-add" onclick="toggleMyList()" class="frost-bg px-12 py-4 rounded-2xl font-black uppercase text-[11px] tracking-widest">+ Watchlist</button>
             </div>
         </div>
@@ -96,7 +94,7 @@
             <h3 class="text-[11px] font-black uppercase tracking-[0.4em] opacity-40 mb-8">My Collection</h3>
             <div id="my-list-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8"></div>
         </div>
-        <h3 id="feed-title" class="text-[11px] font-black uppercase tracking-[0.4em] opacity-40 mb-8">Trending Now</h3>
+        <h3 id="feed-title" class="text-[11px] font-black uppercase tracking-[0.4em] opacity-40 mb-8">Trending</h3>
         <div id="grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8"></div>
     </main>
 
@@ -115,15 +113,15 @@
             
             <div class="player-viewport"><iframe id="frame" src="" allowfullscreen></iframe></div>
 
-            <div class="w-[96%] mt-12 pb-32">
-                <div class="mb-12">
+            <div class="w-[96%] mt-12 grid grid-cols-1 lg:grid-cols-3 gap-16 pb-24">
+                <div class="lg:col-span-2">
                     <div id="modal-meta" class="flex gap-4 text-[10px] font-black uppercase tracking-widest opacity-40 mb-4"></div>
-                    <h3 id="modal-title" class="text-5xl font-black uppercase italic mb-6"></h3>
-                    <p id="modal-desc" class="text-base opacity-60 leading-relaxed font-medium mb-10 max-w-5xl"></p>
+                    <h3 id="modal-title" class="text-4xl font-black uppercase italic mb-6"></h3>
+                    <p id="modal-desc" class="text-sm opacity-50 leading-relaxed font-medium mb-10 max-w-4xl"></p>
+                    
+                    <h4 class="text-[10px] font-black uppercase tracking-[0.3em] opacity-30 mb-6">Starring Cast</h4>
+                    <div id="cast-list" class="flex gap-6 overflow-x-auto pb-4"></div>
                 </div>
-                
-                <h4 class="text-[10px] font-black uppercase tracking-[0.3em] opacity-30 mb-8">Full Starring Cast</h4>
-                <div id="cast-list" class="cast-grid"></div>
             </div>
         </div>
     </div>
@@ -187,7 +185,7 @@
                     <img src="https://image.tmdb.org/t/p/w92${m.poster_path}" class="w-10 h-14 rounded-md object-cover">
                     <div class="flex flex-col justify-center">
                         <span class="text-[11px] font-bold uppercase">${m.title || m.name}</span>
-                        <span class="text-[9px] opacity-40 font-bold">${(m.release_date || m.first_air_date || '').split('-')[0]}</span>
+                        <span class="text-[9px] opacity-40">${(m.release_date || m.first_air_date || '').split('-')[0]}</span>
                     </div>
                 </div>`).join('');
         });
@@ -227,23 +225,20 @@
             document.getElementById('modal-title').innerText = info.title || info.name;
             document.getElementById('modal-desc').innerText = info.overview;
             const year = (info.release_date || info.first_air_date || 'TBA').split('-')[0];
-            const rating = info.vote_average ? info.vote_average.toFixed(1) : 'N/A';
-            document.getElementById('modal-meta').innerHTML = `<span>${year}</span><span>•</span><span>⭐ ${rating}</span><span>•</span><span>${info.genres.map(g => g.name).join(' / ')}</span>`;
+            document.getElementById('modal-meta').innerHTML = `<span>${year}</span><span>•</span><span>${info.genres.slice(0,2).map(g => g.name).join(' / ')}</span>`;
 
-            // FULL CAST FETCH (NO SLICE)
             const cr = await fetch(`https://api.themoviedb.org/3/${mode}/${id}/credits?api_key=${KEY}`).then(r => r.json());
-            document.getElementById('cast-list').innerHTML = cr.cast.map(c => `
+            document.getElementById('cast-list').innerHTML = cr.cast.slice(0, 10).map(c => `
                 <div class="cast-card">
-                    <img class="cast-img" src="${c.profile_path ? 'https://image.tmdb.org/t/p/w185'+c.profile_path : 'https://via.placeholder.com/185x185?text=N/A'}">
-                    <p class="text-[9px] font-black uppercase tracking-tighter leading-tight">${c.name}</p>
-                    <p class="text-[8px] opacity-40 font-bold uppercase mt-1">${c.character || ''}</p>
+                    <img class="cast-img" src="${c.profile_path ? 'https://image.tmdb.org/t/p/w185'+c.profile_path : 'https://via.placeholder.com/185x185?text=No+Pic'}">
+                    <p class="text-[9px] font-bold uppercase tracking-tighter">${c.name}</p>
                 </div>`).join('');
 
             updPlayer(); updateBtnStates();
         }
 
         window.toggleMyList = async () => {
-            if (!currentUser) return alert("Please Login");
+            if (!currentUser) return alert("Login required");
             const docRef = doc(db, "users", currentUser.uid, "mylist", activeItem.id.toString());
             myList.some(x => x.id === activeItem.id) ? await deleteDoc(docRef) : await setDoc(docRef, activeItem);
         };
