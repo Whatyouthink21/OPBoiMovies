@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OP BOI MOVIES | ZENITH</title>
+    <title>OP BOI MOVIES | IMAX ZENITH</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;900&display=swap" rel="stylesheet">
     <style>
@@ -12,7 +12,7 @@
         
         .glass-nav { background: rgba(2, 2, 5, 0.95); backdrop-filter: blur(30px); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
 
-        /* Custom Dropdown Bridge */
+        /* Dropdown Fix */
         .dropdown { position: relative; }
         .dropdown-content { 
             display: none; position: absolute; top: 100%; left: 0; min-width: 220px;
@@ -20,88 +20,76 @@
             padding: 8px; z-index: 500; margin-top: 5px;
         }
         .dropdown::after { content: ''; position: absolute; bottom: -10px; left: 0; width: 100%; height: 10px; }
-        .dropdown:hover .dropdown-content { display: block; animation: fadeUp 0.3s ease-out forwards; }
+        .dropdown:hover .dropdown-content { display: block; }
 
-        /* Hero Enhancements */
-        .hero-vignette { background: linear-gradient(75deg, var(--bg) 20%, transparent 60%), linear-gradient(to top, var(--bg) 5%, transparent 40%); }
-        @keyframes slideIn { from { opacity: 0; transform: translateX(-30px); } to { opacity: 1; transform: translateX(0); } }
-        .animate-slide { animation: slideIn 0.8s ease-out forwards; }
+        /* THE PLAYER FIX: MASSIVE SCALE */
+        .video-fixed-height { 
+            width: 100%; 
+            aspect-ratio: 16 / 9; 
+            max-height: 85vh; /* Takes up 85% of screen height */
+            background: #000;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 0 80px rgba(0,0,0,0.5);
+        }
+        iframe { width: 100%; height: 100%; border: none; }
 
-        /* Grid Item Hover */
-        .movie-card { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .movie-card:hover { transform: scale(1.08); z-index: 10; }
-        .movie-card img { box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .movie-card:hover img { border-color: var(--accent); box-shadow: 0 0 40px rgba(255,0,0,0.25); }
-
-        /* Scrollbars */
-        .no-scrollbar::-webkit-scrollbar { display: none; }
+        /* Modal Layout */
+        #player-modal { 
+            background: var(--bg);
+            overflow-y: auto;
+            scrollbar-width: none;
+        }
+        #player-modal::-webkit-scrollbar { display: none; }
         .modal-open { overflow: hidden !important; }
 
-        /* Video Container */
-        .video-container { aspect-ratio: 16 / 9; max-height: 75vh; background: #000; border-radius: 24px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05); }
-        
-        @keyframes fadeUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        .bento-card { 
+            background: var(--panel); 
+            border: 1px solid rgba(255,255,255,0.1); 
+            border-radius: 32px; 
+            padding: 40px; 
+        }
+
+        .movie-card { transition: transform 0.4s ease; }
+        .movie-card:hover { transform: translateY(-10px) scale(1.05); }
     </style>
 </head>
-<body class="pb-20">
+<body>
 
     <nav class="fixed top-0 w-full z-[100] glass-nav px-8 lg:px-16 py-5 flex items-center justify-between">
-        <h1 class="text-3xl font-black italic tracking-tighter cursor-pointer" onclick="location.reload()">OP BOI <span class="text-red-600">MOVIES</span></h1>
-        
-        <div class="hidden xl:flex items-center gap-8">
-            <div class="flex bg-white/5 p-1 rounded-2xl border border-white/10">
-                <button onclick="changeMode('movie')" id="m-nav" class="px-6 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all bg-red-600 text-white">Movies</button>
-                <button onclick="changeMode('tv')" id="t-nav" class="px-6 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all text-gray-400 hover:text-white">TV Shows</button>
-            </div>
-            
-            <select id="genre-select" onchange="filterGenre()" class="bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-[11px] font-black uppercase tracking-widest outline-none text-red-500 focus:border-red-600">
+        <h1 class="text-3xl font-black italic cursor-pointer" onclick="location.reload()">OP BOI <span class="text-red-600">MOVIES</span></h1>
+        <div class="hidden lg:flex items-center gap-6">
+            <button onclick="changeMode('movie')" id="m-nav" class="bg-red-600 px-6 py-2 rounded-xl text-[11px] font-black uppercase">Movies</button>
+            <button onclick="changeMode('tv')" id="t-nav" class="text-gray-400 px-6 py-2 rounded-xl text-[11px] font-black uppercase">TV Shows</button>
+            <select id="genre-select" onchange="filterGenre()" class="bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-[11px] font-black uppercase text-red-500 outline-none">
                 <option value="">All Genres</option>
             </select>
         </div>
-
-        <div class="relative flex items-center bg-white/5 border border-white/10 rounded-full px-6 py-2 group focus-within:ring-2 focus-within:ring-red-600/50 transition">
-            <input type="text" id="search" placeholder="Search universe..." class="bg-transparent text-sm w-48 lg:w-80 outline-none">
-        </div>
+        <input type="text" id="search" placeholder="Search..." class="bg-white/5 border border-white/10 rounded-full px-6 py-2 text-sm w-64 outline-none focus:ring-1 focus:ring-red-600">
     </nav>
 
-    <section id="hero" class="relative h-[92vh] w-full flex items-center overflow-hidden">
-        <div id="hero-bg" class="absolute inset-0 bg-cover bg-center transition-all duration-1000 scale-105"></div>
-        <div class="absolute inset-0 hero-vignette"></div>
-        
-        <div class="relative z-10 px-8 lg:px-20 max-w-6xl opacity-0 animate-slide" id="hero-content">
-            <div class="flex items-center gap-4 mb-6">
-                <span class="bg-red-600 px-4 py-1 rounded-lg text-[10px] font-black tracking-[0.2em] uppercase">Premiering Now</span>
-                <span id="hero-meta" class="text-sm font-bold opacity-70 tracking-widest uppercase text-white"></span>
-            </div>
-            <h2 id="hero-title" class="text-6xl lg:text-9xl font-black italic uppercase mb-8 leading-[0.85] tracking-tighter drop-shadow-2xl">TITLE</h2>
-            <p id="hero-desc" class="text-gray-300 text-lg lg:text-xl mb-12 max-w-3xl line-clamp-3 font-light leading-relaxed"></p>
-            
-            <div class="flex flex-wrap gap-6">
-                <button id="hero-play" class="bg-white text-black px-12 py-5 rounded-2xl font-black hover:bg-red-600 hover:text-white transition-all transform hover:scale-105 shadow-[0_0_50px_rgba(255,255,255,0.1)] flex items-center gap-4">
-                    <span class="text-2xl">▶</span> WATCH NOW
-                </button>
-                <div id="hero-genres" class="flex gap-3 items-center"></div>
-            </div>
+    <section id="hero" class="relative h-[85vh] flex items-center overflow-hidden">
+        <div id="hero-bg" class="absolute inset-0 bg-cover bg-center"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-[#020205] via-transparent to-transparent"></div>
+        <div class="relative z-10 px-16 max-w-5xl opacity-0 transition-all duration-1000" id="hero-content">
+            <h2 id="hero-title" class="text-7xl lg:text-9xl font-black italic uppercase mb-8 leading-none tracking-tighter">TITLE</h2>
+            <button id="hero-play" class="bg-white text-black px-12 py-5 rounded-2xl font-black hover:bg-red-600 hover:text-white transition-all">WATCH NOW</button>
         </div>
     </section>
 
-    <main class="px-8 lg:px-20 mt-16">
-        <div class="flex items-center gap-6 mb-12">
-            <h3 id="grid-title" class="text-3xl font-black italic uppercase tracking-tighter">Recommended For You</h3>
-            <div class="flex-1 h-px bg-white/10"></div>
-        </div>
-        <div id="grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8 lg:gap-12"></div>
+    <main class="px-8 lg:px-16 mt-12">
+        <h3 class="text-2xl font-black uppercase mb-10 tracking-widest text-red-600">Recommended</h3>
+        <div id="grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8"></div>
     </main>
 
-    <div id="player-modal" class="fixed inset-0 z-[200] hidden flex-col items-center p-4 lg:p-12 overflow-y-auto bg-[#020205]/98 backdrop-blur-xl">
-        <div class="w-full max-w-7xl">
+    <div id="player-modal" class="fixed inset-0 z-[200] hidden flex-col items-center p-4 lg:p-10">
+        <div class="w-full max-w-[1400px]">
             
-            <div class="flex justify-between items-center mb-8 gap-4">
-                <button onclick="closeP()" class="bg-white/10 hover:bg-red-600 px-8 py-3 rounded-2xl font-black text-xs transition-all tracking-widest">← CLOSE PLAYER</button>
-                
-                <div class="flex gap-3">
+            <div class="flex justify-between items-center mb-6">
+                <button onclick="closeP()" class="bg-white/10 hover:bg-red-600 px-8 py-3 rounded-2xl font-black text-xs transition">← BACK</button>
+                <div class="flex gap-4">
                     <div class="dropdown">
-                        <button class="bg-white/5 border border-white/10 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest">Server: <span id="active-srv" class="text-red-600">CinemaOS</span></button>
+                        <button class="bg-white/5 border border-white/10 px-6 py-3 rounded-xl text-[10px] font-black uppercase">Server: <span id="active-srv" class="text-red-500">CinemaOS</span></button>
                         <div class="dropdown-content" id="server-list"></div>
                     </div>
                     <div id="tv-ui" class="hidden flex gap-3">
@@ -111,22 +99,23 @@
                 </div>
             </div>
 
-            <div class="video-container mb-12 shadow-2xl">
+            <div class="video-fixed-height mb-12">
                 <iframe id="v-frame" src="" allowfullscreen></iframe>
             </div>
 
             <div class="grid lg:grid-cols-3 gap-8 pb-32">
-                <div class="lg:col-span-2 bg-[#0a0a0f] border border-white/10 rounded-[32px] p-8 lg:p-12 shadow-2xl">
-                    <div class="flex items-center gap-6 mb-8">
-                        <span id="p-date" class="text-red-600 font-black text-3xl tracking-tighter">2026</span>
+                <div class="lg:col-span-2 bento-card">
+                    <div class="flex items-center gap-5 mb-6">
+                        <span id="p-date" class="text-red-600 font-black text-3xl">2026</span>
                         <div id="p-genres-list" class="flex flex-wrap gap-2"></div>
+                        <span id="p-rating" class="ml-auto font-bold opacity-50">IMDb 0.0</span>
                     </div>
-                    <h2 id="p-title" class="text-5xl lg:text-7xl font-black uppercase italic mb-8 leading-none tracking-tighter">Title</h2>
+                    <h2 id="p-title" class="text-6xl font-black uppercase italic mb-8 tracking-tighter leading-none">Title</h2>
                     <p id="p-desc" class="text-gray-400 text-xl font-light leading-relaxed"></p>
                 </div>
                 
-                <div class="bg-[#0a0a0f] border border-white/10 rounded-[32px] p-10 shadow-2xl">
-                    <h3 class="text-red-600 text-[10px] font-black uppercase tracking-[0.4em] mb-12 text-center">Featured Stars</h3>
+                <div class="bento-card">
+                    <h3 class="text-red-600 text-[10px] font-black uppercase tracking-[0.4em] mb-10 text-center">Featured Stars</h3>
                     <div id="p-cast" class="grid grid-cols-2 gap-y-12"></div>
                 </div>
             </div>
@@ -137,9 +126,8 @@
         const KEY = 'a45420333457411e78d5ad35d6c51a2d';
         let mode = 'movie', curId = null, srv = 'cinemaos', curS = 1, curE = 1;
         const servers = [
-            {id:'cinemaos', name:'Server 1 (High)'}, {id:'vidsrcto', name:'Server 2 (Backup)'},
-            {id:'vidsrcme', name:'Server 3 (Stable)'}, {id:'vidsrccc', name:'Server 4 (Direct)'},
-            {id:'embedsu', name:'Server 5 (Mirror)'}
+            {id:'cinemaos', name:'CinemaOS'}, {id:'vidsrcto', name:'VidSrc.to'},
+            {id:'vidsrcme', name:'VidSrc.me'}, {id:'vidsrccc', name:'VidSrc.cc'}, {id:'embedsu', name:'Embed.su'}
         ];
 
         async function init(query = '', genreId = '') {
@@ -149,40 +137,30 @@
             
             const res = await fetch(url);
             const data = await res.json();
-            
             if(!query && !genreId && data.results[0]) setupHero(data.results[0]);
             renderGrid(data.results);
-            loadGenreList();
+            loadGenres();
         }
 
-        async function loadGenreList() {
+        async function loadGenres() {
             const res = await fetch(`https://api.themoviedb.org/3/genre/${mode}/list?api_key=${KEY}`);
             const data = await res.json();
-            const select = document.getElementById('genre-select');
-            const currentVal = select.value;
-            select.innerHTML = `<option value="">All Genres</option>` + data.genres.map(g => `<option value="${g.id}" ${g.id == currentVal ? 'selected':''}>${g.name}</option>`).join('');
+            document.getElementById('genre-select').innerHTML = `<option value="">All Genres</option>` + data.genres.map(g => `<option value="${g.id}">${g.name}</option>`).join('');
         }
 
-        async function setupHero(m) {
-            const details = await fetch(`https://api.themoviedb.org/3/${mode}/${m.id}?api_key=${KEY}`).then(r => r.json());
+        function setupHero(m) {
             document.getElementById('hero-bg').style.backgroundImage = `url(https://image.tmdb.org/t/p/original${m.backdrop_path})`;
             document.getElementById('hero-title').innerText = m.title || m.name;
-            document.getElementById('hero-desc').innerText = m.overview;
-            document.getElementById('hero-meta').innerText = `${(m.release_date || m.first_air_date || '2026').split('-')[0]} • ${mode === 'movie' ? details.runtime + 'm' : details.number_of_seasons + ' Seasons'}`;
-            document.getElementById('hero-genres').innerHTML = details.genres.slice(0,3).map(g => `<span class="border border-white/20 px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest text-white/60">${g.name}</span>`).join('');
             document.getElementById('hero-play').onclick = () => openP(m.id, m.title || m.name);
             document.getElementById('hero-content').style.opacity = '1';
         }
 
         function renderGrid(items) {
-            document.getElementById('grid').innerHTML = items.map((m, i) => {
-                if(!m.poster_path) return '';
-                return `
-                <div class="movie-card cursor-pointer group" onclick="openP(${m.id}, '${(m.title||m.name).replace(/'/g,"\\")}')" style="animation: fadeUp 0.5s ease-out ${i*0.05}s forwards; opacity: 0;">
-                    <img src="https://image.tmdb.org/t/p/w500${m.poster_path}" class="rounded-[2rem] border-2 border-transparent transition duration-500">
-                    <h4 class="mt-5 font-bold text-[11px] uppercase tracking-[0.15em] text-gray-500 group-hover:text-red-500 transition">${m.title || m.name}</h4>
-                </div>`;
-            }).join('');
+            document.getElementById('grid').innerHTML = items.map(m => !m.poster_path ? '' : `
+                <div class="movie-card cursor-pointer group" onclick="openP(${m.id}, '${(m.title||m.name).replace(/'/g,"\\")}')">
+                    <img src="https://image.tmdb.org/t/p/w500${m.poster_path}" class="rounded-[2rem] border-2 border-transparent group-hover:border-red-600 transition">
+                    <h4 class="mt-4 font-bold text-[10px] uppercase tracking-widest text-gray-500 group-hover:text-white">${m.title || m.name}</h4>
+                </div>`).join('');
         }
 
         async function openP(id, title) {
@@ -192,19 +170,18 @@
             document.body.classList.add('modal-open');
             
             const d = await fetch(`https://api.themoviedb.org/3/${mode}/${id}?api_key=${KEY}&append_to_response=credits`).then(r => r.json());
-            
             document.getElementById('p-desc').innerText = d.overview;
             document.getElementById('p-date').innerText = (d.release_date || d.first_air_date || '2026').split('-')[0];
+            document.getElementById('p-rating').innerText = `IMDb ${d.vote_average.toFixed(1)}`;
             document.getElementById('p-genres-list').innerHTML = d.genres.map(g => `<span class="bg-red-600/10 text-red-500 px-3 py-1 rounded-lg text-[10px] font-black uppercase">${g.name}</span>`).join('');
             
             document.getElementById('p-cast').innerHTML = d.credits.cast.slice(0, 6).map(c => `
-                <div class="flex flex-col items-center group">
-                    <img src="${c.profile_path ? 'https://image.tmdb.org/t/p/w185' + c.profile_path : 'https://via.placeholder.com/185x185'}" class="w-20 h-20 rounded-full object-cover border-2 border-white/10 group-hover:border-red-600 transition duration-300 shadow-xl">
-                    <p class="text-[9px] font-black uppercase mt-4 text-center text-gray-400 group-hover:text-white">${c.name}</p>
-                </div>
-            `).join('');
+                <div class="flex flex-col items-center">
+                    <img src="${c.profile_path ? 'https://image.tmdb.org/t/p/w185' + c.profile_path : 'https://via.placeholder.com/185x185'}" class="w-20 h-20 rounded-full object-cover border-2 border-white/10 mb-4 shadow-xl">
+                    <p class="text-[9px] font-black uppercase text-center text-gray-400">${c.name}</p>
+                </div>`).join('');
 
-            document.getElementById('server-list').innerHTML = servers.map(s => `<button onclick="setServer('${s.id}', '${s.name}')" class="w-full text-left p-3 rounded-lg hover:bg-red-600 text-[10px] font-black mb-1 uppercase tracking-tighter">${s.name}</button>`).join('');
+            document.getElementById('server-list').innerHTML = servers.map(s => `<button onclick="setServer('${s.id}', '${s.name}')" class="w-full text-left p-3 rounded-lg hover:bg-red-600 text-[10px] font-black mb-1 uppercase">${s.name}</button>`).join('');
 
             if (mode === 'tv') {
                 document.getElementById('tv-ui').classList.remove('hidden');
@@ -222,11 +199,11 @@
             updSrc();
         }
 
-        function setServer(id, name) { srv = id; document.getElementById('active-srv').innerText = name.split(' ')[0]; updSrc(); }
+        function setServer(id, name) { srv = id; document.getElementById('active-srv').innerText = name; updSrc(); }
         function setS(s) { curS = s; curE = 1; document.getElementById('cur-s').innerText = s; loadEps(); }
         function setE(e) { curE = e; document.getElementById('cur-e').innerText = e; updSrc(); }
         function filterGenre() { init('', document.getElementById('genre-select').value); }
-
+        
         function updSrc() {
             const t = curId, s = curS, e = curE;
             let url = mode === 'movie' 
@@ -236,14 +213,8 @@
         }
 
         function closeP() { document.getElementById('player-modal').style.display='none'; document.getElementById('v-frame').src=''; document.body.classList.remove('modal-open'); }
-        function changeMode(m) { 
-            mode = m; 
-            document.getElementById('m-nav').className = m === 'movie' ? 'px-6 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all bg-red-600 text-white' : 'px-6 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all text-gray-400 hover:text-white';
-            document.getElementById('t-nav').className = m === 'tv' ? 'px-6 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all bg-red-600 text-white' : 'px-6 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all text-gray-400 hover:text-white';
-            init(); 
-        }
+        function changeMode(m) { mode = m; init(); }
         document.getElementById('search').addEventListener('input', e => { if(e.target.value.length > 2) init(e.target.value); });
-
         init();
     </script>
 </body>
