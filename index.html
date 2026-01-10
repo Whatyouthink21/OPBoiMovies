@@ -12,36 +12,30 @@
        
         .frost-bg { background: var(--glass); backdrop-filter: blur(40px); border: 1px solid var(--border); }
         .hero-vignette { background: linear-gradient(to top, #0a0b0d 10%, transparent 70%), linear-gradient(to right, #0a0b0d 10%, transparent 70%); }
-        .dropdown-content {
-            display: none; position: absolute; top: calc(100% + 10px); right: 0;
-            min-width: 200px; border-radius: 12px; padding: 8px; z-index: 5000;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-        }
+        .dropdown-content { display: none; position: absolute; top: calc(100% + 10px); right: 0; min-width: 200px; border-radius: 12px; padding: 8px; z-index: 5000; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
         .dropdown-content.show { display: block; animation: popIn 0.2s ease-out; }
         @keyframes popIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-        .drop-item {
-            width: 100%; text-align: left; padding: 10px 14px; border-radius: 8px;
-            font-size: 10px; font-weight: 700; text-transform: uppercase;
-            color: rgba(255,255,255,0.6); transition: 0.2s;
-        }
+        .drop-item { width: 100%; text-align: left; padding: 10px 14px; border-radius: 8px; font-size: 10px; font-weight: 700; text-transform: uppercase; color: rgba(255,255,255,0.6); transition: 0.2s; }
         .drop-item:hover { background: rgba(255,255,255,0.1); color: #fff; }
-        #player-overlay { position: fixed; inset: 0; z-index: 4000; display: none; background: rgba(5, 6, 8, 0.98); backdrop-filter: blur(50px); overflow-y: auto; }
-        .player-viewport { width: 95%; max-width: 1700px; aspect-ratio: 16 / 9; border-radius: 24px; overflow: hidden; border: 1px solid var(--border); }
-        iframe { width: 100%; height: 100%; border: none; }
+       
+        #search-modal { position: fixed; inset: 0; z-index: 9999; background: rgba(10,11,13,0.98); backdrop-filter: blur(20px); display: none; opacity: 0; transition: opacity 0.4s ease; }
+        #search-modal.active { display: flex; opacity: 1; }
+        .search-input-big { font-size: 3rem; font-weight: 900; letter-spacing: -0.05em; background: transparent; border: none; outline: none; width: 100%; max-width: 900px; caret-color: white; }
+        .search-input-big::placeholder { color: rgba(255,255,255,0.3); }
+       
         .movie-card { border-radius: 16px; overflow: hidden; transition: 0.5s cubic-bezier(0.2, 1, 0.2, 1); cursor: pointer; border: 1px solid transparent; position: relative; }
         .movie-card:hover { transform: scale(1.05); border-color: rgba(255,255,255,0.3); }
         .movie-details { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); padding: 8px; text-align: center; opacity: 0; transition: 0.3s; }
         .movie-card:hover .movie-details { opacity: 1; }
-        .pagination { display: flex; justify-content: center; gap: 8px; margin-top: 16px; }
-        .pagination button { background: var(--glass); border: 1px solid var(--border); padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: 0.2s; }
-        .pagination button:hover { background: rgba(255,255,255,0.1); }
-        .pagination button.active { background: white; color: black; }
        
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
     </style>
 </head>
 <body>
+    <!-- Your existing nav, header, main, player-overlay remains same -->
+    <!-- Just replacing the search part in nav -->
+
     <nav class="fixed top-0 w-full z-[100] px-8 py-4 flex items-center justify-between">
         <div class="flex items-center gap-10">
             <h1 class="text-xl font-black italic tracking-tighter cursor-pointer" onclick="location.reload()">OPBoi Movies</h1>
@@ -55,23 +49,11 @@
             </div>
         </div>
         <div class="flex items-center gap-6">
-            <div class="flex frost-bg rounded-full p-1 items-center">
-                <input type="text" id="search" placeholder="SEARCH..." class="px-6 py-2 rounded-l-full text-[11px] w-64 outline-none focus:border-white/40 transition uppercase font-bold bg-transparent">
-                <div class="relative ml-2">
-                    <button onclick="toggleDrop('filter-menu')" class="frost-bg px-4 py-2 rounded-full text-[9px] font-black uppercase tracking-widest">Filters ↓</button>
-                    <div id="filter-menu" class="dropdown-content frost-bg">
-                        <div class="p-4">
-                            <label class="text-[9px] opacity-60">Year</label>
-                            <input type="number" id="filter-year" placeholder="e.g. 2023" class="w-full frost-bg px-4 py-2 rounded mt-1 text-[11px]">
-                        </div>
-                        <div class="p-4">
-                            <label class="text-[9px] opacity-60">Min IMDb</label>
-                            <input type="number" id="filter-imdb" step="0.1" min="0" max="10" placeholder="e.g. 7.0" class="w-full frost-bg px-4 py-2 rounded mt-1 text-[11px]">
-                        </div>
-                        <button onclick="applyFilters()" class="drop-item w-full">Apply</button>
-                    </div>
-                </div>
+            <div class="frost-bg px-6 py-2 rounded-full text-[11px] w-64 cursor-text flex items-center gap-3" onclick="openSearchModal()">
+                <svg class="w-5 h-5 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <span class="opacity-50">Search movies, series...</span>
             </div>
+           
             <div id="auth-container">
                 <button id="login-btn" class="frost-bg px-6 py-2 rounded-full text-[9px] font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all">GOOGLE LOGIN</button>
                 <div id="user-profile" class="hidden flex items-center gap-3 frost-bg pl-4 pr-1 py-1 rounded-full cursor-pointer relative" onclick="toggleDrop('user-menu')">
@@ -84,283 +66,86 @@
             </div>
         </div>
     </nav>
-    <header class="relative h-[85vh] flex items-end pb-24 px-10 lg:px-24 overflow-hidden">
-        <div id="hero-bg" class="absolute inset-0 bg-cover bg-center transition-all duration-1000 scale-105"></div>
-        <div class="absolute inset-0 hero-vignette"></div>
-        <div class="relative z-10 max-w-2xl">
-            <h2 id="hero-title" class="text-5xl lg:text-7xl font-black uppercase tracking-tighter leading-tight italic mb-4">...</h2>
-            <div id="hero-details" class="flex gap-4 mb-8 text-[12px] opacity-70">
-                <span id="hero-year"></span> • <span id="hero-imdb"></span>
-            </div>
-            <div class="flex gap-4">
-                <button id="hero-play" class="bg-white text-black px-10 py-4 rounded-xl font-black uppercase text-[10px] tracking-widest hover:scale-105 transition">Start Stream</button>
-                <button id="hero-add" class="frost-bg px-10 py-4 rounded-xl font-black uppercase text-[10px] tracking-widest transition">Add To List</button>
-            </div>
+
+    <!-- NEW FULL SCREEN SEARCH MODAL -->
+    <div id="search-modal" class="flex flex-col items-center justify-start pt-32 px-6">
+        <div class="w-full max-w-5xl flex justify-between items-center mb-12">
+            <input type="text" id="big-search" class="search-input-big" placeholder="What are we watching tonight?" autofocus>
+            <button onclick="closeSearchModal()" class="text-3xl opacity-60 hover:opacity-100 transition">✕</button>
         </div>
-    </header>
-    <main class="px-10 lg:px-24 py-16 relative z-20">
-        <div id="my-list-section" class="mb-20 hidden">
-            <h3 class="text-[10px] font-black uppercase tracking-[0.4em] opacity-30 mb-8">Your Collection</h3>
-            <div id="my-list-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8"></div>
-        </div>
-        <h3 class="text-[10px] font-black uppercase tracking-[0.4em] opacity-30 mb-8">Top Rated</h3>
-        <div id="top-rated-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8 mb-20"></div>
-        <h3 class="text-[10px] font-black uppercase tracking-[0.4em] opacity-30 mb-8">Discovery Feed</h3>
-        <div id="grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8"></div>
-        <div class="pagination" id="pagination"></div>
-        <h3 class="text-[10px] font-black uppercase tracking-[0.4em] opacity-30 mb-8 mt-20">Recommendations</h3>
-        <div id="recommendations-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8"></div>
-    </main>
-    <div id="player-overlay">
-        <div class="flex flex-col items-center py-10">
-            <div class="w-[95%] max-w-[1700px] flex justify-between items-center mb-8">
-                <button onclick="closePlayer()" class="frost-bg px-8 py-3 rounded-xl text-[9px] font-black uppercase tracking-widest">← Exit</button>
-                <div class="flex gap-3">
-                    <button id="modal-add-btn" onclick="toggleMyList()" class="frost-bg px-8 py-3 rounded-xl text-[9px] font-black uppercase tracking-widest"></button>
-                    <div class="relative">
-                        <button onclick="toggleDrop('srv-menu')" class="frost-bg px-8 py-3 rounded-xl text-[9px] font-black uppercase"><span id="active-srv">Aura Primary</span></button>
-                        <div id="srv-menu" class="dropdown-content frost-bg"></div>
-                    </div>
-                    <div id="tv-controls" class="hidden flex gap-3">
-                        <div class="relative">
-                            <button onclick="toggleDrop('s-menu')" class="frost-bg px-6 py-3 rounded-xl text-[9px] font-black uppercase">S <span id="s-val">1</span></button>
-                            <div id="s-menu" class="dropdown-content frost-bg max-h-60 overflow-y-auto"></div>
-                        </div>
-                        <div class="relative">
-                            <button onclick="toggleDrop('e-menu')" class="frost-bg px-6 py-3 rounded-xl text-[9px] font-black uppercase">E <span id="e-val">1</span></button>
-                            <div id="e-menu" class="dropdown-content frost-bg max-h-60 overflow-y-auto"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="player-viewport bg-black mb-12 shadow-2xl">
-                <iframe id="frame" src="" allowfullscreen></iframe>
-            </div>
-            <div class="w-[95%] max-w-[1700px] grid lg:grid-cols-3 gap-16 pb-16">
-                <div class="lg:col-span-2">
-                    <h2 id="p-title" class="text-4xl font-black uppercase mb-4 tracking-tighter italic">...</h2>
-                    <div class="flex gap-4 mb-4 text-[12px] opacity-70">
-                        <span id="p-year"></span> • <span id="p-imdb"></span>
-                    </div>
-                    <p id="p-desc" class="text-white/40 text-base font-light leading-relaxed max-w-3xl"></p>
-                </div>
-                <div class="frost-bg p-8 rounded-[32px] h-fit">
-                    <h3 class="text-[9px] font-black uppercase tracking-[0.4em] opacity-30 mb-8">Featured Cast</h3>
-                    <div id="p-cast" class="space-y-6"></div>
-                </div>
-            </div>
+       
+        <div class="w-full max-w-5xl">
+            <div id="search-suggestions" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6"></div>
         </div>
     </div>
+
+    <!-- Rest of your HTML (header, main, player-overlay) remains exactly same -->
+
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        const firebaseConfig = {
-            apiKey: "AIzaSyDFDQG_-vhIYXWtRUW5dXOvP_BCsCIhLJI",
-            authDomain: "opboimovies.firebaseapp.com",
-            projectId: "opboimovies",
-            storageBucket: "opboimovies.firebasestorage.app",
-            messagingSenderId: "436070860394",
-            appId: "1:436070860394:web:c3443eba4bba154a14ec13",
-            measurementId: "G-5C425WE7H6"
-        };
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const provider = new GoogleAuthProvider();
-        const KEY = 'a45420333457411e78d5ad35d6c51a2d';
-        let mode = 'movie', activeID = null, currentSrv = 'cinemaos', s = 1, e = 1, activeItem = null;
-        let myList = [];
-        let currentUser = null;
-        let currentPage = 1, totalPages = 1;
-        const servers = [
-            {id:'cinemaos', n:'Aura Primary'},
-            {id:'vidsrcto', n:'Aura Mirror'},
-            {id:'vidsrcme', n:'Aura Legacy'},
-            {id:'vidsrcicu', n:'Aura Stream'},
-            {id:'2embed', n:'Aura Cloud'}
-        ];
-        window.login = async () => { try { await signInWithPopup(auth, provider); } catch(e) { console.error(e); alert("Login Error: Make sure your domain is authorized in Firebase Console."); } };
-        window.logout = () => signOut(auth);
-        onAuthStateChanged(auth, (user) => {
-            currentUser = user;
-            const loginBtn = document.getElementById('login-btn');
-            const userProfile = document.getElementById('user-profile');
-           
-            if (user) {
-                loginBtn.classList.add('hidden');
-                userProfile.classList.remove('hidden');
-                document.getElementById('user-name').innerText = user.displayName.split(' ')[0];
-                document.getElementById('user-pic').src = user.photoURL;
-                syncCloudList(user.uid);
-            } else {
-                loginBtn.classList.remove('hidden');
-                userProfile.classList.add('hidden');
-                myList = [];
-                updateListUI();
+        // ... your existing imports and variables ...
+
+        // Add these new functions
+        function openSearchModal() {
+            document.getElementById('search-modal').classList.add('active');
+            document.getElementById('big-search').focus();
+            document.body.style.overflow = 'hidden';
+            // Optional: show trending if empty
+            if (!document.getElementById('big-search').value) {
+                showTrendingSuggestions();
             }
-        });
-        function syncCloudList(uid) {
-            onSnapshot(collection(db, "users", uid, "mylist"), (snap) => {
-                myList = snap.docs.map(d => d.data());
-                updateListUI();
-                updateBtnStates();
-            });
         }
-        window.toggleMyList = async () => {
-            if (!currentUser) return alert("Login to save to collection");
-            const docRef = doc(db, "users", currentUser.uid, "mylist", activeItem.id.toString());
-            const exists = myList.some(x => x.id === activeItem.id);
-            exists ? await deleteDoc(docRef) : await setDoc(docRef, activeItem);
-        };
-        async function init(q = '', g = '', year = '', imdb = '', page = 1) {
-            let url = `https://api.themoviedb.org/3/trending/${mode}/week?api_key=${KEY}&page=${page}`;
-            if(q) url = `https://api.themoviedb.org/3/search/${mode}?api_key=${KEY}&query=${q}&page=${page}`;
-            if(g) url = `https://api.themoviedb.org/3/discover/${mode}?api_key=${KEY}&with_genres=${g}&page=${page}`;
-            if(year) url += `&primary_release_year=${year}`;
-            if(imdb) url += `&vote_average.gte=${imdb}`;
+
+        function closeSearchModal() {
+            document.getElementById('search-modal').classList.remove('active');
+            document.body.style.overflow = 'auto';
+            document.getElementById('big-search').value = '';
+            document.getElementById('search-suggestions').innerHTML = '';
+        }
+
+        async function showTrendingSuggestions() {
+            const url = `https://api.themoviedb.org/3/trending/${mode}/week?api_key=${KEY}`;
             const r = await fetch(url);
             const d = await r.json();
-            totalPages = d.total_pages;
-            if(!q && !g && d.results[0]) setupHero(d.results[0]);
-            renderGrid(d.results, 'grid');
-            renderPagination();
-            loadGenres();
-            loadTopRated();
-            loadRecommendations();
+            renderSearchSuggestions(d.results.slice(0, 12));
         }
-        function setupHero(m) {
-            document.getElementById('hero-bg').style.backgroundImage = `ur[](https://image.tmdb.org/t/p/original${m.backdrop_path})`;
-            document.getElementById('hero-title').innerText = m.title || m.name;
-            document.getElementById('hero-year').innerText = (m.release_date || m.first_air_date || '').split('-')[0];
-            document.getElementById('hero-imdb').innerText = `IMDb: ${m.vote_average.toFixed(1)}`;
-            activeItem = { id: m.id, title: m.title || m.name, poster_path: m.poster_path, mode, release_year: (m.release_date || m.first_air_date || '').split('-')[0], imdb: m.vote_average };
-            document.getElementById('hero-play').onclick = () => openPlayer(m.id, m.title || m.name, m.poster_path, m.vote_average, (m.release_date || m.first_air_date));
-            document.getElementById('hero-add').onclick = () => toggleMyList();
-            updateBtnStates();
-        }
-        function renderGrid(list, target) {
-            document.getElementById(target).innerHTML = list.map(m => !m.poster_path ? '' : `
-                <div class="movie-card" onclick="openPlayer(${m.id}, '${(m.title||m.name).replace(/'/g,"\\")}', '${m.poster_path}', ${m.vote_average}, '${m.release_date || m.first_air_date}')">
+
+        function renderSearchSuggestions(list) {
+            document.getElementById('search-suggestions').innerHTML = list.map(m => !m.poster_path ? '' : `
+                <div class="movie-card" onclick="openPlayer(${m.id}, '${(m.title||m.name).replace(/'/g,"\\")}', '${m.poster_path}'); closeSearchModal();">
                     <img src="https://image.tmdb.org/t/p/w500${m.poster_path}" class="w-full">
                     <div class="movie-details">
-                        <p class="text-[10px] font-bold">${(m.release_date || m.first_air_date || '').split('-')[0]} • IMDb: ${m.vote_average.toFixed(1)}</p>
+                        <p class="text-[10px] font-bold">${m.title || m.name}</p>
                     </div>
-                </div>`).join('');
+                </div>
+            `).join('');
         }
-        function renderPagination() {
-            const pag = document.getElementById('pagination');
-            pag.innerHTML = '';
-            for(let i = 1; i <= Math.min(5, totalPages); i++) {
-                const btn = document.createElement('button');
-                btn.innerText = i;
-                btn.onclick = () => { currentPage = i; init(document.getElementById('search').value, '', document.getElementById('filter-year').value, document.getElementById('filter-imdb').value, i); };
-                if(i === currentPage) btn.classList.add('active');
-                pag.appendChild(btn);
-            }
-        }
-        async function loadTopRated() {
-            const url = `https://api.themoviedb.org/3/${mode}/top_rated?api_key=${KEY}`;
-            const r = await fetch(url);
-            const d = await r.json();
-            renderGrid(d.results.slice(0, 12), 'top-rated-grid');
-        }
-        async function loadRecommendations() {
-            // Simple recs based on first genre of hero or random
-            const genreId = activeItem ? activeItem.genre_ids?.[0] : '';
-            const url = `https://api.themoviedb.org/3/discover/${mode}?api_key=${KEY}&sort_by=popularity.desc&with_genres=${genreId || 28}`;
-            const r = await fetch(url);
-            const d = await r.json();
-            renderGrid(d.results.slice(0, 12), 'recommendations-grid');
-        }
-        window.openPlayer = async (id, title, poster, imdb, releaseDate) => {
-            activeID = id; activeItem = { id, title, poster_path: poster, mode, imdb, release_year: releaseDate.split('-')[0] };
-            document.getElementById('p-title').innerText = title;
-            document.getElementById('p-year').innerText = releaseDate.split('-')[0];
-            document.getElementById('p-imdb').innerText = `IMDb: ${imdb.toFixed(1)}`;
-            document.getElementById('player-overlay').style.display = 'block';
-            document.body.style.overflow = 'hidden';
-            updateBtnStates();
-            const res = await fetch(`https://api.themoviedb.org/3/${mode}/${id}?api_key=${KEY}&append_to_response=credits`).then(r => r.json());
-            document.getElementById('p-desc').innerText = res.overview;
-            document.getElementById('p-cast').innerHTML = res.credits.cast.slice(0, 5).map(c => `
-                <div class="flex items-center gap-4">
-                    <img src="https://image.tmdb.org/t/p/w185${c.profile_path}" class="w-10 h-10 rounded-lg object-cover">
-                    <p class="text-[11px] font-black uppercase tracking-wider">${c.name}</p>
-                </div>`).join('');
+
+        // Real-time search
+        let searchTimeout;
+        document.getElementById('big-search').addEventListener('input', (ev) => {
+            clearTimeout(searchTimeout);
+            const query = ev.target.value.trim();
            
-            document.getElementById('srv-menu').innerHTML = servers.map(sv => `<button onclick="setSrv('${sv.id}','${sv.n}')" class="drop-item">${sv.n}</button>`).join('');
-           
-            if(mode === 'tv') {
-                document.getElementById('tv-controls').classList.remove('hidden');
-                document.getElementById('s-menu').innerHTML = res.seasons.filter(sea => sea.season_number > 0).map(sea => `<button onclick="setS(${sea.season_number})" class="drop-item">Season ${sea.season_number}</button>`).join('');
-                loadEpisodes();
-            } else { document.getElementById('tv-controls').classList.add('hidden'); updPlayer(); }
-        }
-        function updateListUI() {
-            const sec = document.getElementById('my-list-section');
-            if(myList.length > 0) { sec.classList.remove('hidden'); renderGrid(myList, 'my-list-grid'); }
-            else { sec.classList.add('hidden'); }
-        }
-        function updateBtnStates() {
-            if(!activeItem) return;
-            const exists = myList.some(x => x.id === activeItem.id);
-            if(document.getElementById('modal-add-btn')) document.getElementById('modal-add-btn').innerText = exists ? '✓ SAVED' : '+ SAVE';
-            if(document.getElementById('hero-add')) document.getElementById('hero-add').innerText = exists ? '✓ COLLECTED' : 'ADD TO LIST';
-        }
-        window.toggleDrop = (id) => {
-            const el = document.getElementById(id);
-            const isShow = el.classList.contains('show');
-            document.querySelectorAll('.dropdown-content').forEach(d => d.classList.remove('show'));
-            if(!isShow) el.classList.add('show');
-        };
-        window.setSrv = (id, n) => { currentSrv = id; document.getElementById('active-srv').innerText = n; updPlayer(); toggleDrop('srv-menu'); }
-        window.setS = (val) => { s = val; e = 1; document.getElementById('s-val').innerText = val; loadEpisodes(); toggleDrop('s-menu'); }
-        window.setE = (val) => { e = val; document.getElementById('e-val').innerText = val; updPlayer(); toggleDrop('e-menu'); }
-        window.closePlayer = () => { document.getElementById('player-overlay').style.display = 'none'; document.getElementById('frame').src = ''; document.body.style.overflow = 'auto'; }
-       
-        window.setMode = (m) => {
-            mode = m;
-            document.getElementById('m-btn').className = m === 'movie' ? 'px-6 py-2 rounded-full text-[9px] font-black uppercase transition-all bg-white text-black' : 'px-6 py-2 rounded-full text-[9px] font-black uppercase text-white/40';
-            document.getElementById('t-btn').className = m === 'tv' ? 'px-6 py-2 rounded-full text-[9px] font-black uppercase transition-all bg-white text-black' : 'px-6 py-2 rounded-full text-[9px] font-black uppercase text-white/40';
-            init();
-        }
-        function updPlayer() {
-            let src = '';
-            if(mode === 'movie') {
-                if(currentSrv === 'cinemaos') src = `https://cinemaos.tech/player/${activeID}`;
-                else if(currentSrv === 'vidsrcto') src = `https://vidsrc.to/embed/movie/${activeID}`;
-                else if(currentSrv === 'vidsrcme') src = `https://vidsrc.me/embed/movie?tmdb=${activeID}`;
-                else if(currentSrv === 'vidsrcicu') src = `https://vidsrc.icu/embed/movie/${activeID}`;
-                else if(currentSrv === '2embed') src = `https://www.2embed.cc/embed/${activeID}`;
-            } else {
-                if(currentSrv === 'cinemaos') src = `https://cinemaos.tech/player/${activeID}/${s}/${e}`;
-                else if(currentSrv === 'vidsrcto') src = `https://vidsrc.to/embed/tv/${activeID}/${s}/${e}`;
-                else if(currentSrv === 'vidsrcme') src = `https://vidsrc.me/embed/tv?tmdb=${activeID}&sea=${s}&epi=${e}`;
-                else if(currentSrv === 'vidsrcicu') src = `https://vidsrc.icu/embed/tv/${activeID}/${s}/${e}`;
-                else if(currentSrv === '2embed') src = `https://www.2embed.cc/embedtv/${activeID}&s=${s}&e=${e}`;
+            if (query.length < 2) {
+                showTrendingSuggestions();
+                return;
             }
-            document.getElementById('frame').src = src;
-        }
-        async function loadEpisodes() {
-            const d = await fetch(`https://api.themoviedb.org/3/tv/${activeID}/season/${s}?api_key=${KEY}`).then(r => r.json());
-            document.getElementById('e-menu').innerHTML = d.episodes.map(ep => `<button onclick="setE(${ep.episode_number})" class="drop-item">Episode ${ep.episode_number}</button>`).join('');
-            updPlayer();
-        }
-        async function loadGenres() {
-            const r = await fetch(`https://api.themoviedb.org/3/genre/${mode}/list?api_key=${KEY}`);
-            const d = await r.json();
-            document.getElementById('genre-menu').innerHTML = d.genres.map(g => `<button onclick="init('','${g.id}')" class="drop-item">${g.name}</button>`).join('');
-        }
-        window.applyFilters = () => {
-            const year = document.getElementById('filter-year').value;
-            const imdb = document.getElementById('filter-imdb').value;
-            init(document.getElementById('search').value, '', year, imdb);
-            toggleDrop('filter-menu');
-        };
-        window.onclick = (e) => { if (!e.target.closest('.relative') && !e.target.closest('#user-profile')) document.querySelectorAll('.dropdown-content').forEach(d => d.classList.remove('show')); };
-        document.getElementById('search').addEventListener('input', ev => { if(ev.target.value.length > 2) init(ev.target.value); });
-       
+
+            searchTimeout = setTimeout(async () => {
+                const url = `https://api.themoviedb.org/3/search/${mode}?api_key=${KEY}&query=${encodeURIComponent(query)}`;
+                const r = await fetch(url);
+                const d = await r.json();
+                renderSearchSuggestions(d.results.slice(0, 12));
+            }, 400);
+        });
+
+        // Close on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeSearchModal();
+        });
+
+        // Your existing init(), openPlayer(), etc. stay the same
+        // Just make sure to call init() at the end
         init();
     </script>
 </body>
