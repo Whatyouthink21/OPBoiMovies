@@ -1251,3 +1251,29 @@ transform: scale(1.2);
 document.head.appendChild(style);
 // Initialize App
 init();
+
+document.addEventListener('DOMContentLoaded', () => {
+    const hamburger = document.getElementById('hamburger-menu');
+    const navMenu = document.getElementById('nav-menu');
+
+    // Toggle Menu
+    hamburger.addEventListener('click', () => {
+        navMenu.classList.toggle('active');
+        
+        // Change icon between ☰ and ✕
+        if (navMenu.classList.contains('active')) {
+            hamburger.innerHTML = '✕';
+        } else {
+            hamburger.innerHTML = '☰';
+        }
+    });
+
+    // Close menu when clicking a button inside (optional)
+    const navBtns = document.querySelectorAll('.nav-btn, .search-trigger, .login-btn');
+    navBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            navMenu.classList.remove('active');
+            hamburger.innerHTML = '☰';
+        });
+    });
+});
