@@ -1,387 +1,149 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OPBoi Movies | Premium Streaming</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
-    <style>
-        :root { 
-            --accent: #e50914; 
-            --bg: #050608;
-            --glass: rgba(255, 255, 255, 0.03);
-            --border: rgba(255, 255, 255, 0.08);
-        }
-        
-        body { 
-            font-family: 'Outfit', sans-serif; 
-            background: var(--bg); 
-            color: #fff; 
-            overflow-x: hidden; 
-            scroll-behavior: smooth;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OPBoi Movies | Watch movies & series</title>
 
-        /* Glassmorphism Classes */
-        .glass { background: var(--glass); backdrop-filter: blur(20px); border: 1px solid var(--border); }
-        .glass-nav { background: rgba(5, 6, 8, 0.7); backdrop-filter: blur(15px); border-bottom: 1px solid var(--border); }
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;800;900&display=swap" rel="stylesheet">
 
-        /* Cinema Card Effects */
-        .movie-card {
-            position: relative;
-            border-radius: 12px;
-            transition: all 0.5s cubic-bezier(0.2, 1, 0.2, 1);
-            overflow: hidden;
-            aspect-ratio: 2/3;
-        }
-        .movie-card:hover {
-            transform: scale(1.05) translateY(-10px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
-            border: 1px solid rgba(255,255,255,0.2);
-        }
-        .card-info {
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(to top, rgba(0,0,0,0.9) 10%, transparent 100%);
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            padding: 15px;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        .movie-card:hover .card-info { opacity: 1; }
-
-        /* Search Overlay UI */
-        #search-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            z-index: 9999;
-            background: rgba(5, 6, 8, 0.98);
-            backdrop-filter: blur(40px);
-            padding: 50px 20px;
-        }
-
-        /* Player Styling */
-        .player-viewport {
-            box-shadow: 0 0 100px rgba(0,0,0,0.5);
-            border: 1px solid var(--border);
-            background: #000;
-        }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: var(--bg); }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
-
-        /* Animations */
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-feed { animation: fadeIn 0.8s ease forwards; }
-    </style>
+<style>
+:root { --glass: rgba(255,255,255,.05); --border: rgba(255,255,255,.12); }
+body { font-family: Outfit,sans-serif; background:#0a0b0d; color:#fff; font-size:14px }
+.frost-bg{background:var(--glass);backdrop-filter:blur(40px);border:1px solid var(--border)}
+.hero-vignette{background:linear-gradient(to top,#0a0b0d 10%,transparent 70%),linear-gradient(to right,#0a0b0d 10%,transparent 70%)}
+.movie-card{border-radius:16px;overflow:hidden;cursor:pointer;transition:.4s}
+.movie-card:hover{transform:scale(1.05)}
+.dropdown-content{display:none;position:absolute;z-index:999;background:var(--glass);backdrop-filter:blur(30px);border:1px solid var(--border);border-radius:14px;padding:8px}
+.dropdown-content.show{display:block}
+.drop-item{padding:10px 14px;border-radius:8px;font-size:10px;font-weight:800;text-transform:uppercase;color:#aaa}
+.drop-item:hover{background:rgba(255,255,255,.1);color:#fff}
+#player-overlay{position:fixed;inset:0;background:rgba(5,6,8,.98);display:none;z-index:4000}
+iframe{width:100%;height:100%;border:none}
+</style>
 </head>
+
 <body>
 
-    <nav class="fixed top-0 w-full z-[100] glass-nav px-6 lg:px-12 py-4 flex items-center justify-between">
-        <div class="flex items-center gap-12">
-            <h1 class="text-2xl font-black italic tracking-tighter cursor-pointer text-white" onclick="location.reload()">
-                OPBoi<span class="text-red-600">.</span>
-            </h1>
-            <div class="hidden md:flex gap-8 text-[11px] font-bold uppercase tracking-widest text-white/50">
-                <button onclick="setMode('movie')" class="hover:text-white transition" id="m-nav">Movies</button>
-                <button onclick="setMode('tv')" class="hover:text-white transition" id="t-nav">TV Shows</button>
-                <button onclick="toggleSearch()" class="hover:text-white transition">Search</button>
-            </div>
-        </div>
+<!-- NAV -->
+<nav class="fixed top-0 w-full z-50 px-8 py-4 flex justify-between items-center">
+  <h1 class="text-xl font-black italic cursor-pointer" onclick="location.reload()">OPBoi Movies</h1>
 
-        <div class="flex items-center gap-4">
-            <button onclick="toggleSearch()" class="glass p-2 px-4 rounded-full text-[10px] font-bold uppercase">🔍 Search</button>
-            <div id="auth-section">
-                <button id="login-btn" onclick="login()" class="bg-white text-black px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-wider hover:bg-red-600 hover:text-white transition-all">Join Pro</button>
-                <div id="user-profile" class="hidden flex items-center gap-3 glass p-1 pr-4 rounded-full">
-                    <img id="user-pic" class="w-8 h-8 rounded-full">
-                    <span id="user-name" class="text-[10px] font-bold"></span>
-                </div>
-            </div>
-        </div>
-    </nav>
+  <!-- SEARCH -->
+  <div class="relative">
+    <input id="search" placeholder="Search movies, series..."
+      class="frost-bg pl-12 pr-6 py-3 rounded-full w-72 uppercase text-[11px] font-bold tracking-widest outline-none">
+    <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 opacity-40"
+      fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path d="M21 21l-4.35-4.35M10 18a8 8 0 100-16 8 8 0 000 16z"/>
+    </svg>
+  </div>
+</nav>
 
-    <header class="relative h-[90vh] flex items-end pb-32 px-6 lg:px-24 overflow-hidden">
-        <div id="hero-bg" class="absolute inset-0 bg-cover bg-center scale-110 transition-transform duration-[10s]"></div>
-        <div class="absolute inset-0" style="background: radial-gradient(circle at 20% 50%, rgba(5,6,8,0.8) 0%, rgba(5,6,8,0.3) 50%, rgba(5,6,8,0.9) 100%);"></div>
-        <div class="relative z-10 max-w-3xl animate-feed">
-            <div id="hero-meta" class="flex gap-3 mb-4 text-[10px] font-bold uppercase tracking-widest text-red-500"></div>
-            <h2 id="hero-title" class="text-6xl lg:text-8xl font-black uppercase tracking-tighter italic leading-[0.9] mb-8">...</h2>
-            <p id="hero-desc" class="text-white/60 text-sm mb-10 line-clamp-3 max-w-xl font-light"></p>
-            <div class="flex gap-4">
-                <button id="hero-play" class="bg-white text-black px-12 py-4 rounded-full font-black uppercase text-[11px] tracking-widest hover:scale-110 transition shadow-2xl shadow-white/10">▶ Watch Now</button>
-                <button id="hero-add" class="glass px-12 py-4 rounded-full font-black uppercase text-[11px] tracking-widest hover:bg-white hover:text-black transition">＋ My List</button>
-            </div>
-        </div>
-    </header>
+<!-- HERO -->
+<header class="relative h-[85vh] flex items-end pb-24 px-24">
+  <div id="hero-bg" class="absolute inset-0 bg-cover bg-center scale-105"></div>
+  <div class="absolute inset-0 hero-vignette"></div>
+  <div class="relative z-10 max-w-2xl">
+    <h2 id="hero-title" class="text-6xl font-black italic uppercase mb-4">Loading…</h2>
+    <p id="hero-meta" class="text-white/60 text-sm mb-6"></p>
+    <button id="hero-play"
+      class="bg-white text-black px-10 py-4 rounded-xl font-black uppercase text-[10px] tracking-widest">
+      Start Stream
+    </button>
+  </div>
+</header>
 
-    <main class="px-6 lg:px-24 py-20 relative z-20">
-        <div id="my-list-section" class="mb-20 hidden">
-            <h3 class="text-[11px] font-bold uppercase tracking-[0.5em] text-red-600 mb-8">Your Collection</h3>
-            <div id="my-list-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6"></div>
-        </div>
+<!-- GRID -->
+<main class="px-24 py-16">
+  <h3 class="text-[10px] tracking-[0.4em] opacity-40 font-black uppercase mb-8">Discovery Feed</h3>
+  <div id="grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8"></div>
+</main>
 
-        <div class="flex justify-between items-end mb-10">
-            <div>
-                <h3 class="text-[11px] font-bold uppercase tracking-[0.5em] text-white/30">Explore</h3>
-                <h4 class="text-3xl font-black italic">Trending Now</h4>
-            </div>
-            <div class="relative">
-                <button onclick="toggleDrop('genre-menu')" class="glass px-6 py-2 rounded-full text-[10px] font-bold uppercase">Filter: Genre ↓</button>
-                <div id="genre-menu" class="dropdown-content absolute right-0 top-full mt-2 glass p-4 rounded-xl grid grid-cols-2 gap-2 min-w-[300px] hidden"></div>
-            </div>
-        </div>
-        <div id="grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6"></div>
-    </main>
-
-    <div id="search-overlay">
-        <div class="max-w-6xl mx-auto">
-            <div class="flex justify-between items-center mb-12">
-                <input type="text" id="search-input" placeholder="Type to search movies..." class="bg-transparent text-4xl lg:text-6xl font-black italic outline-none w-full placeholder:text-white/10">
-                <button onclick="toggleSearch()" class="text-4xl hover:text-red-600 transition">&times;</button>
-            </div>
-            <div id="search-results" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6"></div>
-        </div>
+<!-- PLAYER -->
+<div id="player-overlay">
+  <div class="p-10">
+    <button onclick="closePlayer()" class="frost-bg px-6 py-3 rounded-xl text-[10px] font-black uppercase">← Exit</button>
+    <div class="aspect-video my-8">
+      <iframe id="frame"></iframe>
     </div>
+    <h2 id="p-title" class="text-4xl font-black uppercase mb-2"></h2>
+    <p id="p-meta" class="text-white/50 text-sm mb-4"></p>
+    <p id="p-desc" class="text-white/40 max-w-4xl"></p>
+  </div>
+</div>
 
-    <div id="player-overlay" class="fixed inset-0 z-[5000] bg-black/95 backdrop-blur-3xl hidden overflow-y-auto">
-        <div class="p-4 lg:p-10">
-            <div class="flex justify-between items-center mb-6">
-                <button onclick="closePlayer()" class="glass px-6 py-2 rounded-full text-[10px] font-black uppercase">← Back</button>
-                <div class="flex gap-2">
-                    <div id="tv-controls" class="hidden flex gap-2">
-                        <select id="s-select" onchange="setS(this.value)" class="glass bg-transparent px-4 py-2 rounded-full text-[10px] outline-none"></select>
-                        <select id="e-select" onchange="setE(this.value)" class="glass bg-transparent px-4 py-2 rounded-full text-[10px] outline-none"></select>
-                    </div>
-                    <select id="srv-select" onchange="setSrv(this.value)" class="glass bg-transparent px-4 py-2 rounded-full text-[10px] outline-none"></select>
-                </div>
-            </div>
-            <div class="player-viewport aspect-video w-full rounded-2xl overflow-hidden mb-10">
-                <iframe id="frame" src="" class="w-full h-full" allowfullscreen></iframe>
-            </div>
-            <div class="max-w-6xl mx-auto grid lg:grid-cols-3 gap-12">
-                <div class="lg:col-span-2">
-                    <h2 id="p-title" class="text-5xl font-black italic uppercase mb-4 tracking-tighter"></h2>
-                    <p id="p-desc" class="text-white/50 font-light leading-relaxed text-lg"></p>
-                </div>
-                <div class="glass p-8 rounded-3xl h-fit">
-                    <h5 class="text-[10px] font-bold uppercase tracking-widest text-red-600 mb-6">Main Cast</h5>
-                    <div id="p-cast" class="space-y-4"></div>
-                </div>
-            </div>
+<script type="module">
+const KEY = "a45420333457411e78d5ad35d6c51a2d";
+let activeID = null;
+
+async function init(q='') {
+  let url = q
+    ? `https://api.themoviedb.org/3/search/movie?api_key=${KEY}&query=${q}`
+    : `https://api.themoviedb.org/3/trending/movie/week?api_key=${KEY}`;
+
+  const res = await fetch(url);
+  const data = await res.json();
+
+  if (!q && data.results[0]) setupHero(data.results[0]);
+  renderGrid(data.results);
+}
+
+function setupHero(m) {
+  document.getElementById('hero-bg').style.backgroundImage =
+    `url(https://image.tmdb.org/t/p/original${m.backdrop_path})`;
+  document.getElementById('hero-title').innerText = m.title;
+  document.getElementById('hero-meta').innerText =
+    `⭐ ${m.vote_average.toFixed(1)} • ${m.release_date.slice(0,4)}`;
+  document.getElementById('hero-play').onclick = () => openPlayer(m.id, m.title);
+}
+
+function renderGrid(list) {
+  grid.innerHTML = list.map(m => {
+    if (!m.poster_path) return '';
+    return `
+    <div class="movie-card group" onclick="openPlayer(${m.id},'${m.title.replace(/'/g,"\\'")}')">
+      <div class="relative">
+        <img src="https://image.tmdb.org/t/p/w500${m.poster_path}">
+        <div class="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition p-4 flex flex-col justify-end">
+          <h4 class="text-sm font-black uppercase">${m.title}</h4>
+          <p class="text-[10px] opacity-70">⭐ ${m.vote_average.toFixed(1)} • ${m.release_date?.slice(0,4)}</p>
         </div>
-    </div>
+      </div>
+    </div>`;
+  }).join('');
+}
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+async function openPlayer(id,title) {
+  activeID = id;
+  const res = await fetch(`https://api.themoviedb.org/3/movie/${id}?api_key=${KEY}`);
+  const m = await res.json();
 
-        // CONFIG
-        const firebaseConfig = { apiKey: "AIzaSyDFDQG_-vhIYXWtRUW5dXOvP_BCsCIhLJI", authDomain: "opboimovies.firebaseapp.com", projectId: "opboimovies", storageBucket: "opboimovies.firebasestorage.app", messagingSenderId: "436070860394", appId: "1:436070860394:web:c3443eba4bba154a14ec13" };
-        const KEY = 'a45420333457411e78d5ad35d6c51a2d';
-        
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const provider = new GoogleAuthProvider();
+  document.getElementById('player-overlay').style.display = 'block';
+  document.getElementById('frame').src = `https://vidsrc.to/embed/movie/${id}`;
+  document.getElementById('p-title').innerText = title;
+  document.getElementById('p-meta').innerText =
+    `⭐ ${m.vote_average.toFixed(1)} • ${m.release_date.slice(0,4)} • ${m.runtime} min`;
+  document.getElementById('p-desc').innerText = m.overview;
+}
 
-        let mode = 'movie', activeID = null, currentSrv = 'vidsrcto', s = 1, e = 1, activeItem = null;
-        let myList = [], currentUser = null;
+function closePlayer() {
+  player-overlay.style.display = 'none';
+  frame.src = '';
+}
 
-        const servers = [
-            {id:'vidsrcto', n:'Server: Aura Prime'},
-            {id:'vidsrcme', n:'Server: Aura Mirror'},
-            {id:'vidsrcicu', n:'Server: Aura Stream'},
-            {id:'2embed', n:'Server: Aura Cloud'}
-        ];
+let timer;
+search.addEventListener('input', e => {
+  clearTimeout(timer);
+  timer = setTimeout(() => {
+    if (e.target.value.length > 2) init(e.target.value);
+    if (e.target.value.length === 0) init();
+  }, 400);
+});
 
-        // --- AUTH LOGIC ---
-        window.login = () => signInWithPopup(auth, provider);
-        window.logout = () => signOut(auth);
+init();
+</script>
 
-        onAuthStateChanged(auth, (user) => {
-            currentUser = user;
-            if(user) {
-                document.getElementById('login-btn').classList.add('hidden');
-                document.getElementById('user-profile').classList.remove('hidden');
-                document.getElementById('user-name').innerText = user.displayName.split(' ')[0];
-                document.getElementById('user-pic').src = user.photoURL;
-                syncList(user.uid);
-            } else {
-                document.getElementById('login-btn').classList.remove('hidden');
-                document.getElementById('user-profile').classList.add('hidden');
-                myList = []; updateUI();
-            }
-        });
-
-        function syncList(uid) {
-            onSnapshot(collection(db, "users", uid, "mylist"), (snap) => {
-                myList = snap.docs.map(d => d.data());
-                updateUI();
-            });
-        }
-
-        // --- DATA LOGIC ---
-        async function init(q = '', g = '') {
-            let url = `https://api.themoviedb.org/3/trending/${mode}/week?api_key=${KEY}`;
-            if(q) url = `https://api.themoviedb.org/3/search/${mode}?api_key=${KEY}&query=${q}`;
-            if(g) url = `https://api.themoviedb.org/3/discover/${mode}?api_key=${KEY}&with_genres=${g}`;
-            
-            const r = await fetch(url);
-            const d = await r.json();
-            
-            if(!q && !g) setupHero(d.results[0]);
-            renderGrid(d.results, q ? 'search-results' : 'grid');
-            loadGenres();
-        }
-
-        function setupHero(m) {
-            document.getElementById('hero-bg').style.backgroundImage = `url(https://image.tmdb.org/t/p/original${m.backdrop_path})`;
-            document.getElementById('hero-title').innerText = m.title || m.name;
-            document.getElementById('hero-desc').innerText = m.overview;
-            document.getElementById('hero-meta').innerHTML = `<span>Rating: ${m.vote_average.toFixed(1)}</span> • <span>${(m.release_date || m.first_air_date).split('-')[0]}</span>`;
-            
-            document.getElementById('hero-play').onclick = () => openPlayer(m.id, m.title || m.name, m.poster_path);
-            document.getElementById('hero-add').onclick = () => toggleList(m);
-        }
-
-        function renderGrid(list, target) {
-            const container = document.getElementById(target);
-            container.innerHTML = list.map(m => {
-                if(!m.poster_path) return '';
-                const title = (m.title || m.name).replace(/'/g, "\\'");
-                const year = (m.release_date || m.first_air_date || 'N/A').split('-')[0];
-                return `
-                    <div class="movie-card animate-feed" onclick="openPlayer(${m.id}, '${title}', '${m.poster_path}')">
-                        <img src="https://image.tmdb.org/t/p/w500${m.poster_path}" class="w-full h-full object-cover">
-                        <div class="card-info">
-                            <span class="text-red-600 text-[9px] font-black uppercase tracking-widest mb-1">IMDb ${m.vote_average.toFixed(1)}</span>
-                            <h4 class="text-xs font-black uppercase truncate">${title}</h4>
-                            <p class="text-[10px] text-white/50">${year}</p>
-                        </div>
-                    </div>`;
-            }).join('');
-        }
-
-        // --- SEARCH UI LOGIC ---
-        let debounceTimer;
-        window.toggleSearch = () => {
-            const el = document.getElementById('search-overlay');
-            const isHidden = el.style.display === 'none' || el.style.display === '';
-            el.style.display = isHidden ? 'block' : 'none';
-            document.body.style.overflow = isHidden ? 'hidden' : 'auto';
-            if(isHidden) document.getElementById('search-input').focus();
-        };
-
-        document.getElementById('search-input').addEventListener('input', (e) => {
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(() => {
-                if(e.target.value.length > 2) init(e.target.value);
-            }, 500);
-        });
-
-        // --- PLAYER LOGIC ---
-        window.openPlayer = async (id, title, poster) => {
-            activeID = id; activeItem = { id, title, poster_path: poster, mode };
-            document.getElementById('p-title').innerText = title;
-            document.getElementById('player-overlay').classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-
-            const res = await fetch(`https://api.themoviedb.org/3/${mode}/${id}?api_key=${KEY}&append_to_response=credits`).then(r => r.json());
-            document.getElementById('p-desc').innerText = res.overview;
-            document.getElementById('p-cast').innerHTML = res.credits.cast.slice(0, 4).map(c => `
-                <div class="flex items-center gap-4">
-                    <img src="https://image.tmdb.org/t/p/w185${c.profile_path}" class="w-10 h-10 rounded-full object-cover border border-white/10">
-                    <div>
-                        <p class="text-[10px] font-black uppercase">${c.name}</p>
-                        <p class="text-[9px] text-white/40">${c.character}</p>
-                    </div>
-                </div>`).join('');
-
-            // Server Select
-            document.getElementById('srv-select').innerHTML = servers.map(s => `<option value="${s.id}">${s.n}</option>`).join('');
-            
-            if(mode === 'tv') {
-                document.getElementById('tv-controls').classList.remove('hidden');
-                document.getElementById('s-select').innerHTML = res.seasons.filter(s => s.season_number > 0).map(s => `<option value="${s.season_number}">Season ${s.season_number}</option>`).join('');
-                loadEpisodes(1);
-            } else {
-                document.getElementById('tv-controls').classList.add('hidden');
-                updPlayer();
-            }
-        };
-
-        async function loadEpisodes(seasonNum) {
-            const d = await fetch(`https://api.themoviedb.org/3/tv/${activeID}/season/${seasonNum}?api_key=${KEY}`).then(r => r.json());
-            document.getElementById('e-select').innerHTML = d.episodes.map(e => `<option value="${e.episode_number}">Episode ${e.episode_number}</option>`).join('');
-            updPlayer();
-        }
-
-        window.updPlayer = () => {
-            const srv = document.getElementById('srv-select').value;
-            let src = '';
-            if(mode === 'movie') {
-                if(srv === 'vidsrcto') src = `https://vidsrc.to/embed/movie/${activeID}`;
-                if(srv === 'vidsrcme') src = `https://vidsrc.me/embed/movie?tmdb=${activeID}`;
-                if(srv === 'vidsrcicu') src = `https://vidsrc.icu/embed/movie/${activeID}`;
-                if(srv === '2embed') src = `https://www.2embed.cc/embed/${activeID}`;
-            } else {
-                if(srv === 'vidsrcto') src = `https://vidsrc.to/embed/tv/${activeID}/${s}/${e}`;
-                if(srv === 'vidsrcme') src = `https://vidsrc.me/embed/tv?tmdb=${activeID}&sea=${s}&epi=${e}`;
-                if(srv === 'vidsrcicu') src = `https://vidsrc.icu/embed/tv/${activeID}/${s}/${e}`;
-                if(srv === '2embed') src = `https://www.2embed.cc/embedtv/${activeID}&s=${s}&e=${e}`;
-            }
-            document.getElementById('frame').src = src;
-        };
-
-        // UI HELPERS
-        window.setS = (val) => { s = val; e = 1; loadEpisodes(val); };
-        window.setE = (val) => { e = val; updPlayer(); };
-        window.setSrv = (val) => { currentSrv = val; updPlayer(); };
-        window.closePlayer = () => {
-            document.getElementById('player-overlay').classList.add('hidden');
-            document.getElementById('frame').src = '';
-            document.body.style.overflow = 'auto';
-        };
-        window.setMode = (m) => {
-            mode = m;
-            document.getElementById('m-nav').style.color = m === 'movie' ? '#fff' : '';
-            document.getElementById('t-nav').style.color = m === 'tv' ? '#fff' : '';
-            init();
-        };
-
-        window.toggleDrop = (id) => document.getElementById(id).classList.toggle('hidden');
-
-        async function loadGenres() {
-            const r = await fetch(`https://api.themoviedb.org/3/genre/${mode}/list?api_key=${KEY}`);
-            const d = await r.json();
-            document.getElementById('genre-menu').innerHTML = d.genres.map(g => `<button onclick="init('','${g.id}');toggleDrop('genre-menu')" class="text-left text-[10px] font-bold uppercase p-2 hover:bg-white/10 rounded-lg">${g.name}</button>`).join('');
-        }
-
-        function updateUI() {
-            if(myList.length > 0) {
-                document.getElementById('my-list-section').classList.remove('hidden');
-                renderGrid(myList, 'my-list-grid');
-            } else {
-                document.getElementById('my-list-section').classList.add('hidden');
-            }
-        }
-
-        window.toggleList = async (m) => {
-            if(!currentUser) return alert("Please login to save movies!");
-            const docRef = doc(db, "users", currentUser.uid, "mylist", m.id.toString());
-            const exists = myList.some(x => x.id === m.id);
-            exists ? await deleteDoc(docRef) : await setDoc(docRef, { id: m.id, title: m.title || m.name, poster_path: m.poster_path, mode, vote_average: m.vote_average, release_date: m.release_date || m.first_air_date });
-        };
-
-        init();
-    </script>
 </body>
 </html>
