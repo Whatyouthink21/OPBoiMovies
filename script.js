@@ -86,6 +86,97 @@ window.toggleMyList = async () => {
     exists ? await deleteDoc(docRef) : await setDoc(docRef, activeItem);
 };
 
+// Search Overlay Functions
+window.openSearchOverlay = () => {
+    document.getElementById('search-overlay').classList.add('active');
+    document.body.style.overflow = 'hidden';
+    document.getElementById('search-input').focus();
+};
+
+window.closeSearchOverlay = () => {
+    document.getElementById('search-overlay').classList.remove('active');
+    document.body.style.overflow = 'auto';
+    document.getElementById('search-input').value = '';
+    document.getElementById('search-results-container').innerHTML = `
+        <div class="search-placeholder">
+            <div class="search-placeholder-icon">🎬</div>
+            <p>Start typing to search...</p>
+        </div>
+    `;
+};
+
+// Search Input Handler
+document.getElementById('search-input').addEventListener('input', async (ev) => {
+    clearTimeout(searchTimeout);
+    const val = ev.target.value.trim();
+    const resultsContainer = document.getElementById('search-results-container');
+    
+    if(val.length < 2) {
+        resultsContainer.innerHTML = `
+            <div class="search-placeholder">
+                <div class="search-placeholder-icon">🎬</div>
+                <p>Start typing to search...</p>
+            </div>
+        `;
+        return;
+    }
+    
+    searchTimeout = setTimeout(async () => {
+        const r = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${KEY}&query=${val}`);
+        const d = await r.json();
+        const results = d.results
+            .filter(x => (x.media_type === 'movie' || x.media_type === 'tv') && x.poster_path)
+            .slice(0, 12);
+        
+        if(results.length === 0) {
+            resultsContainer.innerHTML = `
+                <div class="search-placeholder">
+                    <div class="search-placeholder-icon">😕</div>
+                    <p>No results found for "${val}"</p>
+                </div>
+            `;
+        } else {
+            resultsContainer.innerHTML = `
+                <div class="search-results-grid">
+                    ${results.map(m => {
+                        const rating = m.vote_average ? m.vote_average.toFixed(1) : 'N/A';
+                        const year = (m.release_date || m.first_air_date || '').split('-')[0] || '';
+                        const mediaType = m.media_type === 'movie' ? 'Movie' : 'Series';
+                        const title = (m.title || m.name).replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                        
+                        return `
+                        <div class="search-result-card" onclick="selectSearchResult(${m.id}, '${m.media_type}', '${title}', '${m.poster_path}', ${m.vote_average || 0}, '${m.release_date || m.first_air_date || ''}')">
+                            <div class="search-result-poster">
+                                <img src="https://image.tmdb.org/t/p/w500${m.poster_path}" alt="${m.title || m.name}">
+                            </div>
+                            <div class="search-result-info">
+                                <h4 class="search-result-title">${m.title || m.name}</h4>
+                                <div class="search-result-meta">
+                                    <span class="search-result-rating">★ ${rating}</span>
+                                    <span class="search-result-year">${year}</span>
+                                    <span class="search-result-type">${mediaType}</span>
+                                </div>
+                            </div>
+                        </div>`;
+                    }).join('')}
+                </div>
+            `;
+        }
+    }, 300);
+});
+
+window.selectSearchResult = (id, mediaType, title, poster, rating, releaseDate) => {
+    const oldMode = mode;
+    mode = mediaType;
+    
+    if(oldMode !== mode) {
+        updateModeButtons();
+    }
+    
+    closeSearchOverlay();
+    openPlayer(id, title, poster, rating, releaseDate);
+};
+
 // Main Init Function
 async function init(q = '', g = '') {
     let url = `https://api.themoviedb.org/3/trending/${mode}/week?api_key=${KEY}`;
@@ -111,6 +202,10 @@ async function setupHero(m) {
     const year = (m.release_date || m.first_air_date || '').split('-')[0];
     document.getElementById('hero-year').innerText = year || '';
     
+    // Fetch full details for description
+    const details = await fetch(`https://api.themoviedb.org/3/${mode}/${m.id}?api_key=${KEY}`).then(r => r.json());
+    document.getElementById('hero-description').innerText = details.overview || 'No description available.';
+    
     activeItem = { 
         id: m.id, 
         title: m.title || m.name, 
@@ -129,6 +224,13 @@ async function setupHero(m) {
         m.release_date || m.first_air_date
     );
     document.getElementById('hero-add').onclick = () => toggleMyList();
+    document.getElementById('hero-info').onclick = () => openPlayer(
+        m.id, 
+        m.title || m.name, 
+        m.poster_path, 
+        m.vote_average, 
+        m.release_date || m.first_air_date
+    );
     updateBtnStates();
 }
 
@@ -259,13 +361,21 @@ async function loadEpisodes() {
 // Mode Switch
 window.setMode = (m) => { 
     mode = m; 
-    document.getElementById('m-btn').className = m === 'movie' 
-        ? 'px-6 py-2 rounded-full text-[9px] font-black uppercase transition-all bg-white text-black' 
-        : 'px-6 py-2 rounded-full text-[9px] font-black uppercase text-white/40';
-    document.getElementById('t-btn').className = m === 'tv' 
-        ? 'px-6 py-2 rounded-full text-[9px] font-black uppercase transition-all bg-white text-black' 
-        : 'px-6 py-2 rounded-full text-[9px] font-black uppercase text-white/40';
+    updateModeButtons();
     init(); 
+}
+
+function updateModeButtons() {
+    const mBtn = document.getElementById('m-btn');
+    const tBtn = document.getElementById('t-btn');
+    
+    if(mode === 'movie') {
+        mBtn.classList.add('active');
+        tBtn.classList.remove('active');
+    } else {
+        tBtn.classList.add('active');
+        mBtn.classList.remove('active');
+    }
 }
 
 // Genres
@@ -275,69 +385,6 @@ async function loadGenres() {
     document.getElementById('genre-menu').innerHTML = d.genres
         .map(g => `<button onclick="init('','${g.id}')" class="drop-item">${g.name}</button>`)
         .join('');
-}
-
-// Search Functionality
-document.getElementById('search').addEventListener('input', async (ev) => {
-    clearTimeout(searchTimeout);
-    const val = ev.target.value.trim();
-    const resultsBox = document.getElementById('search-results');
-    
-    if(val.length < 2) {
-        resultsBox.classList.remove('show');
-        return;
-    }
-    
-    searchTimeout = setTimeout(async () => {
-        const r = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${KEY}&query=${val}`);
-        const d = await r.json();
-        const results = d.results
-            .filter(x => (x.media_type === 'movie' || x.media_type === 'tv') && x.poster_path)
-            .slice(0, 6);
-        
-        if(results.length === 0) {
-            resultsBox.innerHTML = '<div class="text-center py-4 text-white/40 text-xs">No results found</div>';
-        } else {
-            resultsBox.innerHTML = results.map(m => {
-                const rating = m.vote_average ? m.vote_average.toFixed(1) : 'N/A';
-                const year = (m.release_date || m.first_air_date || '').split('-')[0] || '';
-                const mediaType = m.media_type === 'movie' ? 'Movie' : 'Series';
-                const title = (m.title || m.name).replace(/'/g, "\\'").replace(/"/g, '&quot;');
-                
-                return `
-                <div class="search-item" onclick="selectSearch(${m.id}, '${m.media_type}', '${title}', '${m.poster_path}', ${m.vote_average || 0}, '${m.release_date || m.first_air_date || ''}')">
-                    <img src="https://image.tmdb.org/t/p/w92${m.poster_path}" class="w-12 h-16 rounded-lg object-cover" alt="${m.title || m.name}">
-                    <div class="flex-1">
-                        <h4 class="font-black text-xs uppercase mb-1">${m.title || m.name}</h4>
-                        <div class="flex items-center gap-2">
-                            <span class="rating-star text-[9px] px-2 py-1">★ ${rating}</span>
-                            <span class="text-[9px] opacity-40">${year}</span>
-                            <span class="text-[9px] opacity-40">• ${mediaType}</span>
-                        </div>
-                    </div>
-                </div>`;
-            }).join('');
-        }
-        resultsBox.classList.add('show');
-    }, 300);
-});
-
-window.selectSearch = (id, mediaType, title, poster, rating, releaseDate) => {
-    const oldMode = mode;
-    mode = mediaType;
-    
-    if(oldMode !== mode) {
-        document.getElementById('m-btn').className = mode === 'movie' 
-            ? 'px-6 py-2 rounded-full text-[9px] font-black uppercase transition-all bg-white text-black' 
-            : 'px-6 py-2 rounded-full text-[9px] font-black uppercase text-white/40';
-        document.getElementById('t-btn').className = mode === 'tv' 
-            ? 'px-6 py-2 rounded-full text-[9px] font-black uppercase transition-all bg-white text-black' 
-            : 'px-6 py-2 rounded-full text-[9px] font-black uppercase text-white/40';
-    }
-    
-    document.getElementById('search-results').classList.remove('show');
-    document.getElementById('search').value = '';
-    openPlayer(id, title, poster, rating, releaseDate);
 }
 
 // UI Updates
@@ -359,23 +406,30 @@ function updateBtnStates() {
     const heroBtn = document.getElementById('hero-add');
     
     if(modalBtn) modalBtn.innerText = exists ? '✓ SAVED' : '+ SAVE';
-    if(heroBtn) heroBtn.innerText = exists ? '✓ COLLECTED' : 'ADD TO LIST';
+    if(heroBtn) heroBtn.innerHTML = exists ? '<span>✓</span> Collected' : '<span>+</span> My List';
 }
 
 // Dropdown Toggle
 window.toggleDrop = (id) => {
     const el = document.getElementById(id);
     const isShow = el.classList.contains('show');
-    document.querySelectorAll('.dropdown-content').forEach(d => d.classList.remove('show'));
+    document.querySelectorAll('.dropdown-menu').forEach(d => d.classList.remove('show'));
     if(!isShow) el.classList.add('show');
 };
 
 // Close dropdowns on outside click
 window.onclick = (e) => { 
     if (!e.target.closest('.relative') && !e.target.closest('#user-profile')) {
-        document.querySelectorAll('.dropdown-content').forEach(d => d.classList.remove('show')); 
+        document.querySelectorAll('.dropdown-menu').forEach(d => d.classList.remove('show')); 
     }
 };
+
+// Close search overlay on ESC key
+document.addEventListener('keydown', (e) => {
+    if(e.key === 'Escape') {
+        closeSearchOverlay();
+    }
+});
 
 // Initialize App
 init();
