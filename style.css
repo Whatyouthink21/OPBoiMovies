@@ -1430,3 +1430,146 @@ iframe {
 .star-btn:hover {
     transform: scale(1.2);
 }
+/* ============================================
+   MOBILE NAVIGATION FIX
+   ============================================ */
+
+@media (max-width: 768px) {
+    .nav-glass > div:first-child {
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none; /* IE/Edge */
+        white-space: nowrap;
+        padding-bottom: 8px;
+    }
+
+    .nav-glass > div:first-child::-webkit-scrollbar {
+        display: none; /* Chrome/Safari */
+    }
+
+    .nav-glass > div:last-child {
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        white-space: nowrap;
+        padding-bottom: 8px;
+    }
+
+    .nav-glass > div:last-child::-webkit-scrollbar {
+        display: none;
+    }
+
+    .nav-glass {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        padding: 12px 8px;
+    }
+
+    .nav-glass > div {
+        display: flex;
+        gap: 8px;
+        flex-wrap: nowrap !important;
+    }
+
+    /* Make all nav items not shrink */
+    .logo-text,
+    .mode-switcher,
+    .nav-btn,
+    .search-trigger,
+    .login-btn,
+    .user-profile {
+        flex-shrink: 0;
+    }
+
+    /* Reduce sizes for mobile */
+    .logo-text {
+        font-size: 18px;
+    }
+
+    .mode-btn {
+        padding: 8px 12px;
+        font-size: 9px;
+    }
+
+    .nav-btn {
+        padding: 8px 14px;
+        font-size: 9px;
+    }
+
+    .search-trigger {
+        padding: 10px 16px;
+        font-size: 10px;
+    }
+
+    .login-btn {
+        padding: 10px 16px;
+        font-size: 9px;
+    }
+
+    /* Add scroll indicators */
+    .nav-glass > div:first-child::after,
+    .nav-glass > div:last-child::after {
+        content: '';
+        position: sticky;
+        right: 0;
+        width: 40px;
+        height: 100%;
+        background: linear-gradient(to left, rgba(10, 10, 15, 0.9), transparent);
+        pointer-events: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .logo-text {
+        font-size: 16px;
+    }
+
+    .mode-btn {
+        padding: 6px 10px;
+        font-size: 8px;
+    }
+
+    .mode-btn span {
+        font-size: 12px;
+    }
+
+    .nav-btn {
+        padding: 6px 12px;
+        font-size: 8px;
+    }
+
+    .nav-btn span {
+        font-size: 12px;
+    }
+
+    .search-trigger {
+        padding: 8px 14px;
+        font-size: 9px;
+    }
+
+    .login-btn {
+        padding: 8px 14px;
+        font-size: 8px;
+    }
+
+    .notice-badge {
+        font-size: 7px;
+        padding: 2px 4px;
+    }
+
+    /* Make sure hero section starts below nav */
+    .hero-section {
+        margin-top: 100px;
+    }
+
+    #continue-watching-section {
+        padding-top: 100px !important;
+    }
+}
