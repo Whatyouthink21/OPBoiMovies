@@ -3,36 +3,64 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>OPBoi Movies | Watch movies & series</title>
+<title>OPBoi Movies | Watch movies and series for free</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;800;900&display=swap" rel="stylesheet">
 
 <style>
-:root { --glass: rgba(255,255,255,.05); --border: rgba(255,255,255,.12); }
-body { font-family: Outfit,sans-serif; background:#0a0b0d; color:#fff; font-size:14px }
-.frost-bg{background:var(--glass);backdrop-filter:blur(40px);border:1px solid var(--border)}
-.hero-vignette{background:linear-gradient(to top,#0a0b0d 10%,transparent 70%),linear-gradient(to right,#0a0b0d 10%,transparent 70%)}
-.movie-card{border-radius:16px;overflow:hidden;cursor:pointer;transition:.4s}
-.movie-card:hover{transform:scale(1.05)}
-.dropdown-content{display:none;position:absolute;z-index:999;background:var(--glass);backdrop-filter:blur(30px);border:1px solid var(--border);border-radius:14px;padding:8px}
-.dropdown-content.show{display:block}
-.drop-item{padding:10px 14px;border-radius:8px;font-size:10px;font-weight:800;text-transform:uppercase;color:#aaa}
-.drop-item:hover{background:rgba(255,255,255,.1);color:#fff}
-#player-overlay{position:fixed;inset:0;background:rgba(5,6,8,.98);display:none;z-index:4000}
-iframe{width:100%;height:100%;border:none}
+:root { --glass: rgba(255,255,255,0.05); --border: rgba(255,255,255,0.12); }
+body { font-family:'Outfit',sans-serif; background:#0a0b0d; color:#fff; overflow-x:hidden; font-size:14px }
+
+.frost-bg { background:var(--glass); backdrop-filter:blur(40px); border:1px solid var(--border) }
+.hero-vignette {
+  background:
+    linear-gradient(to top,#0a0b0d 10%,transparent 70%),
+    linear-gradient(to right,#0a0b0d 10%,transparent 70%);
+}
+
+.movie-card { border-radius:16px; overflow:hidden; cursor:pointer; transition:.5s cubic-bezier(.2,1,.2,1) }
+.movie-card:hover { transform:scale(1.05) }
+
+.dropdown-content {
+  display:none; position:absolute; top:calc(100% + 10px);
+  min-width:200px; border-radius:12px; padding:8px;
+  z-index:5000; box-shadow:0 20px 50px rgba(0,0,0,.5)
+}
+.dropdown-content.show { display:block }
+
+.drop-item {
+  width:100%; text-align:left; padding:10px 14px;
+  border-radius:8px; font-size:10px; font-weight:800;
+  text-transform:uppercase; color:#aaa
+}
+.drop-item:hover { background:rgba(255,255,255,.1); color:#fff }
+
+#player-overlay {
+  position:fixed; inset:0; z-index:4000; display:none;
+  background:rgba(5,6,8,.98); backdrop-filter:blur(50px);
+}
+.player-viewport {
+  width:95%; max-width:1700px; aspect-ratio:16/9;
+  border-radius:24px; overflow:hidden; border:1px solid var(--border)
+}
+iframe { width:100%; height:100%; border:none }
+
+::-webkit-scrollbar { width:5px }
+::-webkit-scrollbar-thumb { background:rgba(255,255,255,.1); border-radius:10px }
 </style>
 </head>
 
 <body>
 
 <!-- NAV -->
-<nav class="fixed top-0 w-full z-50 px-8 py-4 flex justify-between items-center">
+<nav class="fixed top-0 w-full z-[100] px-8 py-4 flex justify-between items-center">
   <h1 class="text-xl font-black italic cursor-pointer" onclick="location.reload()">OPBoi Movies</h1>
 
   <!-- SEARCH -->
   <div class="relative">
-    <input id="search" placeholder="Search movies, series..."
+    <input id="search"
+      placeholder="Search movies, series..."
       class="frost-bg pl-12 pr-6 py-3 rounded-full w-72 uppercase text-[11px] font-bold tracking-widest outline-none">
     <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 opacity-40"
       fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -46,95 +74,134 @@ iframe{width:100%;height:100%;border:none}
   <div id="hero-bg" class="absolute inset-0 bg-cover bg-center scale-105"></div>
   <div class="absolute inset-0 hero-vignette"></div>
   <div class="relative z-10 max-w-2xl">
-    <h2 id="hero-title" class="text-6xl font-black italic uppercase mb-4">Loading…</h2>
+    <h2 id="hero-title" class="text-6xl font-black uppercase italic mb-4">...</h2>
     <p id="hero-meta" class="text-white/60 text-sm mb-6"></p>
-    <button id="hero-play"
-      class="bg-white text-black px-10 py-4 rounded-xl font-black uppercase text-[10px] tracking-widest">
-      Start Stream
-    </button>
+    <div class="flex gap-4">
+      <button id="hero-play"
+        class="bg-white text-black px-10 py-4 rounded-xl font-black uppercase text-[10px] tracking-widest">
+        Start Stream
+      </button>
+    </div>
   </div>
 </header>
 
 <!-- GRID -->
 <main class="px-24 py-16">
-  <h3 class="text-[10px] tracking-[0.4em] opacity-40 font-black uppercase mb-8">Discovery Feed</h3>
+  <h3 class="text-[10px] font-black uppercase tracking-[0.4em] opacity-30 mb-8">
+    Discovery Feed
+  </h3>
   <div id="grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8"></div>
 </main>
 
 <!-- PLAYER -->
 <div id="player-overlay">
-  <div class="p-10">
-    <button onclick="closePlayer()" class="frost-bg px-6 py-3 rounded-xl text-[10px] font-black uppercase">← Exit</button>
-    <div class="aspect-video my-8">
-      <iframe id="frame"></iframe>
+  <div class="flex flex-col items-center py-10">
+    <button onclick="closePlayer()" class="frost-bg px-8 py-3 rounded-xl text-[9px] font-black uppercase tracking-widest mb-6">
+      ← Exit
+    </button>
+
+    <div class="player-viewport bg-black mb-10">
+      <iframe id="frame" allowfullscreen></iframe>
     </div>
-    <h2 id="p-title" class="text-4xl font-black uppercase mb-2"></h2>
-    <p id="p-meta" class="text-white/50 text-sm mb-4"></p>
-    <p id="p-desc" class="text-white/40 max-w-4xl"></p>
+
+    <div class="w-[95%] max-w-[1700px]">
+      <h2 id="p-title" class="text-4xl font-black uppercase mb-2"></h2>
+      <p id="p-meta" class="text-white/50 text-sm mb-4"></p>
+      <p id="p-desc" class="text-white/40 max-w-4xl"></p>
+    </div>
   </div>
 </div>
 
 <script type="module">
 const KEY = "a45420333457411e78d5ad35d6c51a2d";
+
+const grid = document.getElementById("grid");
+const search = document.getElementById("search");
+
 let activeID = null;
 
-async function init(q='') {
+// INIT
+async function init(q = "") {
   let url = q
     ? `https://api.themoviedb.org/3/search/movie?api_key=${KEY}&query=${q}`
     : `https://api.themoviedb.org/3/trending/movie/week?api_key=${KEY}`;
 
   const res = await fetch(url);
-  const data = await res.json();
+  const d = await res.json();
 
-  if (!q && data.results[0]) setupHero(data.results[0]);
-  renderGrid(data.results);
+  if (!q && d.results[0]) setupHero(d.results[0]);
+  renderGrid(d.results);
 }
 
+// HERO
 function setupHero(m) {
-  document.getElementById('hero-bg').style.backgroundImage =
+  document.getElementById("hero-bg").style.backgroundImage =
     `url(https://image.tmdb.org/t/p/original${m.backdrop_path})`;
-  document.getElementById('hero-title').innerText = m.title;
-  document.getElementById('hero-meta').innerText =
-    `⭐ ${m.vote_average.toFixed(1)} • ${m.release_date.slice(0,4)}`;
-  document.getElementById('hero-play').onclick = () => openPlayer(m.id, m.title);
+
+  document.getElementById("hero-title").innerText = m.title || m.name;
+
+  document.getElementById("hero-meta").innerText =
+    `⭐ ${m.vote_average.toFixed(1)} • ${(m.release_date || m.first_air_date || "").slice(0,4)}`;
+
+  document.getElementById("hero-play").onclick =
+    () => openPlayer(m.id, m.title || m.name);
 }
 
+// GRID
 function renderGrid(list) {
   grid.innerHTML = list.map(m => {
-    if (!m.poster_path) return '';
+    if (!m.poster_path) return "";
+
+    const year = (m.release_date || m.first_air_date || "").slice(0,4);
+    const rating = m.vote_average ? m.vote_average.toFixed(1) : "N/A";
+
     return `
-    <div class="movie-card group" onclick="openPlayer(${m.id},'${m.title.replace(/'/g,"\\'")}')">
+    <div class="movie-card group"
+      onclick="openPlayer(${m.id}, '${(m.title||m.name).replace(/'/g,"\\'")}')">
       <div class="relative">
         <img src="https://image.tmdb.org/t/p/w500${m.poster_path}">
         <div class="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition p-4 flex flex-col justify-end">
-          <h4 class="text-sm font-black uppercase">${m.title}</h4>
-          <p class="text-[10px] opacity-70">⭐ ${m.vote_average.toFixed(1)} • ${m.release_date?.slice(0,4)}</p>
+          <h4 class="text-sm font-black uppercase leading-tight">
+            ${m.title || m.name}
+          </h4>
+          <p class="text-[10px] opacity-70">
+            ⭐ ${rating} • ${year}
+          </p>
         </div>
       </div>
     </div>`;
-  }).join('');
+  }).join("");
 }
 
-async function openPlayer(id,title) {
+// PLAYER
+async function openPlayer(id, title) {
   activeID = id;
+
   const res = await fetch(`https://api.themoviedb.org/3/movie/${id}?api_key=${KEY}`);
   const m = await res.json();
 
-  document.getElementById('player-overlay').style.display = 'block';
-  document.getElementById('frame').src = `https://vidsrc.to/embed/movie/${id}`;
-  document.getElementById('p-title').innerText = title;
-  document.getElementById('p-meta').innerText =
-    `⭐ ${m.vote_average.toFixed(1)} • ${m.release_date.slice(0,4)} • ${m.runtime} min`;
-  document.getElementById('p-desc').innerText = m.overview;
+  document.getElementById("player-overlay").style.display = "block";
+  document.body.style.overflow = "hidden";
+
+  document.getElementById("frame").src =
+    `https://vidsrc.to/embed/movie/${id}`;
+
+  document.getElementById("p-title").innerText = title;
+  document.getElementById("p-meta").innerText =
+    `⭐ ${m.vote_average.toFixed(1)} • ${(m.release_date||"").slice(0,4)} • ${m.runtime} min`;
+
+  document.getElementById("p-desc").innerText = m.overview;
 }
 
-function closePlayer() {
-  player-overlay.style.display = 'none';
-  frame.src = '';
-}
+window.closePlayer = () => {
+  document.getElementById("player-overlay").style.display = "none";
+  document.getElementById("frame").src = "";
+  document.body.style.overflow = "auto";
+};
 
+// SEARCH (debounce)
 let timer;
-search.addEventListener('input', e => {
+search.addEventListener("input", e => {
   clearTimeout(timer);
   timer = setTimeout(() => {
     if (e.target.value.length > 2) init(e.target.value);
