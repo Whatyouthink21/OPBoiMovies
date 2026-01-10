@@ -58,324 +58,38 @@ body {
     background-attachment: fixed;
 }
 
-/* ============================================
-   NAVIGATION
-   ============================================ */
+<nav class="nav-glass" style="position: fixed; top: 0; width: 100%; z-index: 5000;">
+    <div style="max-width: 1400px; margin: 0 auto; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between;">
+        
+        <div class="logo-text">
+            <span class="logo-gradient">STREAM</span>FLIX
+        </div>
 
-.nav-glass {
-    background: rgba(10, 10, 15, 0.8);
-    backdrop-filter: blur(30px) saturate(180%);
-    border-bottom: 1px solid var(--glass-border);
-    transition: all 0.3s ease;
-}
+        <button class="hamburger" id="hamburger-menu" style="display: none; background: transparent; border: none; color: white; font-size: 24px; cursor: pointer;">
+            ☰
+        </button>
 
-.logo-text {
-    font-size: 26px;
-    font-weight: 900;
-    letter-spacing: -1px;
-    transition: all 0.3s ease;
-}
+        <div class="nav-content" id="nav-menu">
+            <div class="mode-switcher">
+                <button class="mode-btn active" data-mode="dark"><span>🌙</span> Dark</button>
+                <button class="mode-btn" data-mode="light"><span>☀️</span> Light</button>
+            </div>
 
-.logo-gradient {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
+            <button class="nav-btn notice-btn">
+                <span class="notice-icon">🔔</span> Notice
+                <span class="notice-badge">3</span>
+            </button>
 
-.logo-text:hover {
-    transform: scale(1.05);
-}
+            <button class="search-trigger">
+                <span>🔍</span> Search
+            </button>
 
-.mode-switcher {
-    display: flex;
-    gap: 8px;
-    background: var(--glass);
-    padding: 6px;
-    border-radius: 50px;
-    border: 1px solid var(--glass-border);
-}
-
-.mode-btn {
-    padding: 10px 24px;
-    border-radius: 50px;
-    font-size: 11px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    border: none;
-    background: transparent;
-    color: var(--text-secondary);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.mode-btn span {
-    font-size: 14px;
-}
-
-.mode-btn.active {
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-    color: white;
-    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
-}
-
-.mode-btn:hover:not(.active) {
-    background: var(--glass);
-    color: var(--text-primary);
-}
-
-.nav-btn {
-    padding: 10px 20px;
-    border-radius: 12px;
-    font-size: 11px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    background: var(--glass);
-    border: 1px solid var(--glass-border);
-    color: var(--text-primary);
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    position: relative;
-}
-
-.nav-btn:hover {
-    background: var(--glass-border);
-    border-color: rgba(255, 255, 255, 0.15);
-    transform: translateY(-2px);
-}
-
-/* Notice Board Styles */
-.notice-btn {
-    position: relative;
-}
-
-.notice-icon {
-    font-size: 16px;
-    animation: ring 3s ease-in-out infinite;
-}
-
-@keyframes ring {
-    0%, 100% { transform: rotate(0deg); }
-    10%, 30% { transform: rotate(-10deg); }
-    20%, 40% { transform: rotate(10deg); }
-}
-
-.notice-badge {
-    position: absolute;
-    top: -4px;
-    right: -4px;
-    background: var(--accent);
-    color: white;
-    font-size: 9px;
-    font-weight: 900;
-    padding: 2px 6px;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(236, 72, 153, 0.5);
-}
-
-.notice-dropdown {
-    min-width: 350px;
-    max-height: 500px;
-    overflow-y: auto;
-}
-
-.notice-header {
-    font-size: 14px;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    padding: 16px;
-    border-bottom: 1px solid var(--glass-border);
-    background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-.notice-item {
-    padding: 16px;
-    border-bottom: 1px solid var(--glass-border);
-    transition: all 0.2s ease;
-    cursor: pointer;
-}
-
-.notice-item:hover {
-    background: var(--glass);
-}
-
-.notice-title {
-    font-size: 13px;
-    font-weight: 800;
-    margin-bottom: 6px;
-    color: var(--text-primary);
-}
-
-.notice-desc {
-    font-size: 11px;
-    color: var(--text-secondary);
-    line-height: 1.5;
-    margin-bottom: 8px;
-}
-
-.notice-time {
-    font-size: 9px;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-/* Search & Auth */
-.search-trigger {
-    padding: 12px 24px;
-    border-radius: 12px;
-    font-size: 12px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    background: linear-gradient(135deg, var(--primary), var(--accent));
-    border: none;
-    color: white;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
-}
-
-.search-trigger:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 30px rgba(99, 102, 241, 0.5);
-}
-
-.login-btn {
-    padding: 12px 24px;
-    border-radius: 12px;
-    font-size: 11px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    background: var(--glass);
-    border: 1px solid var(--glass-border);
-    color: var(--text-primary);
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.login-btn:hover {
-    background: linear-gradient(135deg, var(--primary), var(--accent));
-    border-color: transparent;
-    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
-}
-
-.user-profile {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: var(--glass);
-    padding: 6px 6px 6px 20px;
-    border-radius: 50px;
-    border: 1px solid var(--glass-border);
-    cursor: pointer;
-    transition: all 0.3s ease;
-    position: relative;
-}
-
-.user-profile:hover {
-    background: var(--glass-border);
-    transform: translateY(-2px);
-}
-
-.user-name {
-    font-size: 11px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.user-pic {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    border: 2px solid var(--glass-border);
-    object-fit: cover;
-}
-
-/* Dropdown Menus */
-.dropdown-menu {
-    display: none;
-    position: absolute;
-    top: calc(100% + 12px);
-    right: 0;
-    min-width: 220px;
-    background: rgba(19, 19, 26, 0.95);
-    backdrop-filter: blur(30px);
-    border: 1px solid var(--glass-border);
-    border-radius: 16px;
-    padding: 8px;
-    z-index: 5000;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
-}
-
-.dropdown-menu.show {
-    display: block;
-    animation: dropdownSlide 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-@keyframes dropdownSlide {
-    from {
-        opacity: 0;
-        transform: translateY(-10px) scale(0.95);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-
-.drop-item {
-    width: 100%;
-    padding: 12px 16px;
-    border-radius: 10px;
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: var(--text-secondary);
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    text-align: left;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.drop-item:hover {
-    background: var(--glass);
-    color: var(--text-primary);
-    transform: translateX(4px);
-}
-
-.logout-item {
-    color: #ef4444 !important;
-}
-
-.logout-item:hover {
-    background: rgba(239, 68, 68, 0.1) !important;
-}
+            <button class="login-btn">
+                <span>👤</span> Login
+            </button>
+        </div>
+    </div>
+</nav>
 
 /* ============================================
    SEARCH OVERLAY
