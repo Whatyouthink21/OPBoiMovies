@@ -10,123 +10,35 @@
 </head>
 <body>
 
-<!-- Navigation -->
-<nav class="fixed top-0 w-full z-[100] nav-glass">
-    <div class="max-w-[1920px] mx-auto px-8 py-5 flex items-center justify-between">
-        <div class="flex items-center gap-12">
-            <h1 class="logo-text cursor-pointer" onclick="location.reload()">
-                <span class="logo-gradient">OPBoi</span> Movies
-            </h1>
-            
-            <div class="mode-switcher">
-                <button onclick="setMode('movie')" id="m-btn" class="mode-btn active">
-                    <span>🎬</span> Cinema
-                </button>
-                <button onclick="setMode('tv')" id="t-btn" class="mode-btn">
-                    <span>📺</span> Series
-                </button>
-            </div>
-            
-            <div class="relative">
-                <button onclick="toggleDrop('genre-menu')" class="nav-btn">
-                    <span>🎭</span> Genres
-                </button>
-                <div id="genre-menu" class="dropdown-menu"></div>
-            </div>
-
-            <div class="relative">
-                <button onclick="toggleDrop('filter-menu')" class="nav-btn">
-                    <span>🎯</span> Filters
-                </button>
-                <div id="filter-menu" class="dropdown-menu" style="min-width: 300px;">
-                    <div style="padding: 12px; border-bottom: 1px solid var(--glass-border);">
-                        <label style="font-size: 10px; opacity: 0.5; text-transform: uppercase; letter-spacing: 2px; display: block; margin-bottom: 8px;">Year Range</label>
-                        <div style="display: flex; gap: 8px;">
-                            <input type="number" id="year-from" placeholder="From" min="1900" max="2025" style="width: 100%; background: var(--glass); border: 1px solid var(--glass-border); padding: 8px; border-radius: 8px; color: white; font-size: 12px;">
-                            <input type="number" id="year-to" placeholder="To" min="1900" max="2025" style="width: 100%; background: var(--glass); border: 1px solid var(--glass-border); padding: 8px; border-radius: 8px; color: white; font-size: 12px;">
-                        </div>
-                    </div>
-                    
-                    <div style="padding: 12px; border-bottom: 1px solid var(--glass-border);">
-                        <label style="font-size: 10px; opacity: 0.5; text-transform: uppercase; letter-spacing: 2px; display: block; margin-bottom: 8px;">Minimum Rating</label>
-                        <select id="min-rating" style="width: 100%; background: var(--glass); border: 1px solid var(--glass-border); padding: 8px; border-radius: 8px; color: white; font-size: 12px;">
-                            <option value="0">All Ratings</option>
-                            <option value="7">7+ ⭐</option>
-                            <option value="8">8+ ⭐⭐</option>
-                            <option value="9">9+ ⭐⭐⭐</option>
-                        </select>
-                    </div>
-                    
-                    <div style="padding: 12px;">
-                        <label style="font-size: 10px; opacity: 0.5; text-transform: uppercase; letter-spacing: 2px; display: block; margin-bottom: 8px;">Sort By</label>
-                        <select id="sort-by" style="width: 100%; background: var(--glass); border: 1px solid var(--glass-border); padding: 8px; border-radius: 8px; color: white; font-size: 12px; margin-bottom: 12px;">
-                            <option value="popularity.desc">Popularity</option>
-                            <option value="vote_average.desc">Highest Rated</option>
-                            <option value="release_date.desc">Newest First</option>
-                            <option value="release_date.asc">Oldest First</option>
-                            <option value="title.asc">A-Z</option>
-                        </select>
-                        
-                        <button onclick="applyFilters()" style="width: 100%; background: linear-gradient(135deg, var(--primary), var(--accent)); border: none; padding: 12px; border-radius: 10px; color: white; font-weight: 900; text-transform: uppercase; font-size: 11px; cursor: pointer;">
-                            Apply Filters
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <button onclick="showUpcomingCalendar()" class="nav-btn">
-                <span>📅</span> Coming
-            </button>
-
-            <button onclick="openRandomPicker()" class="nav-btn">
-                <span>🎲</span> Random
-            </button>
+<nav class="nav-glass" style="position: fixed; top: 0; width: 100%; z-index: 5000;">
+    <div style="max-width: 1400px; margin: 0 auto; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between;">
+        
+        <div class="logo-text">
+            <span class="logo-gradient">STREAM</span>FLIX
         </div>
 
-        <div class="flex items-center gap-4">
-            <!-- Notice Board -->
-            <div class="relative">
-                <button onclick="toggleDrop('notice-menu')" class="nav-btn notice-btn">
-                    <span class="notice-icon">📢</span>
-                    <span class="notice-badge">12</span>
-                </button>
-                <div id="notice-menu" class="dropdown-menu notice-dropdown">
-                    <!-- Keep existing notice items -->
-                </div>
+        <button class="hamburger" id="hamburger-menu" style="display: none; background: transparent; border: none; color: white; font-size: 24px; cursor: pointer;">
+            ☰
+        </button>
+
+        <div class="nav-content" id="nav-menu">
+            <div class="mode-switcher">
+                <button class="mode-btn active" data-mode="dark"><span>🌙</span> Dark</button>
+                <button class="mode-btn" data-mode="light"><span>☀️</span> Light</button>
             </div>
 
-            <!-- Theme Toggle -->
-            <button onclick="toggleTheme()" id="theme-toggle" class="nav-btn" title="Toggle Theme">
-                <span id="theme-icon">🌙</span>
+            <button class="nav-btn notice-btn">
+                <span class="notice-icon">🔔</span> Notice
+                <span class="notice-badge">3</span>
             </button>
 
-            <!-- Search Button -->
-            <button onclick="openSearchOverlay()" class="search-trigger">
+            <button class="search-trigger">
                 <span>🔍</span> Search
             </button>
-            
-            <!-- Auth Container -->
-            <div id="auth-container">
-                <button onclick="login()" id="login-btn" class="login-btn">
-                    <span>👤</span> Login
-                </button>
-                
-                <div id="user-profile" class="hidden user-profile" onclick="toggleDrop('user-menu')">
-                    <span id="user-name" class="user-name"></span>
-                    <img id="user-pic" class="user-pic">
-                    <div id="user-menu" class="dropdown-menu user-dropdown">
-                        <button onclick="openStatsModal()" class="drop-item">
-                            <span>📊</span> My Statistics
-                        </button>
-                        <button onclick="openAchievementsModal()" class="drop-item">
-                            <span>🏆</span> Achievements
-                        </button>
-                        <button onclick="logout()" class="drop-item logout-item">
-                            <span>🚪</span> Sign Out
-                        </button>
-                    </div>
-                </div>
-            </div>
+
+            <button class="login-btn">
+                <span>👤</span> Login
+            </button>
         </div>
     </div>
 </nav>
@@ -583,4 +495,5 @@
     <script type="module" src="script.js"></script>
 </body>
 </html>
+
 
