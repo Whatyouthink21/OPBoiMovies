@@ -1,4 +1,9 @@
 /* ============================================
+   OPBOI MOVIES - STYLE.CSS PART 1 OF 3
+   CSS VARIABLES, RESET, NAVIGATION & SIDEBAR
+   ============================================ */
+
+/* ============================================
    CSS VARIABLES & RESET
    ============================================ */
 
@@ -809,6 +814,13 @@ img {
     background: linear-gradient(90deg, var(--primary), var(--accent));
     transition: width 0.3s ease;
 }
+
+/* END OF PART 1 */
+/* ============================================
+   OPBOI MOVIES - STYLE.CSS PART 2 OF 3
+   HERO, CONTENT, PLAYER & DETAILS MODAL
+   ============================================ */
+
 /* ============================================
    HERO SECTION
    ============================================ */
@@ -1716,7 +1728,9 @@ img {
     text-overflow: ellipsis;
 }
 
-/* Reviews & Comments */
+/* ============================================
+   REVIEWS & COMMENTS
+   ============================================ */
 
 .review-form,
 .comment-form {
@@ -1869,14 +1883,11 @@ img {
     font-size: 15px;
 }
 
-/* Continue in next part... */
-.no-reviews,
-.no-comments {
-    padding: 40px;
-    text-align: center;
-    color: var(--text-muted);
-    font-size: 15px;
-}
+/* END OF PART 2 */
+/* ============================================
+   OPBOI MOVIES - STYLE.CSS PART 3 OF 3
+   ALL MODALS & RESPONSIVE DESIGN
+   ============================================ */
 
 /* ============================================
    ACTOR MODAL
@@ -2071,10 +2082,6 @@ img {
 .calendar-close-btn:hover {
     background: rgba(255, 255, 255, 0.1);
     transform: rotate(90deg);
-}
-
-.upcoming-card .media-card-image {
-    position: relative;
 }
 
 .release-date-badge {
@@ -2802,55 +2809,6 @@ img {
 }
 
 /* ============================================
-   DROPDOWN UTILITIES
-   ============================================ */
-
-.relative .dropdown-menu {
-    min-width: 180px;
-}
-
-.ep-menu {
-    max-height: 400px;
-    overflow-y: auto;
-}
-
-.ep-menu::-webkit-scrollbar {
-    width: 8px;
-}
-
-.ep-menu::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 4px;
-}
-
-.ep-menu::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 4px;
-}
-
-.ep-menu::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.15);
-}
-
-/* Dropdown toggle function */
-window.toggleDrop = function(id) {
-    const menu = document.getElementById(id);
-    const allMenus = document.querySelectorAll('.dropdown-menu');
-    
-    allMenus.forEach(m => {
-        if(m.id !== id) m.classList.remove('show');
-    });
-    
-    menu.classList.toggle('show');
-};
-
-document.addEventListener('click', (e) => {
-    if(!e.target.closest('.relative')) {
-        document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
-    }
-});
-
-/* ============================================
    RESPONSIVE DESIGN
    ============================================ */
 
@@ -2995,4 +2953,11 @@ document.addEventListener('click', (e) => {
         font-size: 28px;
     }
     
-    .
+    .achievement-notification {
+        width: calc(100vw - 40px);
+        right: 20px;
+        bottom: 20px;
+    }
+}
+
+/* END OF PART 3 - STYLE.CSS COMPLETE */
