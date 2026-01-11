@@ -3,77 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OPBoi Movies | Premium Streaming</title>
+    <title>OPBoi Movies | Premium Streaming Experience</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <!-- Navigation -->
-    <nav class="main-nav">
-        <div class="nav-container">
-            <div class="nav-left">
-                <button class="hamburger-btn" onclick="toggleMenu()" aria-label="Menu">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </button>
-                <h1 class="brand" onclick="location.reload()">
-                    <span class="brand-gradient">OPBoi</span>
+    <nav class="fixed top-0 w-full z-[100] nav-glass">
+        <div class="max-w-[1920px] mx-auto px-8 py-5 flex items-center justify-between">
+            <div class="flex items-center gap-12">
+                <h1 class="logo-text cursor-pointer" onclick="location.reload()">
+                    <span class="logo-gradient">OPBoi</span> Movies
                 </h1>
-            </div>
-
-            <div class="nav-center">
-                <div class="mode-toggle">
-                    <button onclick="setMode('movie')" id="m-btn" class="mode-option active">
-                        Movies
+                
+                <div class="mode-switcher">
+                    <button onclick="setMode('movie')" id="m-btn" class="mode-btn active">
+                        <span>🎬</span> Cinema
                     </button>
-                    <button onclick="setMode('tv')" id="t-btn" class="mode-option">
-                        Series
+                    <button onclick="setMode('tv')" id="t-btn" class="mode-btn">
+                        <span>📺</span> Series
                     </button>
-                    <div class="mode-slider"></div>
+                </div>
+                
+                <div class="relative">
+                    <button onclick="toggleDrop('genre-menu')" class="nav-btn">
+                        <span>🎭</span> Genres
+                    </button>
+                    <div id="genre-menu" class="dropdown-menu"></div>
                 </div>
             </div>
 
-            <div class="nav-right">
+            <div class="flex items-center gap-4">
+                <!-- Notice Board -->
+                <div class="relative">
+                    <button onclick="toggleDrop('notice-menu')" class="nav-btn notice-btn">
+                        <span class="notice-icon">📢</span>
+                        <span class="notice-badge">3</span>
+                    </button>
+                    <div id="notice-menu" class="dropdown-menu notice-dropdown">
+                        <div class="notice-header">Announcements</div>
+                        <div class="notice-item">
+                            <div class="notice-title">🎉 New Servers Added!</div>
+                            <div class="notice-desc">We've added 2 new streaming servers for better experience</div>
+                            <div class="notice-time">2 hours ago</div>
+                        </div>
+                        <div class="notice-item">
+                            <div class="notice-title">🔥 Trending Now</div>
+                            <div class="notice-desc">Check out this week's most watched content</div>
+                            <div class="notice-time">1 day ago</div>
+                        </div>
+                        <div class="notice-item">
+                            <div class="notice-title">⚡ USE BRAVE BROWSER</div>
+                            <div class="notice-desc">I do not put advertisements, but sources have ads, that is not in my control</div>
+                            <div class="notice-time">3 days ago</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Search Button -->
+                <button onclick="openSearchOverlay()" class="search-trigger">
+                    <span>🔍</span> Search
+                </button>
+                
+                <!-- Auth Container -->
                 <div id="auth-container">
-                    <button onclick="login()" id="login-btn" class="login-button">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                            <circle cx="12" cy="7" r="4"></circle>
-                        </svg>
-                        <span>Sign In</span>
+                    <button onclick="login()" id="login-btn" class="login-btn">
+                        <span>👤</span> Google Login
                     </button>
                     
-                    <div id="user-profile" class="hidden user-profile-container">
-                        <button class="user-profile-btn" onclick="toggleDrop('user-menu')">
-                            <img id="user-pic" class="user-avatar" alt="User">
-                            <span id="user-name" class="user-name-text"></span>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <polyline points="6 9 12 15 18 9"></polyline>
-                            </svg>
-                        </button>
+                    <div id="user-profile" class="hidden user-profile" onclick="toggleDrop('user-menu')">
+                        <span id="user-name" class="user-name"></span>
+                        <img id="user-pic" class="user-pic">
                         <div id="user-menu" class="dropdown-menu user-dropdown">
-                            <button onclick="openStatsModal()" class="dropdown-item">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M18 20V10M12 20V4M6 20v-6"></path>
-                                </svg>
-                                <span>Statistics</span>
-                            </button>
-                            <button onclick="openAchievementsModal()" class="dropdown-item">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <circle cx="12" cy="8" r="7"></circle>
-                                    <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>
-                                </svg>
-                                <span>Achievements</span>
-                            </button>
-                            <div class="dropdown-divider"></div>
-                            <button onclick="logout()" class="dropdown-item danger">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"></path>
-                                </svg>
-                                <span>Sign Out</span>
+                            <button onclick="logout()" class="drop-item logout-item">
+                                <span>🚪</span> Sign Out
                             </button>
                         </div>
                     </div>
@@ -82,279 +87,50 @@
         </div>
     </nav>
 
-    <!-- Hamburger Sidebar Menu -->
-    <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMenu()"></div>
-    <aside class="sidebar-menu" id="sidebar-menu">
-        <div class="sidebar-header">
-            <h2>Menu</h2>
-            <button class="close-btn" onclick="toggleMenu()">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-            </button>
-        </div>
-
-        <div class="sidebar-content">
-            <button onclick="openSearchOverlay(); toggleMenu();" class="sidebar-item">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <path d="m21 21-4.35-4.35"></path>
-                </svg>
-                <span>Search</span>
-            </button>
-
-            <button onclick="toggleSidebarDrop('genres-drop')" class="sidebar-item">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
-                </svg>
-                <span>Genres</span>
-                <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="6 9 12 15 18 9"></polyline>
-                </svg>
-            </button>
-            <div id="genres-drop" class="sidebar-dropdown"></div>
-
-            <button onclick="toggleSidebarDrop('filters-drop')" class="sidebar-item">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
-                </svg>
-                <span>Filters</span>
-                <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="6 9 12 15 18 9"></polyline>
-                </svg>
-            </button>
-            <div id="filters-drop" class="sidebar-dropdown">
-                <div class="filter-group">
-                    <label>Year Range</label>
-                    <div class="filter-row">
-                        <input type="number" id="year-from" placeholder="From" min="1900" max="2025">
-                        <input type="number" id="year-to" placeholder="To" min="1900" max="2025">
-                    </div>
-                </div>
-                <div class="filter-group">
-                    <label>Minimum Rating</label>
-                    <select id="min-rating">
-                        <option value="0">All Ratings</option>
-                        <option value="7">7+ ⭐</option>
-                        <option value="8">8+ ⭐⭐</option>
-                        <option value="9">9+ ⭐⭐⭐</option>
-                    </select>
-                </div>
-                <div class="filter-group">
-                    <label>Sort By</label>
-                    <select id="sort-by">
-                        <option value="popularity.desc">Popularity</option>
-                        <option value="vote_average.desc">Highest Rated</option>
-                        <option value="release_date.desc">Newest First</option>
-                        <option value="release_date.asc">Oldest First</option>
-                        <option value="title.asc">A-Z</option>
-                    </select>
-                </div>
-                <button onclick="applyFilters(); toggleMenu();" class="apply-filters-btn">Apply Filters</button>
-            </div>
-
-            <button onclick="showUpcomingCalendar(); toggleMenu();" class="sidebar-item">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                    <line x1="16" y1="2" x2="16" y2="6"></line>
-                    <line x1="8" y1="2" x2="8" y2="6"></line>
-                    <line x1="3" y1="10" x2="21" y2="10"></line>
-                </svg>
-                <span>Coming Soon</span>
-            </button>
-
-            <button onclick="openRandomPicker(); toggleMenu();" class="sidebar-item">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                    <circle cx="9" cy="9" r="1"></circle>
-                    <circle cx="9" cy="15" r="1"></circle>
-                    <circle cx="15" cy="9" r="1"></circle>
-                    <circle cx="15" cy="15" r="1"></circle>
-                </svg>
-                <span>Surprise Me</span>
-            </button>
-
-            <button onclick="openQuizModal(); toggleMenu();" class="sidebar-item">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                </svg>
-                <span>Movie Quiz</span>
-            </button>
-
-            <button onclick="toggleSidebarDrop('announcements-drop')" class="sidebar-item">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-                    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-                </svg>
-                <span>Announcements</span>
-                <span class="badge">12</span>
-                <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="6 9 12 15 18 9"></polyline>
-                </svg>
-            </button>
-            <div id="announcements-drop" class="sidebar-dropdown announcements-list">
-                <div class="announcement-item">
-                    <div class="announcement-icon">🎉</div>
-                    <div class="announcement-content">
-                        <h4>HUGE UPDATE!</h4>
-                        <p>12 amazing new features added! IMDB ratings, actor pages, reviews & more!</p>
-                        <span class="announcement-time">Just now</span>
-                    </div>
-                </div>
-                <div class="announcement-item">
-                    <div class="announcement-icon">🎬</div>
-                    <div class="announcement-content">
-                        <h4>IMDB & Rotten Tomatoes</h4>
-                        <p>Multiple rating sources for better insights</p>
-                        <span class="announcement-time">Just now</span>
-                    </div>
-                </div>
-                <div class="announcement-item">
-                    <div class="announcement-icon">📅</div>
-                    <div class="announcement-content">
-                        <h4>Coming Soon Calendar</h4>
-                        <p>Check upcoming releases for the next 3 months</p>
-                        <span class="announcement-time">Just now</span>
-                    </div>
-                </div>
-                <div class="announcement-item">
-                    <div class="announcement-icon">👥</div>
-                    <div class="announcement-content">
-                        <h4>Actor & Director Pages</h4>
-                        <p>Click any actor to view their filmography</p>
-                        <span class="announcement-time">Just now</span>
-                    </div>
-                </div>
-                <div class="announcement-item">
-                    <div class="announcement-icon">⭐</div>
-                    <div class="announcement-content">
-                        <h4>User Reviews System</h4>
-                        <p>Rate and review your favorites</p>
-                        <span class="announcement-time">Just now</span>
-                    </div>
-                </div>
-                <div class="announcement-item">
-                    <div class="announcement-icon">🔗</div>
-                    <div class="announcement-content">
-                        <h4>Share Movies</h4>
-                        <p>Share content with friends on social media</p>
-                        <span class="announcement-time">Just now</span>
-                    </div>
-                </div>
-                <div class="announcement-item">
-                    <div class="announcement-icon">💬</div>
-                    <div class="announcement-content">
-                        <h4>Comments Section</h4>
-                        <p>Discuss movies with the community</p>
-                        <span class="announcement-time">Just now</span>
-                    </div>
-                </div>
-                <div class="announcement-item">
-                    <div class="announcement-icon">🤖</div>
-                    <div class="announcement-content">
-                        <h4>AI Recommendations</h4>
-                        <p>Personalized suggestions based on your history</p>
-                        <span class="announcement-time">Just now</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="sidebar-divider"></div>
-
-            <button onclick="toggleTheme()" class="sidebar-item">
-                <svg id="theme-icon-sidebar" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-                </svg>
-                <span id="theme-text">Dark Mode</span>
-            </button>
-        </div>
-    </aside>
-
     <!-- Search Overlay -->
     <div id="search-overlay" class="search-overlay">
         <div class="search-container">
             <div class="search-header">
-                <button onclick="closeSearchOverlay()" class="search-close-btn">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                </button>
+                <button onclick="closeSearchOverlay()" class="search-close">✕</button>
+                <h2 class="search-title">What are you looking for?</h2>
             </div>
             
-            <div class="search-input-container">
-                <svg class="search-input-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <path d="m21 21-4.35-4.35"></path>
-                </svg>
-                <input type="text" id="search-input" placeholder="Search movies, series, actors..." class="search-input-field" autocomplete="off">
+            <div class="search-input-wrapper">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="search-input" placeholder="Search movies, series, actors..." class="search-input" autocomplete="off">
             </div>
             
-            <div id="search-results-container" class="search-results-wrapper">
-                <div class="search-empty-state">
-                    <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <path d="m21 21-4.35-4.35"></path>
-                    </svg>
+            <div id="search-results-container" class="search-results-container">
+                <div class="search-placeholder">
+                    <div class="search-placeholder-icon">🎬</div>
                     <p>Start typing to search...</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Continue Watching Section -->
-    <section id="continue-watching-section" class="content-section hidden">
-        <div class="section-header-container">
-            <h2 class="section-title">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                </svg>
-                Continue Watching
-            </h2>
-        </div>
-        <div id="continue-watching-grid" class="media-grid"></div>
-    </section>
-
     <!-- Hero Section -->
     <header class="hero-section">
-        <div id="hero-bg" class="hero-background"></div>
-        <div class="hero-gradient"></div>
-        <div class="hero-content-wrapper">
-            <div class="hero-content">
-                <div class="hero-badges">
-                    <span id="hero-rating" class="hero-badge rating">★ -</span>
-                    <span id="hero-year" class="hero-badge"></span>
-                    <span class="hero-badge quality">4K</span>
-                </div>
-                <h1 id="hero-title" class="hero-title">Loading...</h1>
-                <p id="hero-description" class="hero-description">Loading description...</p>
-                <div class="hero-buttons">
-                    <button id="hero-play" class="hero-btn primary">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                        </svg>
-                        <span>Watch Now</span>
-                    </button>
-                    <button id="hero-add" class="hero-btn secondary">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <line x1="12" y1="5" x2="12" y2="19"></line>
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                        </svg>
-                        <span>My List</span>
-                    </button>
-                    <button id="hero-info" class="hero-btn secondary">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <line x1="12" y1="16" x2="12" y2="12"></line>
-                            <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                        </svg>
-                        <span>More Info</span>
-                    </button>
-                </div>
+        <div id="hero-bg" class="hero-bg"></div>
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <div class="hero-meta">
+                <span id="hero-rating" class="hero-rating">★ -</span>
+                <span id="hero-year" class="hero-year"></span>
+                <span class="hero-quality">4K HDR</span>
+            </div>
+            <h2 id="hero-title" class="hero-title">Loading...</h2>
+            <p id="hero-description" class="hero-desc"></p>
+            <div class="hero-actions">
+                <button id="hero-play" class="hero-btn-primary">
+                    <span>▶</span> Watch Now
+                </button>
+                <button id="hero-add" class="hero-btn-secondary">
+                    <span>+</span> My List
+                </button>
+                <button id="hero-info" class="hero-btn-secondary">
+                    <span>ℹ</span> More Info
+                </button>
             </div>
         </div>
     </header>
@@ -362,90 +138,54 @@
     <!-- Main Content -->
     <main class="main-content">
         <!-- My List Section -->
-        <section id="my-list-section" class="content-section hidden">
-            <div class="section-header-container">
-                <h2 class="section-title">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                    </svg>
-                    My Collection
-                </h2>
+        <div id="my-list-section" class="content-section hidden">
+            <div class="section-header">
+                <h3 class="section-title">
+                    <span class="section-icon">⭐</span>
+                    Your Collection
+                </h3>
             </div>
-            <div id="my-list-grid" class="media-grid"></div>
-        </section>
-
-        <!-- Recommended Section -->
-        <section id="recommended-section" class="content-section hidden">
-            <div class="section-header-container">
-                <h2 class="section-title">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M12 2v20M2 12h20"></path>
-                        <circle cx="12" cy="12" r="9"></circle>
-                    </svg>
-                    Recommended For You
-                </h2>
-            </div>
-            <div id="recommended-grid" class="media-grid"></div>
-        </section>
+            <div id="my-list-grid" class="content-grid"></div>
+        </div>
         
         <!-- Discovery Feed -->
-        <section class="content-section">
-            <div class="section-header-container">
-                <h2 class="section-title">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
-                    </svg>
+        <div class="content-section">
+            <div class="section-header">
+                <h3 class="section-title">
+                    <span class="section-icon">🔥</span>
                     Trending Now
-                </h2>
+                </h3>
             </div>
-            <div id="grid" class="media-grid"></div>
-        </section>
+            <div id="grid" class="content-grid"></div>
+        </div>
     </main>
+
     <!-- Player Overlay -->
     <div id="player-overlay" class="player-overlay">
-        <div class="player-wrapper">
-            <div class="player-controls-bar">
-                <button onclick="closePlayer()" class="control-btn back">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="19" y1="12" x2="5" y2="12"></line>
-                        <polyline points="12 19 5 12 12 5"></polyline>
-                    </svg>
-                    <span>Back</span>
+        <div class="player-container">
+            <!-- Player Controls -->
+            <div class="player-controls">
+                <button onclick="closePlayer()" class="control-btn back-btn">
+                    <span>←</span> Back
                 </button>
-                <div class="player-controls-right">
+                <div class="control-right">
                     <button id="modal-add-btn" onclick="toggleMyList()" class="control-btn"></button>
-                    <button onclick="shareContent()" class="control-btn">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="18" cy="5" r="3"></circle>
-                            <circle cx="6" cy="12" r="3"></circle>
-                            <circle cx="18" cy="19" r="3"></circle>
-                            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
-                            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
-                        </svg>
-                        <span>Share</span>
-                    </button>
                     <div class="relative">
-                        <button onclick="toggleDrop('srv-menu')" class="control-btn server">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
-                                <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
-                                <line x1="6" y1="6" x2="6.01" y2="6"></line>
-                                <line x1="6" y1="18" x2="6.01" y2="18"></line>
-                            </svg>
-                            <span id="active-srv">BidSrc Pro</span>
+                        <button onclick="toggleDrop('srv-menu')" class="control-btn server-btn">
+                            <span>🎯</span> <span id="active-srv">Aura Primary</span>
                         </button>
                         <div id="srv-menu" class="dropdown-menu"></div>
                     </div>
-                    <div id="tv-controls" class="hidden tv-controls-group">
+                    <div id="tv-controls" class="hidden tv-controls">
                         <div class="relative">
-                            <button onclick="toggleDrop('s-menu')" class="control-btn episode">
-                                <span>S</span><span id="s-val">1</span>
+                            <button onclick="toggleDrop('s-menu')" class="control-btn">
+                                S<span id="s-val">1</span>
                             </button>
                             <div id="s-menu" class="dropdown-menu ep-menu"></div>
                         </div>
                         <div class="relative">
-                            <button onclick="toggleDrop('e-menu')" class="control-btn episode">
-                                <span>E</span><span id="e-val">1</span>
+                            <button onclick="toggleDrop('e-menu')" class="control-btn">
+                                E<span id="e-val">1</span>
                             </button>
                             <div id="e-menu" class="dropdown-menu ep-menu"></div>
                         </div>
@@ -453,406 +193,29 @@
                 </div>
             </div>
             
-            <div class="video-container">
+            <!-- Video Player -->
+            <div class="video-wrapper">
                 <iframe id="frame" src="" allowfullscreen></iframe>
             </div>
             
-            <div class="player-info-section">
-                <div class="player-main-info">
+            <!-- Player Info -->
+            <div class="player-info">
+                <div class="player-info-main">
                     <div class="player-meta">
-                        <span id="p-rating" class="meta-badge rating">★ -</span>
-                        <span id="p-year" class="meta-badge"></span>
-                        <span class="meta-badge quality">HD</span>
+                        <span id="p-rating" class="info-badge">★ -</span>
+                        <span id="p-year" class="info-year"></span>
+                        <span class="info-quality">HD</span>
                     </div>
-                    <h2 id="p-title" class="player-info-title">...</h2>
-                    <p id="p-desc" class="player-info-desc"></p>
+                    <h2 id="p-title" class="player-title">...</h2>
+                    <p id="p-desc" class="player-description"></p>
                 </div>
                 
-                <div class="player-cast-section">
-                    <h3 class="cast-section-title">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                            <circle cx="9" cy="7" r="4"></circle>
-                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                        </svg>
-                        Cast
+                <div class="player-cast">
+                    <h3 class="cast-title">
+                        <span>👥</span> Cast
                     </h3>
-                    <div id="p-cast" class="cast-grid"></div>
+                    <div id="p-cast" class="cast-list"></div>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Details Modal -->
-    <div id="details-modal" class="details-modal">
-        <div class="details-container">
-            <button onclick="closeDetailsModal()" class="details-close-btn">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-            </button>
-            
-            <div class="details-hero">
-                <div id="details-backdrop" class="details-backdrop"></div>
-                <div class="details-hero-gradient"></div>
-                <div class="details-hero-content">
-                    <div id="details-rating" class="details-ratings"></div>
-                    <h2 id="details-title" class="details-hero-title">Title</h2>
-                    <div class="details-hero-meta">
-                        <span id="details-year"></span>
-                        <span id="details-runtime"></span>
-                    </div>
-                    <div class="details-hero-actions">
-                        <button id="details-play-btn" class="details-btn primary">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                                <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                            </svg>
-                            Watch Now
-                        </button>
-                        <button id="details-add-btn" class="details-btn secondary">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <line x1="12" y1="5" x2="12" y2="19"></line>
-                                <line x1="5" y1="12" x2="19" y2="12"></line>
-                            </svg>
-                            My List
-                        </button>
-                        <button onclick="shareContent()" class="details-btn secondary">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <circle cx="18" cy="5" r="3"></circle>
-                                <circle cx="6" cy="12" r="3"></circle>
-                                <circle cx="18" cy="19" r="3"></circle>
-                                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
-                                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
-                            </svg>
-                            Share
-                        </button>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="details-body">
-                <div class="details-main">
-                    <div id="details-genres" class="details-genres"></div>
-                    
-                    <section class="details-section">
-                        <h3 class="details-section-title">Overview</h3>
-                        <p id="details-overview" class="details-overview-text"></p>
-                    </section>
-                    
-                    <div class="details-stats-grid">
-                        <div class="stat-card">
-                            <span class="stat-label">Status</span>
-                            <span id="details-status" class="stat-value">-</span>
-                        </div>
-                        <div class="stat-card">
-                            <span class="stat-label">Language</span>
-                            <span id="details-language" class="stat-value">-</span>
-                        </div>
-                        <div class="stat-card">
-                            <span class="stat-label">Budget</span>
-                            <span id="details-budget" class="stat-value">-</span>
-                        </div>
-                    </div>
-                    
-                    <section class="details-section">
-                        <h3 class="details-section-title">Trailer</h3>
-                        <div id="details-trailer" class="trailer-container"></div>
-                    </section>
-                    
-                    <section class="details-section">
-                        <h3 class="details-section-title">User Reviews</h3>
-                        <div class="review-form">
-                            <div class="rating-selector">
-                                <span class="rating-label">Your Rating:</span>
-                                <div id="star-rating" class="star-rating">
-                                    <span class="star-btn" onclick="rateMovie(1)">☆</span>
-                                    <span class="star-btn" onclick="rateMovie(2)">☆</span>
-                                    <span class="star-btn" onclick="rateMovie(3)">☆</span>
-                                    <span class="star-btn" onclick="rateMovie(4)">☆</span>
-                                    <span class="star-btn" onclick="rateMovie(5)">☆</span>
-                                </div>
-                            </div>
-                            <textarea id="review-text" placeholder="Write your review..." class="review-textarea"></textarea>
-                            <button onclick="submitReview()" class="submit-review-btn">Submit Review</button>
-                        </div>
-                        <div id="reviews-container" class="reviews-list"></div>
-                    </section>
-                    
-                    <section class="details-section">
-                        <h3 class="details-section-title">Comments</h3>
-                        <div class="comment-form">
-                            <textarea id="comment-text" placeholder="Join the discussion..." class="comment-textarea"></textarea>
-                            <button onclick="submitComment()" class="submit-comment-btn">Post Comment</button>
-                        </div>
-                        <div id="comments-container" class="comments-list"></div>
-                    </section>
-                    
-                    <section class="details-section">
-                        <h3 class="details-section-title">Similar Titles</h3>
-                        <div id="details-similar" class="similar-grid"></div>
-                    </section>
-                </div>
-                
-                <aside class="details-sidebar">
-                    <div class="sidebar-card">
-                        <h3 class="sidebar-card-title">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                                <circle cx="9" cy="7" r="4"></circle>
-                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                            </svg>
-                            Cast
-                        </h3>
-                        <div id="details-cast" class="details-cast-list"></div>
-                    </div>
-                </aside>
-            </div>
-        </div>
-    </div>
-
-    <!-- Actor Modal -->
-    <div id="actor-modal" class="actor-modal">
-        <div class="actor-container">
-            <button onclick="closeActorModal()" class="actor-close-btn">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-            </button>
-            
-            <div class="actor-header">
-                <div class="actor-photo-container">
-                    <img id="actor-photo" class="actor-photo" alt="Actor">
-                </div>
-                <div class="actor-info">
-                    <h2 id="actor-name" class="actor-name">Actor Name</h2>
-                    <div class="actor-details">
-                        <div class="actor-detail-item">
-                            <span class="actor-detail-label">Born</span>
-                            <span id="actor-birthday" class="actor-detail-value"></span>
-                        </div>
-                        <div class="actor-detail-item">
-                            <span class="actor-detail-label">Birthplace</span>
-                            <span id="actor-birthplace" class="actor-detail-value"></span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="actor-body">
-                <section class="actor-section">
-                    <h3 class="actor-section-title">Biography</h3>
-                    <p id="actor-bio" class="actor-bio-text"></p>
-                </section>
-                
-                <section class="actor-section">
-                    <h3 class="actor-section-title">Filmography</h3>
-                    <div id="actor-filmography" class="media-grid"></div>
-                </section>
-            </div>
-        </div>
-    </div>
-
-    <!-- Calendar Modal -->
-    <div id="calendar-modal" class="calendar-modal">
-        <div class="calendar-container">
-            <div class="calendar-header">
-                <h2 class="calendar-title">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                        <line x1="16" y1="2" x2="16" y2="6"></line>
-                        <line x1="8" y1="2" x2="8" y2="6"></line>
-                        <line x1="3" y1="10" x2="21" y2="10"></line>
-                    </svg>
-                    Upcoming Releases
-                </h2>
-                <button onclick="closeCalendarModal()" class="calendar-close-btn">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                </button>
-            </div>
-            <div id="calendar-grid" class="media-grid"></div>
-        </div>
-    </div>
-
-    <!-- Random Picker Modal -->
-    <div id="random-modal" class="random-modal">
-        <div class="random-container">
-            <button onclick="closeRandomModal()" class="random-close-btn">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-            </button>
-            <div class="random-content">
-                <div class="random-icon">🎲</div>
-                <h2 class="random-title">Surprise Me!</h2>
-                <p class="random-subtitle">Let us pick something random for you</p>
-                
-                <div class="random-genres">
-                    <button onclick="setRandomGenre(null)" id="random-any" class="random-genre-btn active">Any Genre</button>
-                    <button onclick="setRandomGenre(28)" id="random-action" class="random-genre-btn">Action</button>
-                    <button onclick="setRandomGenre(35)" id="random-comedy" class="random-genre-btn">Comedy</button>
-                    <button onclick="setRandomGenre(27)" id="random-horror" class="random-genre-btn">Horror</button>
-                    <button onclick="setRandomGenre(10749)" id="random-romance" class="random-genre-btn">Romance</button>
-                </div>
-                
-                <button onclick="pickRandom()" class="random-pick-btn">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                        <circle cx="9" cy="9" r="1"></circle>
-                        <circle cx="9" cy="15" r="1"></circle>
-                        <circle cx="15" cy="9" r="1"></circle>
-                        <circle cx="15" cy="15" r="1"></circle>
-                    </svg>
-                    Pick Random Movie
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Quiz Modal -->
-    <div id="quiz-modal" class="quiz-modal">
-        <div class="quiz-container">
-            <div class="quiz-header">
-                <h2 class="quiz-title">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                    </svg>
-                    Movie Quiz
-                </h2>
-                <button onclick="closeQuizModal()" class="quiz-close-btn">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                </button>
-            </div>
-            
-            <div id="quiz-content" class="quiz-content">
-                <div id="quiz-question" class="quiz-question-container">
-                    <img id="quiz-poster" class="quiz-poster" alt="Movie Poster">
-                    <h3 class="quiz-question-title">Guess the Movie!</h3>
-                    <div id="quiz-options" class="quiz-options"></div>
-                </div>
-                
-                <div class="quiz-score">
-                    Score: <span id="quiz-score-value">0</span> / <span id="quiz-total">0</span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Achievements Modal -->
-    <div id="achievements-modal" class="achievements-modal">
-        <div class="achievements-container">
-            <div class="achievements-header">
-                <h2 class="achievements-title">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="8" r="7"></circle>
-                        <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>
-                    </svg>
-                    Your Achievements
-                </h2>
-                <button onclick="closeAchievementsModal()" class="achievements-close-btn">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                </button>
-            </div>
-            <div id="achievements-grid" class="achievements-grid"></div>
-        </div>
-    </div>
-
-    <!-- Statistics Modal -->
-    <div id="stats-modal" class="stats-modal">
-        <div class="stats-container">
-            <div class="stats-header">
-                <h2 class="stats-title">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M18 20V10M12 20V4M6 20v-6"></path>
-                    </svg>
-                    Your Statistics
-                </h2>
-                <button onclick="closeStatsModal()" class="stats-close-btn">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                </button>
-            </div>
-            
-            <div class="stats-cards">
-                <div class="stat-big-card">
-                    <div class="stat-big-icon">🎬</div>
-                    <div id="stat-movies" class="stat-big-value">0</div>
-                    <div class="stat-big-label">Movies Watched</div>
-                </div>
-                <div class="stat-big-card">
-                    <div class="stat-big-icon">📺</div>
-                    <div id="stat-series" class="stat-big-value">0</div>
-                    <div class="stat-big-label">Series Watched</div>
-                </div>
-                <div class="stat-big-card">
-                    <div class="stat-big-icon">⏱️</div>
-                    <div id="stat-hours" class="stat-big-value">0</div>
-                    <div class="stat-big-label">Hours Watched</div>
-                </div>
-                <div class="stat-big-card">
-                    <div class="stat-big-icon">✍️</div>
-                    <div id="stat-reviews" class="stat-big-value">0</div>
-                    <div class="stat-big-label">Reviews Written</div>
-                </div>
-            </div>
-            
-            <section class="stats-section">
-                <h3 class="stats-section-title">Favorite Genres</h3>
-                <div id="genre-stats" class="genre-stats-list"></div>
-            </section>
-        </div>
-    </div>
-
-    <!-- Share Modal -->
-    <div id="share-modal" class="share-modal">
-        <div class="share-container">
-            <button onclick="closeShareModal()" class="share-close-btn">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-            </button>
-            <h3 class="share-title">Share This</h3>
-            <div class="share-buttons">
-                <button onclick="shareOn('twitter')" class="share-btn twitter">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z"></path>
-                    </svg>
-                    Twitter
-                </button>
-                <button onclick="shareOn('facebook')" class="share-btn facebook">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"></path>
-                    </svg>
-                    Facebook
-                </button>
-                <button onclick="shareOn('whatsapp')" class="share-btn whatsapp">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"></path>
-                    </svg>
-                    WhatsApp
-                </button>
-            </div>
-            <div class="share-link-container">
-                <input id="share-link" type="text" readonly class="share-link-input">
-                <button onclick="copyShareLink()" class="share-copy-btn">Copy</button>
             </div>
         </div>
     </div>
@@ -860,3 +223,5 @@
     <script type="module" src="script.js"></script>
 </body>
 </html>
+
+
