@@ -3,204 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OPBoi Movies | Premium Streaming Experience</title>
+    <title>OPBoi Movies | Premium Streaming</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <!-- Navigation -->
-    <nav class="fixed top-0 w-full z-[100] nav-glass">
-        <div class="max-w-[1920px] mx-auto px-8 py-5 flex items-center justify-between">
-            <div class="flex items-center gap-12">
-                <h1 class="logo-text cursor-pointer" onclick="location.reload()">
-                    <span class="logo-gradient">OPBoi</span> Movies
+    <nav class="main-nav">
+        <div class="nav-container">
+            <div class="nav-left">
+                <button class="hamburger-btn" onclick="toggleMenu()" aria-label="Menu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                <h1 class="brand" onclick="location.reload()">
+                    <span class="brand-gradient">OPBoi</span>
                 </h1>
-                
-                <div class="mode-switcher">
-                    <button onclick="setMode('movie')" id="m-btn" class="mode-btn active">
-                        <span>🎬</span> Cinema
-                    </button>
-                    <button onclick="setMode('tv')" id="t-btn" class="mode-btn">
-                        <span>📺</span> Series
-                    </button>
-                </div>
-                
-                <div class="relative">
-                    <button onclick="toggleDrop('genre-menu')" class="nav-btn">
-                        <span>🎭</span> Genres
-                    </button>
-                    <div id="genre-menu" class="dropdown-menu"></div>
-                </div>
-
-                <div class="relative">
-                    <button onclick="toggleDrop('filter-menu')" class="nav-btn">
-                        <span>🎯</span> Filters
-                    </button>
-                    <div id="filter-menu" class="dropdown-menu" style="min-width: 300px;">
-                        <div style="padding: 12px; border-bottom: 1px solid var(--glass-border);">
-                            <label style="font-size: 10px; opacity: 0.5; text-transform: uppercase; letter-spacing: 2px; display: block; margin-bottom: 8px;">Year Range</label>
-                            <div style="display: flex; gap: 8px;">
-                                <input type="number" id="year-from" placeholder="From" min="1900" max="2025" style="width: 100%; background: var(--glass); border: 1px solid var(--glass-border); padding: 8px; border-radius: 8px; color: white; font-size: 12px;">
-                                <input type="number" id="year-to" placeholder="To" min="1900" max="2025" style="width: 100%; background: var(--glass); border: 1px solid var(--glass-border); padding: 8px; border-radius: 8px; color: white; font-size: 12px;">
-                            </div>
-                        </div>
-                        
-                        <div style="padding: 12px; border-bottom: 1px solid var(--glass-border);">
-                            <label style="font-size: 10px; opacity: 0.5; text-transform: uppercase; letter-spacing: 2px; display: block; margin-bottom: 8px;">Minimum Rating</label>
-                            <select id="min-rating" style="width: 100%; background: var(--glass); border: 1px solid var(--glass-border); padding: 8px; border-radius: 8px; color: white; font-size: 12px;">
-                                <option value="0">All Ratings</option>
-                                <option value="7">7+ ⭐</option>
-                                <option value="8">8+ ⭐⭐</option>
-                                <option value="9">9+ ⭐⭐⭐</option>
-                            </select>
-                        </div>
-                        
-                        <div style="padding: 12px;">
-                            <label style="font-size: 10px; opacity: 0.5; text-transform: uppercase; letter-spacing: 2px; display: block; margin-bottom: 8px;">Sort By</label>
-                            <select id="sort-by" style="width: 100%; background: var(--glass); border: 1px solid var(--glass-border); padding: 8px; border-radius: 8px; color: white; font-size: 12px; margin-bottom: 12px;">
-                                <option value="popularity.desc">Popularity</option>
-                                <option value="vote_average.desc">Highest Rated</option>
-                                <option value="release_date.desc">Newest First</option>
-                                <option value="release_date.asc">Oldest First</option>
-                                <option value="title.asc">A-Z</option>
-                            </select>
-                            
-                            <button onclick="applyFilters()" style="width: 100%; background: linear-gradient(135deg, var(--primary), var(--accent)); border: none; padding: 12px; border-radius: 10px; color: white; font-weight: 900; text-transform: uppercase; font-size: 11px; cursor: pointer;">
-                                Apply Filters
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <button onclick="showUpcomingCalendar()" class="nav-btn">
-                    <span>📅</span> Coming Soon
-                </button>
-
-                <button onclick="openRandomPicker()" class="nav-btn">
-                    <span>🎲</span> Surprise Me
-                </button>
             </div>
 
-            <div class="flex items-center gap-4">
-                <!-- Notice Board -->
-                <div class="relative">
-                    <button onclick="toggleDrop('notice-menu')" class="nav-btn notice-btn">
-                        <span class="notice-icon">📢</span>
-                        <span class="notice-badge">12</span>
+            <div class="nav-center">
+                <div class="mode-toggle">
+                    <button onclick="setMode('movie')" id="m-btn" class="mode-option active">
+                        Movies
                     </button>
-                    <div id="notice-menu" class="dropdown-menu notice-dropdown">
-                        <div class="notice-header">Announcements</div>
-                        
-                        <div class="notice-item">
-                            <div class="notice-title">🎉 HUGE UPDATE!</div>
-                            <div class="notice-desc">12 amazing new features added! IMDB ratings, actor pages, reviews, achievements & more!</div>
-                            <div class="notice-time">Just now</div>
-                        </div>
-
-                        <div class="notice-item">
-                            <div class="notice-title">🎬 IMDB & Rotten Tomatoes Ratings</div>
-                            <div class="notice-desc">Now showing ratings from multiple sources for better insights</div>
-                            <div class="notice-time">Just now</div>
-                        </div>
-
-                        <div class="notice-item">
-                            <div class="notice-title">📅 Coming Soon Calendar</div>
-                            <div class="notice-desc">Check out upcoming movie releases for the next 3 months</div>
-                            <div class="notice-time">Just now</div>
-                        </div>
-
-                        <div class="notice-item">
-                            <div class="notice-title">👥 Actor & Director Pages</div>
-                            <div class="notice-desc">Click any actor to view their complete filmography</div>
-                            <div class="notice-time">Just now</div>
-                        </div>
-
-                        <div class="notice-item">
-                            <div class="notice-title">⭐ User Reviews System</div>
-                            <div class="notice-desc">Rate and review your favorite movies & series</div>
-                            <div class="notice-time">Just now</div>
-                        </div>
-
-                        <div class="notice-item">
-                            <div class="notice-title">🔗 Share Movies</div>
-                            <div class="notice-desc">Share your favorite content with friends on social media</div>
-                            <div class="notice-time">Just now</div>
-                        </div>
-
-                        <div class="notice-item">
-                            <div class="notice-title">💬 Comments Section</div>
-                            <div class="notice-desc">Discuss movies with the community in real-time</div>
-                            <div class="notice-time">Just now</div>
-                        </div>
-
-                        <div class="notice-item">
-                            <div class="notice-title">🤖 AI Recommendations</div>
-                            <div class="notice-desc">Get personalized suggestions based on your watch history</div>
-                            <div class="notice-time">Just now</div>
-                        </div>
-
-                        <div class="notice-item">
-                            <div class="notice-title">📊 Your Statistics</div>
-                            <div class="notice-desc">Track your watch time, favorite genres and more</div>
-                            <div class="notice-time">Just now</div>
-                        </div>
-
-                        <div class="notice-item">
-                            <div class="notice-title">🎲 Random Picker</div>
-                            <div class="notice-desc">Can't decide? Let us pick a random movie for you!</div>
-                            <div class="notice-time">Just now</div>
-                        </div>
-
-                        <div class="notice-item">
-                            <div class="notice-title">🎮 Movie Quiz</div>
-                            <div class="notice-desc">Test your movie knowledge with fun trivia games</div>
-                            <div class="notice-time">Just now</div>
-                        </div>
-
-                        <div class="notice-item">
-                            <div class="notice-title">🏆 Achievements</div>
-                            <div class="notice-desc">Earn badges for watching milestones and challenges</div>
-                            <div class="notice-time">Just now</div>
-                        </div>
-
-                        <div class="notice-item">
-                            <div class="notice-title">🆕 New Server Added</div>
-                            <div class="notice-desc">BidSrc Pro added for faster streaming experience</div>
-                            <div class="notice-time">1 hour ago</div>
-                        </div>
-                    </div>
+                    <button onclick="setMode('tv')" id="t-btn" class="mode-option">
+                        Series
+                    </button>
+                    <div class="mode-slider"></div>
                 </div>
+            </div>
 
-                <!-- Theme Toggle -->
-                <button onclick="toggleTheme()" id="theme-toggle" class="nav-btn" title="Toggle Theme">
-                    <span id="theme-icon">🌙</span>
-                </button>
-
-                <!-- Search Button -->
-                <button onclick="openSearchOverlay()" class="search-trigger">
-                    <span>🔍</span> Search
-                </button>
-                
-                <!-- Auth Container -->
+            <div class="nav-right">
                 <div id="auth-container">
-                    <button onclick="login()" id="login-btn" class="login-btn">
-                        <span>👤</span> Google Login
+                    <button onclick="login()" id="login-btn" class="login-button">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                        <span>Sign In</span>
                     </button>
                     
-                    <div id="user-profile" class="hidden user-profile" onclick="toggleDrop('user-menu')">
-                        <span id="user-name" class="user-name"></span>
-                        <img id="user-pic" class="user-pic">
+                    <div id="user-profile" class="hidden user-profile-container">
+                        <button class="user-profile-btn" onclick="toggleDrop('user-menu')">
+                            <img id="user-pic" class="user-avatar" alt="User">
+                            <span id="user-name" class="user-name-text"></span>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </button>
                         <div id="user-menu" class="dropdown-menu user-dropdown">
-                            <button onclick="openStatsModal()" class="drop-item">
-                                <span>📊</span> My Statistics
+                            <button onclick="openStatsModal()" class="dropdown-item">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M18 20V10M12 20V4M6 20v-6"></path>
+                                </svg>
+                                <span>Statistics</span>
                             </button>
-                            <button onclick="openAchievementsModal()" class="drop-item">
-                                <span>🏆</span> Achievements
+                            <button onclick="openAchievementsModal()" class="dropdown-item">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="8" r="7"></circle>
+                                    <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>
+                                </svg>
+                                <span>Achievements</span>
                             </button>
-                            <button onclick="logout()" class="drop-item logout-item">
-                                <span>🚪</span> Sign Out
+                            <div class="dropdown-divider"></div>
+                            <button onclick="logout()" class="dropdown-item danger">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"></path>
+                                </svg>
+                                <span>Sign Out</span>
                             </button>
                         </div>
                     </div>
@@ -209,22 +82,224 @@
         </div>
     </nav>
 
+    <!-- Hamburger Sidebar Menu -->
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMenu()"></div>
+    <aside class="sidebar-menu" id="sidebar-menu">
+        <div class="sidebar-header">
+            <h2>Menu</h2>
+            <button class="close-btn" onclick="toggleMenu()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+
+        <div class="sidebar-content">
+            <button onclick="openSearchOverlay(); toggleMenu();" class="sidebar-item">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                </svg>
+                <span>Search</span>
+            </button>
+
+            <button onclick="toggleSidebarDrop('genres-drop')" class="sidebar-item">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                </svg>
+                <span>Genres</span>
+                <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+            </button>
+            <div id="genres-drop" class="sidebar-dropdown"></div>
+
+            <button onclick="toggleSidebarDrop('filters-drop')" class="sidebar-item">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                </svg>
+                <span>Filters</span>
+                <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+            </button>
+            <div id="filters-drop" class="sidebar-dropdown">
+                <div class="filter-group">
+                    <label>Year Range</label>
+                    <div class="filter-row">
+                        <input type="number" id="year-from" placeholder="From" min="1900" max="2025">
+                        <input type="number" id="year-to" placeholder="To" min="1900" max="2025">
+                    </div>
+                </div>
+                <div class="filter-group">
+                    <label>Minimum Rating</label>
+                    <select id="min-rating">
+                        <option value="0">All Ratings</option>
+                        <option value="7">7+ ⭐</option>
+                        <option value="8">8+ ⭐⭐</option>
+                        <option value="9">9+ ⭐⭐⭐</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Sort By</label>
+                    <select id="sort-by">
+                        <option value="popularity.desc">Popularity</option>
+                        <option value="vote_average.desc">Highest Rated</option>
+                        <option value="release_date.desc">Newest First</option>
+                        <option value="release_date.asc">Oldest First</option>
+                        <option value="title.asc">A-Z</option>
+                    </select>
+                </div>
+                <button onclick="applyFilters(); toggleMenu();" class="apply-filters-btn">Apply Filters</button>
+            </div>
+
+            <button onclick="showUpcomingCalendar(); toggleMenu();" class="sidebar-item">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+                <span>Coming Soon</span>
+            </button>
+
+            <button onclick="openRandomPicker(); toggleMenu();" class="sidebar-item">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <circle cx="9" cy="9" r="1"></circle>
+                    <circle cx="9" cy="15" r="1"></circle>
+                    <circle cx="15" cy="9" r="1"></circle>
+                    <circle cx="15" cy="15" r="1"></circle>
+                </svg>
+                <span>Surprise Me</span>
+            </button>
+
+            <button onclick="openQuizModal(); toggleMenu();" class="sidebar-item">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+                <span>Movie Quiz</span>
+            </button>
+
+            <button onclick="toggleSidebarDrop('announcements-drop')" class="sidebar-item">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                </svg>
+                <span>Announcements</span>
+                <span class="badge">12</span>
+                <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+            </button>
+            <div id="announcements-drop" class="sidebar-dropdown announcements-list">
+                <div class="announcement-item">
+                    <div class="announcement-icon">🎉</div>
+                    <div class="announcement-content">
+                        <h4>HUGE UPDATE!</h4>
+                        <p>12 amazing new features added! IMDB ratings, actor pages, reviews & more!</p>
+                        <span class="announcement-time">Just now</span>
+                    </div>
+                </div>
+                <div class="announcement-item">
+                    <div class="announcement-icon">🎬</div>
+                    <div class="announcement-content">
+                        <h4>IMDB & Rotten Tomatoes</h4>
+                        <p>Multiple rating sources for better insights</p>
+                        <span class="announcement-time">Just now</span>
+                    </div>
+                </div>
+                <div class="announcement-item">
+                    <div class="announcement-icon">📅</div>
+                    <div class="announcement-content">
+                        <h4>Coming Soon Calendar</h4>
+                        <p>Check upcoming releases for the next 3 months</p>
+                        <span class="announcement-time">Just now</span>
+                    </div>
+                </div>
+                <div class="announcement-item">
+                    <div class="announcement-icon">👥</div>
+                    <div class="announcement-content">
+                        <h4>Actor & Director Pages</h4>
+                        <p>Click any actor to view their filmography</p>
+                        <span class="announcement-time">Just now</span>
+                    </div>
+                </div>
+                <div class="announcement-item">
+                    <div class="announcement-icon">⭐</div>
+                    <div class="announcement-content">
+                        <h4>User Reviews System</h4>
+                        <p>Rate and review your favorites</p>
+                        <span class="announcement-time">Just now</span>
+                    </div>
+                </div>
+                <div class="announcement-item">
+                    <div class="announcement-icon">🔗</div>
+                    <div class="announcement-content">
+                        <h4>Share Movies</h4>
+                        <p>Share content with friends on social media</p>
+                        <span class="announcement-time">Just now</span>
+                    </div>
+                </div>
+                <div class="announcement-item">
+                    <div class="announcement-icon">💬</div>
+                    <div class="announcement-content">
+                        <h4>Comments Section</h4>
+                        <p>Discuss movies with the community</p>
+                        <span class="announcement-time">Just now</span>
+                    </div>
+                </div>
+                <div class="announcement-item">
+                    <div class="announcement-icon">🤖</div>
+                    <div class="announcement-content">
+                        <h4>AI Recommendations</h4>
+                        <p>Personalized suggestions based on your history</p>
+                        <span class="announcement-time">Just now</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-divider"></div>
+
+            <button onclick="toggleTheme()" class="sidebar-item">
+                <svg id="theme-icon-sidebar" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                </svg>
+                <span id="theme-text">Dark Mode</span>
+            </button>
+        </div>
+    </aside>
+
     <!-- Search Overlay -->
     <div id="search-overlay" class="search-overlay">
         <div class="search-container">
             <div class="search-header">
-                <button onclick="closeSearchOverlay()" class="search-close">✕</button>
-                <h2 class="search-title">What are you looking for?</h2>
+                <button onclick="closeSearchOverlay()" class="search-close-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
             </div>
             
-            <div class="search-input-wrapper">
-                <span class="search-icon">🔍</span>
-                <input type="text" id="search-input" placeholder="Search movies, series, actors..." class="search-input" autocomplete="off">
+            <div class="search-input-container">
+                <svg class="search-input-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                </svg>
+                <input type="text" id="search-input" placeholder="Search movies, series, actors..." class="search-input-field" autocomplete="off">
             </div>
             
-            <div id="search-results-container" class="search-results-container">
-                <div class="search-placeholder">
-                    <div class="search-placeholder-icon">🎬</div>
+            <div id="search-results-container" class="search-results-wrapper">
+                <div class="search-empty-state">
+                    <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
                     <p>Start typing to search...</p>
                 </div>
             </div>
@@ -232,41 +307,54 @@
     </div>
 
     <!-- Continue Watching Section -->
-    <section id="continue-watching-section" class="hidden" style="padding: 120px 80px 40px;">
-        <div class="section-header">
-            <h3 class="section-title">
-                <span class="section-icon">▶️</span>
+    <section id="continue-watching-section" class="content-section hidden">
+        <div class="section-header-container">
+            <h2 class="section-title">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                </svg>
                 Continue Watching
-            </h3>
+            </h2>
         </div>
-        <div id="continue-watching-grid" class="content-grid"></div>
+        <div id="continue-watching-grid" class="media-grid"></div>
     </section>
 
     <!-- Hero Section -->
     <header class="hero-section">
-        <div id="hero-bg" class="hero-bg"></div>
-        <div class="hero-overlay"></div>
-        <div class="hero-content">
-            <div class="hero-meta">
-                <span id="hero-rating" class="hero-rating">★ -</span>
-                <span id="hero-year" class="hero-year"></span>
-                <span class="hero-quality">4K HDR</span>
-            </div>
-            <h2 id="hero-title" class="hero-title">Loading...</h2>
-            <p id="hero-description" class="hero-desc"></p>
-            <div class="hero-actions">
-                <button id="hero-play" class="hero-btn-primary">
-                    <span>▶</span> Watch Now
-                </button>
-                <button id="hero-add" class="hero-btn-secondary">
-                    <span>+</span> My List
-                </button>
-                <button id="hero-info" class="hero-btn-secondary">
-                    <span>ℹ</span> More Info
-                </button>
-                <button id="hero-share" class="hero-btn-secondary">
-                    <span>🔗</span> Share
-                </button>
+        <div id="hero-bg" class="hero-background"></div>
+        <div class="hero-gradient"></div>
+        <div class="hero-content-wrapper">
+            <div class="hero-content">
+                <div class="hero-badges">
+                    <span id="hero-rating" class="hero-badge rating">★ -</span>
+                    <span id="hero-year" class="hero-badge"></span>
+                    <span class="hero-badge quality">4K</span>
+                </div>
+                <h1 id="hero-title" class="hero-title">Loading...</h1>
+                <p id="hero-description" class="hero-description">Loading description...</p>
+                <div class="hero-buttons">
+                    <button id="hero-play" class="hero-btn primary">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                        </svg>
+                        <span>Watch Now</span>
+                    </button>
+                    <button id="hero-add" class="hero-btn secondary">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        <span>My List</span>
+                    </button>
+                    <button id="hero-info" class="hero-btn secondary">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="16" x2="12" y2="12"></line>
+                            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                        </svg>
+                        <span>More Info</span>
+                    </button>
+                </div>
             </div>
         </div>
     </header>
@@ -274,67 +362,90 @@
     <!-- Main Content -->
     <main class="main-content">
         <!-- My List Section -->
-        <div id="my-list-section" class="content-section hidden">
-            <div class="section-header">
-                <h3 class="section-title">
-                    <span class="section-icon">⭐</span>
-                    Your Collection
-                </h3>
+        <section id="my-list-section" class="content-section hidden">
+            <div class="section-header-container">
+                <h2 class="section-title">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                    </svg>
+                    My Collection
+                </h2>
             </div>
-            <div id="my-list-grid" class="content-grid"></div>
-        </div>
+            <div id="my-list-grid" class="media-grid"></div>
+        </section>
 
         <!-- Recommended Section -->
-        <div id="recommended-section" class="content-section hidden">
-            <div class="section-header">
-                <h3 class="section-title">
-                    <span class="section-icon">🤖</span>
+        <section id="recommended-section" class="content-section hidden">
+            <div class="section-header-container">
+                <h2 class="section-title">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2v20M2 12h20"></path>
+                        <circle cx="12" cy="12" r="9"></circle>
+                    </svg>
                     Recommended For You
-                </h3>
+                </h2>
             </div>
-            <div id="recommended-grid" class="content-grid"></div>
-        </div>
+            <div id="recommended-grid" class="media-grid"></div>
+        </section>
         
         <!-- Discovery Feed -->
-        <div class="content-section">
-            <div class="section-header">
-                <h3 class="section-title">
-                    <span class="section-icon">🔥</span>
+        <section class="content-section">
+            <div class="section-header-container">
+                <h2 class="section-title">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
+                    </svg>
                     Trending Now
-                </h3>
+                </h2>
             </div>
-            <div id="grid" class="content-grid"></div>
-        </div>
+            <div id="grid" class="media-grid"></div>
+        </section>
     </main>
     <!-- Player Overlay -->
     <div id="player-overlay" class="player-overlay">
-        <div class="player-container">
-            <!-- Player Controls -->
-            <div class="player-controls">
-                <button onclick="closePlayer()" class="control-btn back-btn">
-                    <span>←</span> Back
+        <div class="player-wrapper">
+            <div class="player-controls-bar">
+                <button onclick="closePlayer()" class="control-btn back">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                    <span>Back</span>
                 </button>
-                <div class="control-right">
+                <div class="player-controls-right">
                     <button id="modal-add-btn" onclick="toggleMyList()" class="control-btn"></button>
                     <button onclick="shareContent()" class="control-btn">
-                        <span>🔗</span> Share
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="18" cy="5" r="3"></circle>
+                            <circle cx="6" cy="12" r="3"></circle>
+                            <circle cx="18" cy="19" r="3"></circle>
+                            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                        </svg>
+                        <span>Share</span>
                     </button>
                     <div class="relative">
-                        <button onclick="toggleDrop('srv-menu')" class="control-btn server-btn">
-                            <span>🎯</span> <span id="active-srv">Aura Primary</span>
+                        <button onclick="toggleDrop('srv-menu')" class="control-btn server">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+                                <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+                                <line x1="6" y1="6" x2="6.01" y2="6"></line>
+                                <line x1="6" y1="18" x2="6.01" y2="18"></line>
+                            </svg>
+                            <span id="active-srv">BidSrc Pro</span>
                         </button>
                         <div id="srv-menu" class="dropdown-menu"></div>
                     </div>
-                    <div id="tv-controls" class="hidden tv-controls">
+                    <div id="tv-controls" class="hidden tv-controls-group">
                         <div class="relative">
-                            <button onclick="toggleDrop('s-menu')" class="control-btn">
-                                S<span id="s-val">1</span>
+                            <button onclick="toggleDrop('s-menu')" class="control-btn episode">
+                                <span>S</span><span id="s-val">1</span>
                             </button>
                             <div id="s-menu" class="dropdown-menu ep-menu"></div>
                         </div>
                         <div class="relative">
-                            <button onclick="toggleDrop('e-menu')" class="control-btn">
-                                E<span id="e-val">1</span>
+                            <button onclick="toggleDrop('e-menu')" class="control-btn episode">
+                                <span>E</span><span id="e-val">1</span>
                             </button>
                             <div id="e-menu" class="dropdown-menu ep-menu"></div>
                         </div>
@@ -342,238 +453,297 @@
                 </div>
             </div>
             
-            <!-- Video Player -->
-            <div class="video-wrapper">
+            <div class="video-container">
                 <iframe id="frame" src="" allowfullscreen></iframe>
             </div>
             
-            <!-- Player Info -->
-            <div class="player-info">
-                <div class="player-info-main">
+            <div class="player-info-section">
+                <div class="player-main-info">
                     <div class="player-meta">
-                        <span id="p-rating" class="info-badge">★ -</span>
-                        <span id="p-year" class="info-year"></span>
-                        <span class="info-quality">HD</span>
+                        <span id="p-rating" class="meta-badge rating">★ -</span>
+                        <span id="p-year" class="meta-badge"></span>
+                        <span class="meta-badge quality">HD</span>
                     </div>
-                    <h2 id="p-title" class="player-title">...</h2>
-                    <p id="p-desc" class="player-description"></p>
+                    <h2 id="p-title" class="player-info-title">...</h2>
+                    <p id="p-desc" class="player-info-desc"></p>
                 </div>
                 
-                <div class="player-cast">
-                    <h3 class="cast-title">
-                        <span>👥</span> Cast
+                <div class="player-cast-section">
+                    <h3 class="cast-section-title">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                        Cast
                     </h3>
-                    <div id="p-cast" class="cast-list"></div>
+                    <div id="p-cast" class="cast-grid"></div>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Details Modal -->
-    <div id="details-modal" class="player-overlay" style="display: none;">
-        <div class="player-container">
-            <div class="player-controls">
-                <button onclick="closeDetailsModal()" class="control-btn back-btn">
-                    <span>←</span> Back
-                </button>
-                <div class="control-right">
-                    <button id="details-play-btn" class="control-btn back-btn">
-                        <span>▶</span> Watch Now
-                    </button>
-                    <button id="details-add-btn" class="control-btn">
-                        <span>+</span> My List
-                    </button>
-                    <button onclick="shareContent()" class="control-btn">
-                        <span>🔗</span> Share
-                    </button>
+    <div id="details-modal" class="details-modal">
+        <div class="details-container">
+            <button onclick="closeDetailsModal()" class="details-close-btn">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+            
+            <div class="details-hero">
+                <div id="details-backdrop" class="details-backdrop"></div>
+                <div class="details-hero-gradient"></div>
+                <div class="details-hero-content">
+                    <div id="details-rating" class="details-ratings"></div>
+                    <h2 id="details-title" class="details-hero-title">Title</h2>
+                    <div class="details-hero-meta">
+                        <span id="details-year"></span>
+                        <span id="details-runtime"></span>
+                    </div>
+                    <div class="details-hero-actions">
+                        <button id="details-play-btn" class="details-btn primary">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                            </svg>
+                            Watch Now
+                        </button>
+                        <button id="details-add-btn" class="details-btn secondary">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            My List
+                        </button>
+                        <button onclick="shareContent()" class="details-btn secondary">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="18" cy="5" r="3"></circle>
+                                <circle cx="6" cy="12" r="3"></circle>
+                                <circle cx="18" cy="19" r="3"></circle>
+                                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                            </svg>
+                            Share
+                        </button>
+                    </div>
                 </div>
             </div>
             
-            <div style="position: relative; margin-bottom: 40px;">
-                <div id="details-backdrop" style="width: 100%; height: 500px; background-size: cover; background-position: center; border-radius: 24px; position: relative;">
-                    <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(10,10,15,1) 0%, transparent 60%); border-radius: 24px;"></div>
-                </div>
-                <div style="position: absolute; bottom: 40px; left: 40px; right: 40px;">
-                    <div id="details-rating" style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px;"></div>
-                    <div class="flex items-center gap-4 mb-4">
-                        <span id="details-year" class="hero-year"></span>
-                        <span id="details-runtime" class="hero-quality"></span>
-                    </div>
-                    <h2 id="details-title" style="font-size: 56px; font-weight: 900; margin-bottom: 16px; text-transform: uppercase;">Title</h2>
-                </div>
-            </div>
-            
-            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 40px; padding: 0 40px;">
-                <div>
-                    <div id="details-genres" class="flex gap-2 mb-6"></div>
-                    <h3 style="font-size: 18px; font-weight: 900; margin-bottom: 16px; text-transform: uppercase; opacity: 0.5;">Overview</h3>
-                    <p id="details-overview" style="font-size: 16px; line-height: 1.8; color: var(--text-secondary); margin-bottom: 32px;"></p>
+            <div class="details-body">
+                <div class="details-main">
+                    <div id="details-genres" class="details-genres"></div>
                     
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 32px;">
-                        <div style="background: var(--glass); padding: 20px; border-radius: 16px; border: 1px solid var(--glass-border);">
-                            <div style="font-size: 11px; opacity: 0.5; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 2px;">Status</div>
-                            <div id="details-status" style="font-size: 16px; font-weight: 900;">-</div>
+                    <section class="details-section">
+                        <h3 class="details-section-title">Overview</h3>
+                        <p id="details-overview" class="details-overview-text"></p>
+                    </section>
+                    
+                    <div class="details-stats-grid">
+                        <div class="stat-card">
+                            <span class="stat-label">Status</span>
+                            <span id="details-status" class="stat-value">-</span>
                         </div>
-                        <div style="background: var(--glass); padding: 20px; border-radius: 16px; border: 1px solid var(--glass-border);">
-                            <div style="font-size: 11px; opacity: 0.5; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 2px;">Language</div>
-                            <div id="details-language" style="font-size: 16px; font-weight: 900;">-</div>
+                        <div class="stat-card">
+                            <span class="stat-label">Language</span>
+                            <span id="details-language" class="stat-value">-</span>
                         </div>
-                        <div style="background: var(--glass); padding: 20px; border-radius: 16px; border: 1px solid var(--glass-border);">
-                            <div style="font-size: 11px; opacity: 0.5; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 2px;">Budget</div>
-                            <div id="details-budget" style="font-size: 16px; font-weight: 900;">-</div>
+                        <div class="stat-card">
+                            <span class="stat-label">Budget</span>
+                            <span id="details-budget" class="stat-value">-</span>
                         </div>
                     </div>
                     
-                    <!-- Trailer -->
-                    <h3 style="font-size: 18px; font-weight: 900; margin-bottom: 16px; text-transform: uppercase; opacity: 0.5;">Trailer</h3>
-                    <div id="details-trailer" style="width: 100%; aspect-ratio: 16/9; border-radius: 16px; background: var(--glass); margin-bottom: 32px;"></div>
+                    <section class="details-section">
+                        <h3 class="details-section-title">Trailer</h3>
+                        <div id="details-trailer" class="trailer-container"></div>
+                    </section>
                     
-                    <!-- User Reviews -->
-                    <h3 style="font-size: 18px; font-weight: 900; margin-bottom: 16px; text-transform: uppercase; opacity: 0.5;">User Reviews</h3>
-                    <div id="user-rating-section" style="background: var(--glass); padding: 24px; border-radius: 16px; border: 1px solid var(--glass-border); margin-bottom: 24px;">
-                        <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
-                            <span style="font-size: 14px; font-weight: 800;">Rate this:</span>
-                            <div id="star-rating" style="display: flex; gap: 8px; font-size: 28px;">
-                                <span class="star-btn" onclick="rateMovie(1)">☆</span>
-                                <span class="star-btn" onclick="rateMovie(2)">☆</span>
-                                <span class="star-btn" onclick="rateMovie(3)">☆</span>
-                                <span class="star-btn" onclick="rateMovie(4)">☆</span>
-                                <span class="star-btn" onclick="rateMovie(5)">☆</span>
+                    <section class="details-section">
+                        <h3 class="details-section-title">User Reviews</h3>
+                        <div class="review-form">
+                            <div class="rating-selector">
+                                <span class="rating-label">Your Rating:</span>
+                                <div id="star-rating" class="star-rating">
+                                    <span class="star-btn" onclick="rateMovie(1)">☆</span>
+                                    <span class="star-btn" onclick="rateMovie(2)">☆</span>
+                                    <span class="star-btn" onclick="rateMovie(3)">☆</span>
+                                    <span class="star-btn" onclick="rateMovie(4)">☆</span>
+                                    <span class="star-btn" onclick="rateMovie(5)">☆</span>
+                                </div>
                             </div>
+                            <textarea id="review-text" placeholder="Write your review..." class="review-textarea"></textarea>
+                            <button onclick="submitReview()" class="submit-review-btn">Submit Review</button>
                         </div>
-                        <textarea id="review-text" placeholder="Write your review here..." style="width: 100%; background: var(--bg-dark); border: 1px solid var(--glass-border); padding: 12px; border-radius: 12px; color: white; font-size: 14px; min-height: 100px; resize: vertical;"></textarea>
-                        <button onclick="submitReview()" style="margin-top: 12px; background: linear-gradient(135deg, var(--primary), var(--accent)); border: none; padding: 12px 24px; border-radius: 10px; color: white; font-weight: 900; text-transform: uppercase; font-size: 11px; cursor: pointer;">
-                            Submit Review
-                        </button>
-                    </div>
-                    <div id="reviews-container" style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 32px;"></div>
+                        <div id="reviews-container" class="reviews-list"></div>
+                    </section>
                     
-                    <!-- Comments Section -->
-                    <h3 style="font-size: 18px; font-weight: 900; margin-bottom: 16px; text-transform: uppercase; opacity: 0.5;">💬 Comments</h3>
-                    <div style="background: var(--glass); padding: 24px; border-radius: 16px; border: 1px solid var(--glass-border); margin-bottom: 24px;">
-                        <textarea id="comment-text" placeholder="Join the discussion..." style="width: 100%; background: var(--bg-dark); border: 1px solid var(--glass-border); padding: 12px; border-radius: 12px; color: white; font-size: 14px; min-height: 80px; resize: vertical;"></textarea>
-                        <button onclick="submitComment()" style="margin-top: 12px; background: linear-gradient(135deg, var(--primary), var(--accent)); border: none; padding: 12px 24px; border-radius: 10px; color: white; font-weight: 900; text-transform: uppercase; font-size: 11px; cursor: pointer;">
-                            Post Comment
-                        </button>
-                    </div>
-                    <div id="comments-container" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px;"></div>
+                    <section class="details-section">
+                        <h3 class="details-section-title">Comments</h3>
+                        <div class="comment-form">
+                            <textarea id="comment-text" placeholder="Join the discussion..." class="comment-textarea"></textarea>
+                            <button onclick="submitComment()" class="submit-comment-btn">Post Comment</button>
+                        </div>
+                        <div id="comments-container" class="comments-list"></div>
+                    </section>
                     
-                    <!-- Similar -->
-                    <h3 style="font-size: 18px; font-weight: 900; margin-bottom: 16px; text-transform: uppercase; opacity: 0.5;">Similar Titles</h3>
-                    <div id="details-similar" class="grid grid-cols-4 gap-4"></div>
+                    <section class="details-section">
+                        <h3 class="details-section-title">Similar Titles</h3>
+                        <div id="details-similar" class="similar-grid"></div>
+                    </section>
                 </div>
                 
-                <div>
-                    <div style="background: var(--glass); padding: 32px; border-radius: 24px; border: 1px solid var(--glass-border);">
-                        <h3 class="cast-title">👥 Cast</h3>
-                        <div id="details-cast" class="cast-list"></div>
+                <aside class="details-sidebar">
+                    <div class="sidebar-card">
+                        <h3 class="sidebar-card-title">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                            </svg>
+                            Cast
+                        </h3>
+                        <div id="details-cast" class="details-cast-list"></div>
                     </div>
-                </div>
+                </aside>
             </div>
         </div>
     </div>
 
     <!-- Actor Modal -->
-    <div id="actor-modal" class="player-overlay" style="display: none;">
-        <div class="player-container">
-            <div class="player-controls">
-                <button onclick="closeActorModal()" class="control-btn back-btn">
-                    <span>←</span> Back
-                </button>
-            </div>
+    <div id="actor-modal" class="actor-modal">
+        <div class="actor-container">
+            <button onclick="closeActorModal()" class="actor-close-btn">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
             
-            <div style="display: grid; grid-template-columns: 300px 1fr; gap: 40px; margin-bottom: 40px;">
-                <div>
-                    <img id="actor-photo" style="width: 100%; border-radius: 24px; margin-bottom: 20px; border: 2px solid var(--glass-border);">
-                    <div style="background: var(--glass); padding: 20px; border-radius: 16px; border: 1px solid var(--glass-border);">
-                        <div style="margin-bottom: 16px;">
-                            <div style="font-size: 10px; opacity: 0.5; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 4px;">Born</div>
-                            <div id="actor-birthday" style="font-size: 14px; font-weight: 800;"></div>
+            <div class="actor-header">
+                <div class="actor-photo-container">
+                    <img id="actor-photo" class="actor-photo" alt="Actor">
+                </div>
+                <div class="actor-info">
+                    <h2 id="actor-name" class="actor-name">Actor Name</h2>
+                    <div class="actor-details">
+                        <div class="actor-detail-item">
+                            <span class="actor-detail-label">Born</span>
+                            <span id="actor-birthday" class="actor-detail-value"></span>
                         </div>
-                        <div>
-                            <div style="font-size: 10px; opacity: 0.5; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 4px;">Birthplace</div>
-                            <div id="actor-birthplace" style="font-size: 14px; font-weight: 800;"></div>
+                        <div class="actor-detail-item">
+                            <span class="actor-detail-label">Birthplace</span>
+                            <span id="actor-birthplace" class="actor-detail-value"></span>
                         </div>
                     </div>
                 </div>
+            </div>
+            
+            <div class="actor-body">
+                <section class="actor-section">
+                    <h3 class="actor-section-title">Biography</h3>
+                    <p id="actor-bio" class="actor-bio-text"></p>
+                </section>
                 
-                <div>
-                    <h2 id="actor-name" style="font-size: 48px; font-weight: 900; text-transform: uppercase; margin-bottom: 24px;"></h2>
-                    <h3 style="font-size: 16px; font-weight: 900; text-transform: uppercase; opacity: 0.5; margin-bottom: 12px;">Biography</h3>
-                    <p id="actor-bio" style="font-size: 14px; line-height: 1.8; color: var(--text-secondary); margin-bottom: 32px;"></p>
-                    
-                    <h3 style="font-size: 16px; font-weight: 900; text-transform: uppercase; opacity: 0.5; margin-bottom: 16px;">Filmography</h3>
-                    <div id="actor-filmography" class="content-grid"></div>
-                </div>
+                <section class="actor-section">
+                    <h3 class="actor-section-title">Filmography</h3>
+                    <div id="actor-filmography" class="media-grid"></div>
+                </section>
             </div>
         </div>
     </div>
 
     <!-- Calendar Modal -->
-    <div id="calendar-modal" class="player-overlay" style="display: none;">
-        <div class="player-container">
-            <div class="player-controls">
-                <button onclick="closeCalendarModal()" class="control-btn back-btn">
-                    <span>←</span> Back
-                </button>
-                <h2 style="font-size: 24px; font-weight: 900; text-transform: uppercase;">
-                    📅 Upcoming Releases
+    <div id="calendar-modal" class="calendar-modal">
+        <div class="calendar-container">
+            <div class="calendar-header">
+                <h2 class="calendar-title">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                    Upcoming Releases
                 </h2>
+                <button onclick="closeCalendarModal()" class="calendar-close-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
             </div>
-            <div id="calendar-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 24px;"></div>
+            <div id="calendar-grid" class="media-grid"></div>
         </div>
     </div>
 
     <!-- Random Picker Modal -->
-    <div id="random-modal" class="player-overlay" style="display: none;">
-        <div class="player-container" style="display: flex; align-items: center; justify-content: center; min-height: 80vh;">
-            <div style="text-align: center; max-width: 600px;">
-                <h2 style="font-size: 48px; font-weight: 900; margin-bottom: 32px;">🎲 Surprise Me!</h2>
-                <p style="font-size: 18px; color: var(--text-secondary); margin-bottom: 40px;">Let us pick something random for you to watch</p>
+    <div id="random-modal" class="random-modal">
+        <div class="random-container">
+            <button onclick="closeRandomModal()" class="random-close-btn">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+            <div class="random-content">
+                <div class="random-icon">🎲</div>
+                <h2 class="random-title">Surprise Me!</h2>
+                <p class="random-subtitle">Let us pick something random for you</p>
                 
-                <div style="display: flex; gap: 16px; justify-content: center; margin-bottom: 32px;">
-                    <button onclick="setRandomGenre(null)" id="random-any" class="control-btn" style="background: linear-gradient(135deg, var(--primary), var(--accent)); border: none;">
-                        Any Genre
-                    </button>
-                    <button onclick="setRandomGenre(28)" id="random-action" class="control-btn">Action</button>
-                    <button onclick="setRandomGenre(35)" id="random-comedy" class="control-btn">Comedy</button>
-                    <button onclick="setRandomGenre(27)" id="random-horror" class="control-btn">Horror</button>
-                    <button onclick="setRandomGenre(10749)" id="random-romance" class="control-btn">Romance</button>
+                <div class="random-genres">
+                    <button onclick="setRandomGenre(null)" id="random-any" class="random-genre-btn active">Any Genre</button>
+                    <button onclick="setRandomGenre(28)" id="random-action" class="random-genre-btn">Action</button>
+                    <button onclick="setRandomGenre(35)" id="random-comedy" class="random-genre-btn">Comedy</button>
+                    <button onclick="setRandomGenre(27)" id="random-horror" class="random-genre-btn">Horror</button>
+                    <button onclick="setRandomGenre(10749)" id="random-romance" class="random-genre-btn">Romance</button>
                 </div>
                 
-                <button onclick="pickRandom()" class="hero-btn-primary" style="font-size: 18px; padding: 24px 48px;">
-                    <span>🎲</span> Pick Random Movie
+                <button onclick="pickRandom()" class="random-pick-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        <circle cx="9" cy="9" r="1"></circle>
+                        <circle cx="9" cy="15" r="1"></circle>
+                        <circle cx="15" cy="9" r="1"></circle>
+                        <circle cx="15" cy="15" r="1"></circle>
+                    </svg>
+                    Pick Random Movie
                 </button>
-                
-                <div style="margin-top: 32px;">
-                    <button onclick="closeRandomModal()" style="background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 14px; text-decoration: underline;">
-                        Cancel
-                    </button>
-                </div>
             </div>
         </div>
     </div>
 
     <!-- Quiz Modal -->
-    <div id="quiz-modal" class="player-overlay" style="display: none;">
-        <div class="player-container">
-            <div class="player-controls">
-                <button onclick="closeQuizModal()" class="control-btn back-btn">
-                    <span>←</span> Back
-                </button>
-                <h2 style="font-size: 24px; font-weight: 900; text-transform: uppercase;">
-                    🎮 Movie Quiz
+    <div id="quiz-modal" class="quiz-modal">
+        <div class="quiz-container">
+            <div class="quiz-header">
+                <h2 class="quiz-title">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                    Movie Quiz
                 </h2>
+                <button onclick="closeQuizModal()" class="quiz-close-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
             </div>
             
-            <div id="quiz-content" style="max-width: 800px; margin: 0 auto; text-align: center;">
-                <div id="quiz-question" style="margin-bottom: 40px;">
-                    <img id="quiz-poster" style="width: 300px; height: 450px; object-fit: cover; border-radius: 16px; margin: 0 auto 24px; border: 2px solid var(--glass-border);">
-                    <h3 style="font-size: 24px; font-weight: 900; margin-bottom: 32px;">Guess the Movie!</h3>
-                    <div id="quiz-options" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;"></div>
+            <div id="quiz-content" class="quiz-content">
+                <div id="quiz-question" class="quiz-question-container">
+                    <img id="quiz-poster" class="quiz-poster" alt="Movie Poster">
+                    <h3 class="quiz-question-title">Guess the Movie!</h3>
+                    <div id="quiz-options" class="quiz-options"></div>
                 </div>
                 
-                <div id="quiz-score" style="margin-top: 32px; font-size: 18px; font-weight: 800;">
+                <div class="quiz-score">
                     Score: <span id="quiz-score-value">0</span> / <span id="quiz-total">0</span>
                 </div>
             </div>
@@ -581,80 +751,109 @@
     </div>
 
     <!-- Achievements Modal -->
-    <div id="achievements-modal" class="player-overlay" style="display: none;">
-        <div class="player-container">
-            <div class="player-controls">
-                <button onclick="closeAchievementsModal()" class="control-btn back-btn">
-                    <span>←</span> Back
-                </button>
-                <h2 style="font-size: 24px; font-weight: 900; text-transform: uppercase;">
-                    🏆 Your Achievements
+    <div id="achievements-modal" class="achievements-modal">
+        <div class="achievements-container">
+            <div class="achievements-header">
+                <h2 class="achievements-title">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="8" r="7"></circle>
+                        <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>
+                    </svg>
+                    Your Achievements
                 </h2>
+                <button onclick="closeAchievementsModal()" class="achievements-close-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
             </div>
-            <div id="achievements-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 24px;"></div>
+            <div id="achievements-grid" class="achievements-grid"></div>
         </div>
     </div>
 
     <!-- Statistics Modal -->
-    <div id="stats-modal" class="player-overlay" style="display: none;">
-        <div class="player-container">
-            <div class="player-controls">
-                <button onclick="closeStatsModal()" class="control-btn back-btn">
-                    <span>←</span> Back
-                </button>
-                <h2 style="font-size: 24px; font-weight: 900; text-transform: uppercase;">
-                    📊 Your Statistics
+    <div id="stats-modal" class="stats-modal">
+        <div class="stats-container">
+            <div class="stats-header">
+                <h2 class="stats-title">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 20V10M12 20V4M6 20v-6"></path>
+                    </svg>
+                    Your Statistics
                 </h2>
+                <button onclick="closeStatsModal()" class="stats-close-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
             </div>
             
-            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-bottom: 40px;">
-                <div style="background: var(--glass); padding: 32px; border-radius: 16px; border: 1px solid var(--glass-border); text-align: center;">
-                    <div style="font-size: 48px; font-weight: 900; margin-bottom: 8px;" id="stat-movies">0</div>
-                    <div style="font-size: 12px; opacity: 0.5; text-transform: uppercase; letter-spacing: 2px;">Movies Watched</div>
+            <div class="stats-cards">
+                <div class="stat-big-card">
+                    <div class="stat-big-icon">🎬</div>
+                    <div id="stat-movies" class="stat-big-value">0</div>
+                    <div class="stat-big-label">Movies Watched</div>
                 </div>
-                <div style="background: var(--glass); padding: 32px; border-radius: 16px; border: 1px solid var(--glass-border); text-align: center;">
-                    <div style="font-size: 48px; font-weight: 900; margin-bottom: 8px;" id="stat-series">0</div>
-                    <div style="font-size: 12px; opacity: 0.5; text-transform: uppercase; letter-spacing: 2px;">Series Watched</div>
+                <div class="stat-big-card">
+                    <div class="stat-big-icon">📺</div>
+                    <div id="stat-series" class="stat-big-value">0</div>
+                    <div class="stat-big-label">Series Watched</div>
                 </div>
-                <div style="background: var(--glass); padding: 32px; border-radius: 16px; border: 1px solid var(--glass-border); text-align: center;">
-                    <div style="font-size: 48px; font-weight: 900; margin-bottom: 8px;" id="stat-hours">0</div>
-                    <div style="font-size: 12px; opacity: 0.5; text-transform: uppercase; letter-spacing: 2px;">Hours Watched</div>
+                <div class="stat-big-card">
+                    <div class="stat-big-icon">⏱️</div>
+                    <div id="stat-hours" class="stat-big-value">0</div>
+                    <div class="stat-big-label">Hours Watched</div>
                 </div>
-                <div style="background: var(--glass); padding: 32px; border-radius: 16px; border: 1px solid var(--glass-border); text-align: center;">
-                    <div style="font-size: 48px; font-weight: 900; margin-bottom: 8px;" id="stat-reviews">0</div>
-                    <div style="font-size: 12px; opacity: 0.5; text-transform: uppercase; letter-spacing: 2px;">Reviews Written</div>
+                <div class="stat-big-card">
+                    <div class="stat-big-icon">✍️</div>
+                    <div id="stat-reviews" class="stat-big-value">0</div>
+                    <div class="stat-big-label">Reviews Written</div>
                 </div>
             </div>
             
-            <h3 style="font-size: 18px; font-weight: 900; margin-bottom: 16px; text-transform: uppercase; opacity: 0.5;">Favorite Genres</h3>
-            <div id="genre-stats" style="display: flex; flex-wrap: wrap; gap: 12px;"></div>
+            <section class="stats-section">
+                <h3 class="stats-section-title">Favorite Genres</h3>
+                <div id="genre-stats" class="genre-stats-list"></div>
+            </section>
         </div>
     </div>
 
     <!-- Share Modal -->
-    <div id="share-modal" style="display: none; position: fixed; inset: 0; z-index: 10000; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); align-items: center; justify-content: center;">
-        <div style="background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: 24px; padding: 32px; max-width: 500px; width: 90%;">
-            <h3 style="font-size: 24px; font-weight: 900; margin-bottom: 24px; text-align: center;">Share This</h3>
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px;">
-                <button onclick="shareOn('twitter')" style="background: #1DA1F2; border: none; padding: 16px; border-radius: 12px; color: white; font-weight: 800; cursor: pointer; font-size: 12px;">
-                    🐦 Twitter
-                </button>
-                <button onclick="shareOn('facebook')" style="background: #4267B2; border: none; padding: 16px; border-radius: 12px; color: white; font-weight: 800; cursor: pointer; font-size: 12px;">
-                    📘 Facebook
-                </button>
-                <button onclick="shareOn('whatsapp')" style="background: #25D366; border: none; padding: 16px; border-radius: 12px; color: white; font-weight: 800; cursor: pointer; font-size: 12px;">
-                    💬 WhatsApp
-                </button>
-            </div>
-            <div style="background: var(--glass); padding: 16px; border-radius: 12px; border: 1px solid var(--glass-border); margin-bottom: 16px; display: flex; align-items: center; gap: 12px;">
-                <input id="share-link" type="text" readonly style="flex: 1; background: none; border: none; color: white; font-size: 12px;" value="">
-                <button onclick="copyShareLink()" style="background: linear-gradient(135deg, var(--primary), var(--accent)); border: none; padding: 8px 16px; border-radius: 8px; color: white; font-weight: 800; cursor: pointer; font-size: 11px;">
-                    Copy
-                </button>
-            </div>
-            <button onclick="closeShareModal()" style="width: 100%; background: var(--glass); border: 1px solid var(--glass-border); padding: 12px; border-radius: 12px; color: white; font-weight: 800; cursor: pointer; font-size: 12px;">
-                Close
+    <div id="share-modal" class="share-modal">
+        <div class="share-container">
+            <button onclick="closeShareModal()" class="share-close-btn">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
             </button>
+            <h3 class="share-title">Share This</h3>
+            <div class="share-buttons">
+                <button onclick="shareOn('twitter')" class="share-btn twitter">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z"></path>
+                    </svg>
+                    Twitter
+                </button>
+                <button onclick="shareOn('facebook')" class="share-btn facebook">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"></path>
+                    </svg>
+                    Facebook
+                </button>
+                <button onclick="shareOn('whatsapp')" class="share-btn whatsapp">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"></path>
+                    </svg>
+                    WhatsApp
+                </button>
+            </div>
+            <div class="share-link-container">
+                <input id="share-link" type="text" readonly class="share-link-input">
+                <button onclick="copyShareLink()" class="share-copy-btn">Copy</button>
+            </div>
         </div>
     </div>
 
