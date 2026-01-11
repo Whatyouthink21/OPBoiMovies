@@ -21,7 +21,7 @@ const provider = new GoogleAuthProvider();
 
 // Constants
 const KEY = 'a45420333457411e78d5ad35d6c51a2d';
-const OMDB_KEY = '8d8b4e0b'; // Free API key
+const OMDB_KEY = '8d8b4e0b';
 
 const servers = [
     {id:'bidsrc', n:'BidSrc Pro'},
@@ -48,13 +48,38 @@ let quizScore = 0;
 let quizTotal = 0;
 let currentQuizMovie = null;
 
-// Authentication Functions
+// Menu Toggle
+window.toggleMenu = () => {
+    const sidebar = document.getElementById('sidebar-menu');
+    const overlay = document.getElementById('sidebar-overlay');
+    const hamburger = document.querySelector('.hamburger-btn');
+    
+    sidebar.classList.toggle('active');
+    overlay.classList.toggle('active');
+    hamburger.classList.toggle('active');
+};
+
+// Sidebar Dropdown Toggle
+window.toggleSidebarDrop = (id) => {
+    const dropdown = document.getElementById(id);
+    const isOpen = dropdown.classList.contains('open');
+    
+    // Close all dropdowns
+    document.querySelectorAll('.sidebar-dropdown').forEach(d => d.classList.remove('open'));
+    
+    // Toggle current
+    if (!isOpen) {
+        dropdown.classList.add('open');
+    }
+};
+
+// Authentication
 window.login = async () => { 
     try { 
         await signInWithPopup(auth, provider); 
     } catch(error) { 
         console.error(error); 
-        alert("Login Error: Make sure your domain is authorized in Firebase Console."); 
+        alert("Login Error: Please try again"); 
     } 
 };
 
@@ -144,17 +169,19 @@ function renderContinueWatching(list) {
         const rating = item.vote_average ? item.vote_average.toFixed(1) : 'N/A';
         
         return `
-        <div class="movie-card" onclick="resumeWatching(${item.id}, '${item.mode}', ${item.season || 1}, ${item.episode || 1})">
-            <img src="https://image.tmdb.org/t/p/w500${item.poster_path}" alt="${item.title}">
-            <div class="progress-bar-container">
-                <div class="progress-bar-fill" style="width: ${progressPercent}%"></div>
-            </div>
-            <div class="card-info">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="rating-star">★ ${rating}</span>
+        <div class="media-card" onclick="resumeWatching(${item.id}, '${item.mode}', ${item.season || 1}, ${item.episode || 1})">
+            <div class="media-card-image">
+                <img src="https://image.tmdb.org/t/p/w500${item.poster_path}" alt="${item.title}">
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: ${progressPercent}%"></div>
                 </div>
-                <h4>${item.title}</h4>
-                <p class="text-xs opacity-60">${progressPercent}% watched</p>
+            </div>
+            <div class="media-card-content">
+                <h3 class="media-card-title">${item.title}</h3>
+                <div class="media-card-meta">
+                    <span class="media-rating">★ ${rating}</span>
+                    <span class="media-progress">${progressPercent}%</span>
+                </div>
             </div>
         </div>`;
     }).join('');
@@ -170,10 +197,10 @@ window.resumeWatching = async (id, itemMode, season = 1, ep = 1) => {
     openPlayer(id, details.title || details.name, details.poster_path, details.vote_average, details.release_date || details.first_air_date);
 };
 
-// External Ratings (Feature 11)
+// External Ratings
 async function getExternalRatings(title, year) {
     try {
-        const response = await fetch(`https://www.omdbapi.com/?apikey=${OMDB_KEY}&t=${encodeURIComponent(title)}&y=${year}&type=movie`);
+        const response = await fetch(`https://www.omdbapi.com/?apikey=${OMDB_KEY}&t=${encodeURIComponent(title)}&y=${year}`);
         const data = await response.json();
         
         if(data.Response === 'True') {
@@ -190,11 +217,11 @@ async function getExternalRatings(title, year) {
     }
 }
 
-// Search Overlay Functions
+// Search Overlay
 window.openSearchOverlay = () => {
     document.getElementById('search-overlay').classList.add('active');
     document.body.style.overflow = 'hidden';
-    document.getElementById('search-input').focus();
+    setTimeout(() => document.getElementById('search-input').focus(), 100);
 };
 
 window.closeSearchOverlay = () => {
@@ -202,8 +229,11 @@ window.closeSearchOverlay = () => {
     document.body.style.overflow = 'auto';
     document.getElementById('search-input').value = '';
     document.getElementById('search-results-container').innerHTML = `
-        <div class="search-placeholder">
-            <div class="search-placeholder-icon">🎬</div>
+        <div class="search-empty-state">
+            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="m21 21-4.35-4.35"></path>
+            </svg>
             <p>Start typing to search...</p>
         </div>
     `;
@@ -216,8 +246,11 @@ document.getElementById('search-input').addEventListener('input', async (ev) => 
     
     if(val.length < 2) {
         resultsContainer.innerHTML = `
-            <div class="search-placeholder">
-                <div class="search-placeholder-icon">🎬</div>
+            <div class="search-empty-state">
+                <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                </svg>
                 <p>Start typing to search...</p>
             </div>
         `;
@@ -233,8 +266,12 @@ document.getElementById('search-input').addEventListener('input', async (ev) => 
         
         if(results.length === 0) {
             resultsContainer.innerHTML = `
-                <div class="search-placeholder">
-                    <div class="search-placeholder-icon">😕</div>
+                <div class="search-empty-state">
+                    <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="15" y1="9" x2="9" y2="15"></line>
+                        <line x1="9" y1="9" x2="15" y2="15"></line>
+                    </svg>
                     <p>No results found for "${val}"</p>
                 </div>
             `;
@@ -248,16 +285,16 @@ document.getElementById('search-input').addEventListener('input', async (ev) => 
                         const title = (m.title || m.name).replace(/'/g, "\\'").replace(/"/g, '&quot;');
                         
                         return `
-                        <div class="search-result-card" onclick="selectSearchResult(${m.id}, '${m.media_type}', '${title}', '${m.poster_path}', ${m.vote_average || 0}, '${m.release_date || m.first_air_date || ''}')">
+                        <div class="search-result-item" onclick="selectSearchResult(${m.id}, '${m.media_type}', '${title}', '${m.poster_path}', ${m.vote_average || 0}, '${m.release_date || m.first_air_date || ''}')">
                             <div class="search-result-poster">
                                 <img src="https://image.tmdb.org/t/p/w500${m.poster_path}" alt="${m.title || m.name}">
                             </div>
                             <div class="search-result-info">
-                                <h4 class="search-result-title">${m.title || m.name}</h4>
+                                <h4>${m.title || m.name}</h4>
                                 <div class="search-result-meta">
-                                    <span class="search-result-rating">★ ${rating}</span>
-                                    <span class="search-result-year">${year}</span>
-                                    <span class="search-result-type">${mediaType}</span>
+                                    <span class="search-rating">★ ${rating}</span>
+                                    <span class="search-year">${year}</span>
+                                    <span class="search-type">${mediaType}</span>
                                 </div>
                             </div>
                         </div>`;
@@ -280,7 +317,7 @@ window.selectSearchResult = (id, mediaType, title, poster, rating, releaseDate) 
     openDetailsModal(id, mediaType);
 };
 
-// Main Init Function
+// Main Init
 async function init(q = '', g = '') {
     let url = `https://api.themoviedb.org/3/trending/${mode}/week?api_key=${KEY}`;
     if(q) url = `https://api.themoviedb.org/3/search/${mode}?api_key=${KEY}&query=${q}`;
@@ -327,7 +364,6 @@ async function setupHero(m) {
     );
     document.getElementById('hero-add').onclick = () => toggleMyList();
     document.getElementById('hero-info').onclick = () => openDetailsModal(m.id, mode);
-    document.getElementById('hero-share').onclick = () => shareContent();
     updateBtnStates();
 }
 
@@ -341,25 +377,29 @@ function renderGrid(list, target) {
         const title = (m.title || m.name).replace(/'/g, "\\'").replace(/"/g, '&quot;');
         
         return `
-        <div class="movie-card" onclick="openDetailsModal(${m.id}, '${m.media_type || mode}')">
-            <img src="https://image.tmdb.org/t/p/w500${m.poster_path}" alt="${m.title || m.name}">
-            <div class="card-info">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="rating-star">★ ${rating}</span>
-                    <span class="text-[9px] font-black uppercase opacity-40">${year}</span>
+        <div class="media-card" onclick="openDetailsModal(${m.id}, '${m.media_type || mode}')">
+            <div class="media-card-image">
+                <img src="https://image.tmdb.org/t/p/w500${m.poster_path}" alt="${m.title || m.name}">
+                <div class="media-card-overlay">
+                    <div class="overlay-content">
+                        <span class="overlay-rating">★ ${rating}</span>
+                        <span class="overlay-year">${year}</span>
+                    </div>
                 </div>
-                <h4 class="font-black text-xs uppercase tracking-tight line-clamp-1">${m.title || m.name}</h4>
+            </div>
+            <div class="media-card-content">
+                <h3 class="media-card-title">${m.title || m.name}</h3>
             </div>
         </div>`;
     }).join('');
 }
 
-// Details Modal with ALL features
+// Details Modal
 window.openDetailsModal = async (id, mediaType) => {
     const oldMode = mode;
     mode = mediaType;
     
-    document.getElementById('details-modal').style.display = 'block';
+    document.getElementById('details-modal').classList.add('active');
     document.body.style.overflow = 'hidden';
     
     const res = await fetch(`https://api.themoviedb.org/3/${mode}/${id}?api_key=${KEY}&append_to_response=credits,videos,similar`).then(r => r.json());
@@ -369,25 +409,27 @@ window.openDetailsModal = async (id, mediaType) => {
         document.getElementById('details-backdrop').style.backgroundImage = `url(https://image.tmdb.org/t/p/original${res.backdrop_path})`;
     }
     
-    // Get External Ratings (Feature 11)
+    // External Ratings
     const externalRatings = await getExternalRatings(res.title || res.name, (res.release_date || res.first_air_date || '').split('-')[0]);
     
-    // Multiple Rating Sources
     document.getElementById('details-rating').innerHTML = `
-        <span class="rating-badge" style="background: rgba(234, 179, 8, 0.2); border: 1px solid rgba(234, 179, 8, 0.4); color: #fbbf24;">
-            ⭐ TMDB ${res.vote_average ? res.vote_average.toFixed(1) : 'N/A'}
+        <span class="rating-badge tmdb">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            </svg>
+            ${res.vote_average ? res.vote_average.toFixed(1) : 'N/A'}
         </span>
         ${externalRatings?.imdb ? `
-        <span class="rating-badge" style="background: rgba(245, 158, 11, 0.2); border: 1px solid rgba(245, 158, 11, 0.4); color: #f59e0b;">
-            🎬 IMDB ${externalRatings.imdb}
+        <span class="rating-badge imdb">
+            <strong>IMDB</strong> ${externalRatings.imdb}
         </span>` : ''}
         ${externalRatings?.rotten ? `
-        <span class="rating-badge" style="background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.4); color: #ef4444;">
-            🍅 ${externalRatings.rotten}
+        <span class="rating-badge rotten">
+            <strong>RT</strong> ${externalRatings.rotten}
         </span>` : ''}
         ${externalRatings?.metacritic ? `
-        <span class="rating-badge" style="background: rgba(34, 197, 94, 0.2); border: 1px solid rgba(34, 197, 94, 0.4); color: #22c55e;">
-            Ⓜ️ ${externalRatings.metacritic}
+        <span class="rating-badge metacritic">
+            <strong>MC</strong> ${externalRatings.metacritic}
         </span>` : ''}
     `;
     
@@ -399,7 +441,7 @@ window.openDetailsModal = async (id, mediaType) => {
     
     // Genres
     document.getElementById('details-genres').innerHTML = res.genres?.map(g => 
-        `<span style="background: var(--glass); padding: 8px 16px; border-radius: 20px; font-size: 11px; font-weight: 800; border: 1px solid var(--glass-border);">${g.name}</span>`
+        `<span class="genre-badge">${g.name}</span>`
     ).join('') || '';
     
     // Stats
@@ -407,13 +449,13 @@ window.openDetailsModal = async (id, mediaType) => {
     document.getElementById('details-language').innerText = res.original_language?.toUpperCase() || 'N/A';
     document.getElementById('details-budget').innerText = res.budget ? `$${(res.budget / 1000000).toFixed(1)}M` : 'N/A';
     
-    // Cast with clickable actors (Feature 15)
+    // Cast
     document.getElementById('details-cast').innerHTML = res.credits.cast.slice(0, 8).map(c => `
-        <div style="cursor: pointer; transition: all 0.2s;" onclick="closeDetailsModal(); openActorPage(${c.id}, '${c.name.replace(/'/g, "\\'").replace(/"/g, '&quot;')}')">
-            ${c.profile_path ? `<img src="https://image.tmdb.org/t/p/w185${c.profile_path}" alt="${c.name}">` : '<div style="width: 50px; height: 50px; border-radius: 12px; background: var(--glass);"></div>'}
-            <div>
-                <p style="font-size: 12px; font-weight: 800;">${c.name}</p>
-                <p style="font-size: 10px; opacity: 0.5;">${c.character}</p>
+        <div class="cast-member" onclick="event.stopPropagation(); closeDetailsModal(); openActorPage(${c.id}, '${c.name.replace(/'/g, "\\'").replace(/"/g, '&quot;')}')">
+            ${c.profile_path ? `<img src="https://image.tmdb.org/t/p/w185${c.profile_path}" alt="${c.name}" class="cast-photo">` : '<div class="cast-photo-placeholder"></div>'}
+            <div class="cast-info">
+                <div class="cast-name">${c.name}</div>
+                <div class="cast-character">${c.character}</div>
             </div>
         </div>
     `).join('');
@@ -421,20 +463,22 @@ window.openDetailsModal = async (id, mediaType) => {
     // Trailer
     const trailer = res.videos?.results?.find(v => v.type === 'Trailer' && v.site === 'YouTube');
     if(trailer) {
-        document.getElementById('details-trailer').innerHTML = `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${trailer.key}" frameborder="0" allowfullscreen style="border-radius: 16px;"></iframe>`;
+        document.getElementById('details-trailer').innerHTML = `<iframe src="https://www.youtube.com/embed/${trailer.key}" frameborder="0" allowfullscreen></iframe>`;
     } else {
-        document.getElementById('details-trailer').innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; opacity: 0.3;">No trailer available</div>';
+        document.getElementById('details-trailer').innerHTML = '<div class="no-trailer">No trailer available</div>';
     }
     
     // Similar
-    document.getElementById('details-similar').innerHTML = res.similar.results.slice(0, 4).map(m => 
-        m.poster_path ? `<img src="https://image.tmdb.org/t/p/w200${m.poster_path}" style="width: 100%; border-radius: 12px; cursor: pointer; border: 2px solid var(--glass-border); transition: all 0.3s;" onclick="openDetailsModal(${m.id}, '${mode}')" alt="${m.title || m.name}">` : ''
+    document.getElementById('details-similar').innerHTML = res.similar.results.slice(0, 6).map(m => 
+        m.poster_path ? `
+        <div class="similar-card" onclick="openDetailsModal(${m.id}, '${mode}')">
+            <img src="https://image.tmdb.org/t/p/w300${m.poster_path}" alt="${m.title || m.name}">
+            <div class="similar-title">${m.title || m.name}</div>
+        </div>` : ''
     ).join('');
     
-    // Load Reviews (Feature 16)
+    // Load Reviews & Comments
     loadReviews(id);
-    
-    // Load Comments (Feature 18)
     loadComments(id);
     
     // Buttons
@@ -455,11 +499,11 @@ window.openDetailsModal = async (id, mediaType) => {
 };
 
 window.closeDetailsModal = () => {
-    document.getElementById('details-modal').style.display = 'none';
+    document.getElementById('details-modal').classList.remove('active');
     document.body.style.overflow = 'auto';
 };
 
-// User Reviews System (Feature 16)
+// User Reviews
 window.rateMovie = (rating) => {
     if (!currentUser) return alert("Login to rate");
     userRating = rating;
@@ -518,23 +562,21 @@ async function loadReviews(movieId) {
     const reviews = snapshot.docs.map(doc => doc.data());
     
     document.getElementById('reviews-container').innerHTML = reviews.map(review => `
-        <div style="background: var(--glass); padding: 20px; border-radius: 16px; border: 1px solid var(--glass-border);">
-            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-                <img src="${review.userPhoto}" style="width: 40px; height: 40px; border-radius: 50%;">
-                <div>
-                    <div style="font-size: 14px; font-weight: 800;">${review.userName}</div>
-                    <div style="font-size: 12px; color: #fbbf24;">${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}</div>
+        <div class="review-card">
+            <div class="review-header">
+                <img src="${review.userPhoto}" alt="${review.userName}" class="review-avatar">
+                <div class="review-user-info">
+                    <div class="review-user-name">${review.userName}</div>
+                    <div class="review-user-rating">${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}</div>
                 </div>
-                <div style="margin-left: auto; font-size: 10px; opacity: 0.5;">
-                    ${new Date(review.timestamp).toLocaleDateString()}
-                </div>
+                <div class="review-date">${new Date(review.timestamp).toLocaleDateString()}</div>
             </div>
-            <p style="font-size: 14px; line-height: 1.6;">${review.review}</p>
+            <div class="review-text">${review.review}</div>
         </div>
-    `).join('') || '<p style="opacity: 0.5; text-align: center;">No reviews yet. Be the first!</p>';
+    `).join('') || '<div class="no-reviews">No reviews yet. Be the first!</div>';
 }
 
-// Comments System (Feature 18)
+// Comments
 window.submitComment = async () => {
     if (!currentUser) return alert("Login to comment");
     
@@ -567,28 +609,27 @@ async function loadComments(movieId) {
     const comments = snapshot.docs.map(doc => doc.data());
     
     document.getElementById('comments-container').innerHTML = comments.map(comment => `
-        <div style="background: var(--glass); padding: 16px; border-radius: 12px; border: 1px solid var(--glass-border);">
-            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
-                <img src="${comment.userPhoto}" style="width: 32px; height: 32px; border-radius: 50%;">
-                <div style="flex: 1;">
-                    <div style="font-size: 12px; font-weight: 800;">${comment.userName}</div>
-                    <div style="font-size: 10px; opacity: 0.5;">${new Date(comment.timestamp).toLocaleDateString()}</div>
+        <div class="comment-card">
+            <img src="${comment.userPhoto}" alt="${comment.userName}" class="comment-avatar">
+            <div class="comment-content">
+                <div class="comment-header">
+                    <span class="comment-user-name">${comment.userName}</span>
+                    <span class="comment-date">${new Date(comment.timestamp).toLocaleDateString()}</span>
                 </div>
+                <div class="comment-text">${comment.comment}</div>
             </div>
-            <p style="font-size: 13px; line-height: 1.5;">${comment.comment}</p>
         </div>
-    `).join('') || '<p style="opacity: 0.5; text-align: center;">No comments yet. Start the discussion!</p>';
+    `).join('') || '<div class="no-comments">No comments yet. Start the discussion!</div>';
 }
-
-// Share Functionality (Feature 17)
+// Share Functionality
 window.shareContent = () => {
-    document.getElementById('share-modal').style.display = 'flex';
+    document.getElementById('share-modal').classList.add('active');
     const shareLink = `${window.location.origin}?movie=${activeItem.id}&mode=${mode}`;
     document.getElementById('share-link').value = shareLink;
 };
 
 window.closeShareModal = () => {
-    document.getElementById('share-modal').style.display = 'none';
+    document.getElementById('share-modal').classList.remove('active');
 };
 
 window.shareOn = (platform) => {
@@ -613,9 +654,10 @@ window.copyShareLink = () => {
     document.execCommand('copy');
     alert('Link copied to clipboard!');
 };
-// Actor/Director Pages (Feature 15)
+
+// Actor Pages
 window.openActorPage = async (actorId, actorName) => {
-    document.getElementById('actor-modal').style.display = 'block';
+    document.getElementById('actor-modal').classList.add('active');
     document.body.style.overflow = 'hidden';
     
     const actorDetails = await fetch(`https://api.themoviedb.org/3/person/${actorId}?api_key=${KEY}`).then(r => r.json());
@@ -637,26 +679,30 @@ window.openActorPage = async (actorId, actorName) => {
         const year = (m.release_date || m.first_air_date || '').split('-')[0] || '';
         
         return `
-        <div class="movie-card" onclick="closeActorModal(); openDetailsModal(${m.id}, '${m.media_type}')">
-            <img src="https://image.tmdb.org/t/p/w300${m.poster_path}" alt="${m.title || m.name}">
-            <div class="card-info">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="rating-star">★ ${rating}</span>
-                    <span class="text-[9px] font-black uppercase opacity-40">${year}</span>
+        <div class="media-card" onclick="closeActorModal(); openDetailsModal(${m.id}, '${m.media_type}')">
+            <div class="media-card-image">
+                <img src="https://image.tmdb.org/t/p/w300${m.poster_path}" alt="${m.title || m.name}">
+                <div class="media-card-overlay">
+                    <div class="overlay-content">
+                        <span class="overlay-rating">★ ${rating}</span>
+                        <span class="overlay-year">${year}</span>
+                    </div>
                 </div>
-                <h4 class="font-black text-xs uppercase tracking-tight line-clamp-1">${m.title || m.name}</h4>
-                <p style="font-size: 9px; opacity: 0.5; margin-top: 4px;">as ${m.character || 'Unknown'}</p>
+            </div>
+            <div class="media-card-content">
+                <h3 class="media-card-title">${m.title || m.name}</h3>
+                <p class="media-card-subtitle">as ${m.character || 'Unknown'}</p>
             </div>
         </div>`;
     }).join('');
 };
 
 window.closeActorModal = () => {
-    document.getElementById('actor-modal').style.display = 'none';
+    document.getElementById('actor-modal').classList.remove('active');
     document.body.style.overflow = 'auto';
 };
 
-// Upcoming Releases Calendar (Feature 14)
+// Upcoming Calendar
 async function loadUpcomingReleases() {
     const today = new Date();
     const futureDate = new Date();
@@ -673,7 +719,7 @@ async function loadUpcomingReleases() {
 window.showUpcomingCalendar = async () => {
     const upcoming = await loadUpcomingReleases();
     
-    document.getElementById('calendar-modal').style.display = 'block';
+    document.getElementById('calendar-modal').classList.add('active');
     document.body.style.overflow = 'hidden';
     
     document.getElementById('calendar-grid').innerHTML = upcoming.map(m => {
@@ -682,15 +728,15 @@ window.showUpcomingCalendar = async () => {
         const rating = m.vote_average ? m.vote_average.toFixed(1) : 'N/A';
         
         return `
-        <div class="upcoming-card" onclick="closeCalendarModal(); openDetailsModal(${m.id}, '${mode}')">
-            <img src="https://image.tmdb.org/t/p/w300${m.poster_path}" alt="${m.title || m.name}">
-            <div style="padding: 16px;">
-                <div style="background: linear-gradient(135deg, var(--primary), var(--accent)); display: inline-block; padding: 6px 12px; border-radius: 8px; font-size: 10px; font-weight: 900; margin-bottom: 8px;">
-                    📅 ${dateStr}
-                </div>
-                <h4 style="font-size: 14px; font-weight: 900; margin-bottom: 8px;">${m.title || m.name}</h4>
-                <div style="display: flex; gap: 8px;">
-                    <span class="rating-star">★ ${rating}</span>
+        <div class="media-card upcoming-card" onclick="closeCalendarModal(); openDetailsModal(${m.id}, '${mode}')">
+            <div class="media-card-image">
+                <img src="https://image.tmdb.org/t/p/w300${m.poster_path}" alt="${m.title || m.name}">
+                <div class="release-date-badge">${dateStr}</div>
+            </div>
+            <div class="media-card-content">
+                <h3 class="media-card-title">${m.title || m.name}</h3>
+                <div class="media-card-meta">
+                    <span class="media-rating">★ ${rating}</span>
                 </div>
             </div>
         </div>`;
@@ -698,25 +744,17 @@ window.showUpcomingCalendar = async () => {
 };
 
 window.closeCalendarModal = () => {
-    document.getElementById('calendar-modal').style.display = 'none';
+    document.getElementById('calendar-modal').classList.remove('active');
     document.body.style.overflow = 'auto';
 };
 
-// AI Recommendations (Feature 20)
+// Recommendations
 async function loadRecommendations() {
     if(!currentUser || myList.length === 0) {
         document.getElementById('recommended-section').classList.add('hidden');
         return;
     }
     
-    // Get genres from user's watchlist
-    const genreCounts = {};
-    myList.forEach(item => {
-        // In real implementation, you'd fetch full details for each item
-        // For now, we'll use a simplified approach
-    });
-    
-    // Get recommendations based on most watched genre
     const url = `https://api.themoviedb.org/3/discover/${mode}?api_key=${KEY}&sort_by=vote_average.desc&vote_count.gte=100`;
     const r = await fetch(url);
     const d = await r.json();
@@ -725,7 +763,7 @@ async function loadRecommendations() {
     renderGrid(d.results.slice(0, 12), 'recommended-grid');
 }
 
-// Statistics Dashboard (Feature 22)
+// Statistics
 async function trackStats(action) {
     if(!currentUser) return;
     
@@ -746,10 +784,10 @@ async function trackStats(action) {
     const updates = {};
     if(action === 'movie_watched') {
         updates.movies_watched = increment(1);
-        updates.hours_watched = increment(2); // Assume 2 hours per movie
+        updates.hours_watched = increment(2);
     } else if(action === 'episode_watched') {
         updates.episodes_watched = increment(1);
-        updates.hours_watched = increment(0.75); // Assume 45 min per episode
+        updates.hours_watched = increment(0.75);
     } else if(action === 'review_written') {
         updates.reviews_written = increment(1);
     } else if(action === 'list_add') {
@@ -762,7 +800,7 @@ async function trackStats(action) {
 window.openStatsModal = async () => {
     if(!currentUser) return alert("Login to view stats");
     
-    document.getElementById('stats-modal').style.display = 'block';
+    document.getElementById('stats-modal').classList.add('active');
     document.body.style.overflow = 'hidden';
     
     const statsRef = doc(db, "users", currentUser.uid, "stats", "overall");
@@ -771,50 +809,51 @@ window.openStatsModal = async () => {
     if(statsDoc.exists()) {
         const stats = statsDoc.data();
         document.getElementById('stat-movies').innerText = stats.movies_watched || 0;
-        document.getElementById('stat-series').innerText = Math.floor((stats.episodes_watched || 0) / 10); // Rough estimate
+        document.getElementById('stat-series').innerText = Math.floor((stats.episodes_watched || 0) / 10);
         document.getElementById('stat-hours').innerText = Math.floor(stats.hours_watched || 0);
         document.getElementById('stat-reviews').innerText = stats.reviews_written || 0;
         
-        // Genre stats (simplified)
         document.getElementById('genre-stats').innerHTML = `
-            <div style="background: var(--glass); padding: 12px 20px; border-radius: 12px; border: 1px solid var(--glass-border);">Action</div>
-            <div style="background: var(--glass); padding: 12px 20px; border-radius: 12px; border: 1px solid var(--glass-border);">Drama</div>
-            <div style="background: var(--glass); padding: 12px 20px; border-radius: 12px; border: 1px solid var(--glass-border);">Comedy</div>
+            <span class="genre-stat-tag">Action</span>
+            <span class="genre-stat-tag">Drama</span>
+            <span class="genre-stat-tag">Comedy</span>
+            <span class="genre-stat-tag">Thriller</span>
         `;
     }
 };
 
 window.closeStatsModal = () => {
-    document.getElementById('stats-modal').style.display = 'none';
+    document.getElementById('stats-modal').classList.remove('active');
     document.body.style.overflow = 'auto';
 };
 
-// Random Movie Picker (Feature 31)
+// Random Picker
 window.openRandomPicker = () => {
-    document.getElementById('random-modal').style.display = 'block';
+    document.getElementById('random-modal').classList.add('active');
     document.body.style.overflow = 'hidden';
     randomGenre = null;
 };
 
 window.closeRandomModal = () => {
-    document.getElementById('random-modal').style.display = 'none';
+    document.getElementById('random-modal').classList.remove('active');
     document.body.style.overflow = 'auto';
 };
 
 window.setRandomGenre = (genreId) => {
     randomGenre = genreId;
     
-    // Update button styles
-    document.querySelectorAll('#random-modal .control-btn').forEach(btn => {
-        btn.style.background = 'var(--glass)';
-        btn.style.border = '1px solid var(--glass-border)';
+    document.querySelectorAll('.random-genre-btn').forEach(btn => {
+        btn.classList.remove('active');
     });
     
-    const activeBtn = genreId === null ? 'random-any' : `random-${genreId}`;
-    const btn = document.getElementById(activeBtn);
-    if(btn) {
-        btn.style.background = 'linear-gradient(135deg, var(--primary), var(--accent))';
-        btn.style.border = 'none';
+    if(genreId === null) {
+        document.getElementById('random-any').classList.add('active');
+    } else {
+        document.querySelectorAll('.random-genre-btn').forEach(btn => {
+            if(btn.onclick && btn.onclick.toString().includes(genreId)) {
+                btn.classList.add('active');
+            }
+        });
     }
 };
 
@@ -828,7 +867,6 @@ window.pickRandom = async () => {
     const r = await fetch(url);
     const d = await r.json();
     
-    // Pick random from top 50
     const randomIndex = Math.floor(Math.random() * Math.min(50, d.results.length));
     const randomMovie = d.results[randomIndex];
     
@@ -836,9 +874,9 @@ window.pickRandom = async () => {
     openDetailsModal(randomMovie.id, mode);
 };
 
-// Movie Quiz/Trivia (Feature 32)
+// Quiz
 window.openQuizModal = async () => {
-    document.getElementById('quiz-modal').style.display = 'block';
+    document.getElementById('quiz-modal').classList.add('active');
     document.body.style.overflow = 'hidden';
     quizScore = 0;
     quizTotal = 0;
@@ -847,7 +885,7 @@ window.openQuizModal = async () => {
 };
 
 window.closeQuizModal = () => {
-    document.getElementById('quiz-modal').style.display = 'none';
+    document.getElementById('quiz-modal').classList.remove('active');
     document.body.style.overflow = 'auto';
 };
 
@@ -856,23 +894,20 @@ async function loadQuizQuestion() {
     const r = await fetch(url);
     const d = await r.json();
     
-    // Pick random movie
     const randomIndex = Math.floor(Math.random() * d.results.length);
     currentQuizMovie = d.results[randomIndex];
     
-    // Get 3 wrong answers
     const wrongAnswers = d.results
         .filter(m => m.id !== currentQuizMovie.id)
         .sort(() => 0.5 - Math.random())
         .slice(0, 3)
         .map(m => m.title);
     
-    // Shuffle answers
     const allAnswers = [currentQuizMovie.title, ...wrongAnswers].sort(() => 0.5 - Math.random());
     
     document.getElementById('quiz-poster').src = `https://image.tmdb.org/t/p/w300${currentQuizMovie.poster_path}`;
     document.getElementById('quiz-options').innerHTML = allAnswers.map(answer => `
-        <button onclick="checkQuizAnswer('${answer.replace(/'/g, "\\'")}')" style="background: var(--glass); border: 1px solid var(--glass-border); padding: 16px; border-radius: 12px; color: white; font-weight: 800; cursor: pointer; transition: all 0.3s; font-size: 14px;">
+        <button onclick="checkQuizAnswer('${answer.replace(/'/g, "\\'").replace(/"/g, '&quot;')}')" class="quiz-option">
             ${answer}
         </button>
     `).join('');
@@ -894,24 +929,23 @@ window.checkQuizAnswer = async (answer) => {
     document.getElementById('quiz-score-value').innerText = quizScore;
     document.getElementById('quiz-total').innerText = quizTotal;
     
-    // Load next question
     setTimeout(() => {
         loadQuizQuestion();
     }, 500);
 };
 
-// Achievements System (Feature 34)
+// Achievements
 const achievements = [
-    { id: 'first_watch', title: '🎬 First Watch', desc: 'Watch your first movie', condition: (stats) => stats.movies_watched >= 1 },
-    { id: 'movie_buff', title: '🍿 Movie Buff', desc: 'Watch 10 movies', condition: (stats) => stats.movies_watched >= 10 },
-    { id: 'cinephile', title: '🎭 Cinephile', desc: 'Watch 50 movies', condition: (stats) => stats.movies_watched >= 50 },
-    { id: 'movie_master', title: '👑 Movie Master', desc: 'Watch 100 movies', condition: (stats) => stats.movies_watched >= 100 },
-    { id: 'first_review', title: '✍️ First Review', desc: 'Write your first review', condition: (stats) => stats.reviews_written >= 1 },
-    { id: 'critic', title: '⭐ Critic', desc: 'Write 10 reviews', condition: (stats) => stats.reviews_written >= 10 },
-    { id: 'binge_watcher', title: '📺 Binge Watcher', desc: 'Watch 50 episodes', condition: (stats) => stats.episodes_watched >= 50 },
-    { id: 'marathon', title: '🏃 Marathon', desc: 'Watch 24 hours of content', condition: (stats) => stats.hours_watched >= 24 },
-    { id: 'collector', title: '📚 Collector', desc: 'Add 25 titles to your list', condition: (stats) => stats.list_adds >= 25 },
-    { id: 'mega_fan', title: '🌟 Mega Fan', desc: 'Watch 200 movies', condition: (stats) => stats.movies_watched >= 200 }
+    { id: 'first_watch', icon: '🎬', title: 'First Watch', desc: 'Watch your first movie', condition: (stats) => stats.movies_watched >= 1 },
+    { id: 'movie_buff', icon: '🍿', title: 'Movie Buff', desc: 'Watch 10 movies', condition: (stats) => stats.movies_watched >= 10 },
+    { id: 'cinephile', icon: '🎭', title: 'Cinephile', desc: 'Watch 50 movies', condition: (stats) => stats.movies_watched >= 50 },
+    { id: 'movie_master', icon: '👑', title: 'Movie Master', desc: 'Watch 100 movies', condition: (stats) => stats.movies_watched >= 100 },
+    { id: 'first_review', icon: '✍️', title: 'First Review', desc: 'Write your first review', condition: (stats) => stats.reviews_written >= 1 },
+    { id: 'critic', icon: '⭐', title: 'Critic', desc: 'Write 10 reviews', condition: (stats) => stats.reviews_written >= 10 },
+    { id: 'binge_watcher', icon: '📺', title: 'Binge Watcher', desc: 'Watch 50 episodes', condition: (stats) => stats.episodes_watched >= 50 },
+    { id: 'marathon', icon: '🏃', title: 'Marathon', desc: 'Watch 24 hours of content', condition: (stats) => stats.hours_watched >= 24 },
+    { id: 'collector', icon: '📚', title: 'Collector', desc: 'Add 25 titles to your list', condition: (stats) => stats.list_adds >= 25 },
+    { id: 'mega_fan', icon: '🌟', title: 'Mega Fan', desc: 'Watch 200 movies', condition: (stats) => stats.movies_watched >= 200 }
 ];
 
 async function checkAchievements() {
@@ -929,12 +963,10 @@ async function checkAchievements() {
     
     for(const achievement of achievements) {
         if(!unlocked.includes(achievement.id) && achievement.condition(stats)) {
-            // Unlock achievement
             await setDoc(unlockedRef, {
                 achievements: [...unlocked, achievement.id]
             });
             
-            // Show notification
             showAchievementNotification(achievement);
         }
     }
@@ -942,38 +974,30 @@ async function checkAchievements() {
 
 function showAchievementNotification(achievement) {
     const notification = document.createElement('div');
-    notification.style.cssText = `
-        position: fixed;
-        top: 100px;
-        right: 20px;
-        background: linear-gradient(135deg, var(--primary), var(--accent));
-        padding: 20px;
-        border-radius: 16px;
-        box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-        z-index: 10000;
-        animation: slideIn 0.5s ease;
-        max-width: 300px;
-    `;
-    
+    notification.className = 'achievement-notification';
     notification.innerHTML = `
-        <div style="font-size: 32px; text-align: center; margin-bottom: 8px;">${achievement.title.split(' ')[0]}</div>
-        <div style="font-size: 16px; font-weight: 900; text-align: center; margin-bottom: 4px;">Achievement Unlocked!</div>
-        <div style="font-size: 14px; font-weight: 800; text-align: center;">${achievement.title}</div>
-        <div style="font-size: 12px; text-align: center; opacity: 0.8;">${achievement.desc}</div>
+        <div class="achievement-notification-icon">${achievement.icon}</div>
+        <div class="achievement-notification-content">
+            <div class="achievement-notification-title">Achievement Unlocked!</div>
+            <div class="achievement-notification-name">${achievement.title}</div>
+            <div class="achievement-notification-desc">${achievement.desc}</div>
+        </div>
     `;
     
     document.body.appendChild(notification);
     
+    setTimeout(() => notification.classList.add('show'), 100);
+    
     setTimeout(() => {
-        notification.style.animation = 'slideOut 0.5s ease';
-        setTimeout(() => notification.remove(), 500);
+        notification.classList.remove('show');
+        setTimeout(() => notification.remove(), 300);
     }, 5000);
 }
 
 window.openAchievementsModal = async () => {
     if(!currentUser) return alert("Login to view achievements");
     
-    document.getElementById('achievements-modal').style.display = 'block';
+    document.getElementById('achievements-modal').classList.add('active');
     document.body.style.overflow = 'hidden';
     
     const unlockedRef = doc(db, "users", currentUser.uid, "achievements", "unlocked");
@@ -984,21 +1008,21 @@ window.openAchievementsModal = async () => {
         const isUnlocked = unlocked.includes(achievement.id);
         
         return `
-        <div style="background: var(--glass); border: 1px solid var(--glass-border); border-radius: 16px; padding: 24px; text-align: center; opacity: ${isUnlocked ? '1' : '0.4'};">
-            <div style="font-size: 64px; margin-bottom: 16px;">${achievement.title.split(' ')[0]}</div>
-            <div style="font-size: 16px; font-weight: 900; margin-bottom: 8px;">${achievement.title}</div>
-            <div style="font-size: 12px; opacity: 0.7;">${achievement.desc}</div>
-            ${isUnlocked ? '<div style="margin-top: 12px; color: #10b981; font-weight: 900; font-size: 12px;">✓ UNLOCKED</div>' : '<div style="margin-top: 12px; opacity: 0.5; font-size: 12px;">🔒 Locked</div>'}
+        <div class="achievement-card ${isUnlocked ? 'unlocked' : 'locked'}">
+            <div class="achievement-icon">${achievement.icon}</div>
+            <div class="achievement-title">${achievement.title}</div>
+            <div class="achievement-desc">${achievement.desc}</div>
+            ${isUnlocked ? '<div class="achievement-status unlocked">✓ Unlocked</div>' : '<div class="achievement-status locked">🔒 Locked</div>'}
         </div>`;
     }).join('');
 };
 
 window.closeAchievementsModal = () => {
-    document.getElementById('achievements-modal').style.display = 'none';
+    document.getElementById('achievements-modal').classList.remove('active');
     document.body.style.overflow = 'auto';
 };
 
-// Player Functions with BidSrc Pro
+// Player
 window.openPlayer = async (id, title, poster, rating = 0, releaseDate = '') => {
     activeID = id; 
     const year = releaseDate.split('-')[0] || '';
@@ -1014,7 +1038,7 @@ window.openPlayer = async (id, title, poster, rating = 0, releaseDate = '') => {
     document.getElementById('p-title').innerText = title;
     document.getElementById('p-rating').innerHTML = `★ ${rating ? rating.toFixed(1) : 'N/A'}`;
     document.getElementById('p-year').innerText = year;
-    document.getElementById('player-overlay').style.display = 'block';
+    document.getElementById('player-overlay').classList.add('active');
     document.body.style.overflow = 'hidden';
     updateBtnStates();
     
@@ -1022,20 +1046,21 @@ window.openPlayer = async (id, title, poster, rating = 0, releaseDate = '') => {
     
     document.getElementById('p-desc').innerText = res.overview || 'No description available.';
     document.getElementById('p-cast').innerHTML = res.credits.cast.slice(0, 5).map(c => `
-        <div class="flex items-center gap-4">
-            ${c.profile_path ? `<img src="https://image.tmdb.org/t/p/w185${c.profile_path}" class="w-10 h-10 rounded-lg object-cover" alt="${c.name}">` : '<div class="w-10 h-10 rounded-lg bg-white/5"></div>'}
-            <p class="text-[11px] font-black uppercase tracking-wider">${c.name}</p>
-        </div>`).join('');
+        <div class="cast-member-small">
+            ${c.profile_path ? `<img src="https://image.tmdb.org/t/p/w185${c.profile_path}" alt="${c.name}">` : '<div class="cast-placeholder"></div>'}
+            <span>${c.name}</span>
+        </div>
+    `).join('');
     
     document.getElementById('srv-menu').innerHTML = servers.map(sv => 
-        `<button onclick="setSrv('${sv.id}','${sv.n}')" class="drop-item">${sv.n}</button>`
+        `<button onclick="setSrv('${sv.id}','${sv.n}')" class="dropdown-item">${sv.n}</button>`
     ).join('');
     
     if(mode === 'tv') {
         document.getElementById('tv-controls').classList.remove('hidden');
         document.getElementById('s-menu').innerHTML = res.seasons
             .filter(sea => sea.season_number > 0)
-            .map(sea => `<button onclick="setS(${sea.season_number})" class="drop-item">Season ${sea.season_number}</button>`)
+            .map(sea => `<button onclick="setS(${sea.season_number})" class="dropdown-item">Season ${sea.season_number}</button>`)
             .join('');
         loadEpisodes();
     } else { 
@@ -1043,14 +1068,13 @@ window.openPlayer = async (id, title, poster, rating = 0, releaseDate = '') => {
         updPlayer(); 
     }
     
-    // Save watch progress
     setTimeout(() => {
-        saveWatchProgress(id, 300, 7200); // Simplified
-    }, 60000); // After 1 minute
+        saveWatchProgress(id, 300, 7200);
+    }, 60000);
 }
 
 window.closePlayer = () => { 
-    document.getElementById('player-overlay').style.display = 'none'; 
+    document.getElementById('player-overlay').classList.remove('active');
     document.getElementById('frame').src = ''; 
     document.body.style.overflow = 'auto'; 
 }
@@ -1100,12 +1124,12 @@ function updPlayer() {
 async function loadEpisodes() {
     const d = await fetch(`https://api.themoviedb.org/3/tv/${activeID}/season/${s}?api_key=${KEY}`).then(r => r.json());
     document.getElementById('e-menu').innerHTML = d.episodes
-        .map(ep => `<button onclick="setE(${ep.episode_number})" class="drop-item">Episode ${ep.episode_number}</button>`)
+        .map(ep => `<button onclick="setE(${ep.episode_number})" class="dropdown-item">Episode ${ep.episode_number}</button>`)
         .join('');
     updPlayer();
 }
 
-// Advanced Filtering
+// Filters
 window.applyFilters = async () => {
     const yearFrom = document.getElementById('year-from').value;
     const yearTo = document.getElementById('year-to').value;
@@ -1123,7 +1147,6 @@ window.applyFilters = async () => {
     const d = await r.json();
     
     renderGrid(d.results, 'grid');
-    toggleDrop('filter-menu');
 };
 
 // Mode Switch
@@ -1136,13 +1159,16 @@ window.setMode = (m) => {
 function updateModeButtons() {
     const mBtn = document.getElementById('m-btn');
     const tBtn = document.getElementById('t-btn');
+    const slider = document.querySelector('.mode-slider');
     
     if(mode === 'movie') {
         mBtn.classList.add('active');
         tBtn.classList.remove('active');
+        slider.style.transform = 'translateX(0)';
     } else {
         tBtn.classList.add('active');
         mBtn.classList.remove('active');
+        slider.style.transform = 'translateX(100%)';
     }
 }
 
@@ -1150,8 +1176,9 @@ function updateModeButtons() {
 async function loadGenres() {
     const r = await fetch(`https://api.themoviedb.org/3/genre/${mode}/list?api_key=${KEY}`);
     const d = await r.json();
-    document.getElementById('genre-menu').innerHTML = d.genres
-        .map(g => `<button onclick="init('','${g.id}')" class="drop-item">${g.name}</button>`)
+    
+    document.getElementById('genres-drop').innerHTML = d.genres
+        .map(g => `<button onclick="init('','${g.id}'); toggleMenu();" class="sidebar-dropdown-item">${g.name}</button>`)
         .join('');
 }
 
@@ -1174,9 +1201,9 @@ function updateBtnStates() {
     const heroBtn = document.getElementById('hero-add');
     const detailsBtn = document.getElementById('details-add-btn');
     
-    if(modalBtn) modalBtn.innerText = exists ? '✓ SAVED' : '+ SAVE';
-    if(heroBtn) heroBtn.innerHTML = exists ? '<span>✓</span> Collected' : '<span>+</span> My List';
-    if(detailsBtn) detailsBtn.innerHTML = exists ? '<span>✓</span> Saved' : '<span>+</span> My List';
+    if(modalBtn) modalBtn.innerHTML = exists ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg><span>Saved</span>' : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg><span>Save</span>';
+    if(heroBtn) heroBtn.innerHTML = exists ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg><span>In My List</span>' : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg><span>My List</span>';
+    if(detailsBtn) detailsBtn.innerHTML = exists ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Saved' : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> My List';
 }
 
 // Theme Toggle
@@ -1186,69 +1213,54 @@ window.toggleTheme = () => {
     const newTheme = currentTheme === 'light' ? 'dark' : 'light';
     
     html.setAttribute('data-theme', newTheme);
-    document.getElementById('theme-icon').innerText = newTheme === 'light' ? '☀️' : '🌙';
+    
+    const icon = document.getElementById('theme-icon-sidebar');
+    const text = document.getElementById('theme-text');
+    
+    if(newTheme === 'light') {
+        icon.innerHTML = '<circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>';
+        text.innerText = 'Light Mode';
+    } else {
+        icon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>';
+        text.innerText = 'Dark Mode';
+    }
     
     localStorage.setItem('theme', newTheme);
 };
 
 // Load saved theme
-const savedTheme = localStorage.getItem('theme') || 'dark';
+const save
+dTheme = localStorage.getItem('theme') || 'dark';
 document.documentElement.setAttribute('data-theme', savedTheme);
-if(savedTheme === 'light') {
-    document.getElementById('theme-icon').innerText = '☀️';
-}
-
 // Dropdown Toggle
 window.toggleDrop = (id) => {
-    const el = document.getElementById(id);
-    const isShow = el.classList.contains('show');
-    document.querySelectorAll('.dropdown-menu').forEach(d => d.classList.remove('show'));
-    if(!isShow) el.classList.add('show');
+const el = document.getElementById(id);
+const isShow = el.classList.contains('show');
+document.querySelectorAll('.dropdown-menu').forEach(d => d.classList.remove('show'));
+if(!isShow) el.classList.add('show');
 };
-
 // Close dropdowns on outside click
-window.onclick = (e) => { 
-    if (!e.target.closest('.relative') && !e.target.closest('#user-profile')) {
-        document.querySelectorAll('.dropdown-menu').forEach(d => d.classList.remove('show')); 
-    }
+window.onclick = (e) => {
+if (!e.target.closest('.relative') && !e.target.closest('.user-profile-container')) {
+document.querySelectorAll('.dropdown-menu').forEach(d => d.classList.remove('show'));
+}
 };
-
-// Close search overlay on ESC key
+// ESC key handler
 document.addEventListener('keydown', (e) => {
-    if(e.key === 'Escape') {
-        closeSearchOverlay();
-        closeDetailsModal();
-        closeActorModal();
-        closeCalendarModal();
-        closeRandomModal();
-        closeQuizModal();
-        closeAchievementsModal();
-        closeStatsModal();
-        closeShareModal();
-    }
+if(e.key === 'Escape') {
+closeSearchOverlay();
+closeDetailsModal();
+closeActorModal();
+closeCalendarModal();
+closeRandomModal();
+closeQuizModal();
+closeAchievementsModal();
+closeStatsModal();
+closeShareModal();
+if(document.getElementById('sidebar-menu').classList.contains('active')) {
+toggleMenu();
+}
+}
 });
-
-// Add CSS animations
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes slideIn {
-        from{ transform: translateX(400px); opacity: 0; }
-to { transform: translateX(0); opacity: 1; }
-}
-@keyframes slideOut {
-from { transform: translateX(0); opacity: 1; }
-to { transform: translateX(400px); opacity: 0; }
-}
-.star-btn {
-cursor: pointer;
-transition: all 0.2s;
-user-select: none;
-}
-.star-btn:hover {
-transform: scale(1.2);
-}
-`;
-document.head.appendChild(style);
-// Initialize App
+// Initialize
 init();
-        
