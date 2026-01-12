@@ -33,6 +33,54 @@
                     </button>
                     <div id="genre-menu" class="dropdown-menu"></div>
                 </div>
+
+                <div class="relative">
+                    <button onclick="toggleDrop('filter-menu')" class="nav-btn">
+                        <span>🎯</span> Filters
+                    </button>
+                    <div id="filter-menu" class="dropdown-menu" style="min-width: 300px;">
+                        <div style="padding: 12px; border-bottom: 1px solid var(--glass-border);">
+                            <label style="font-size: 10px; opacity: 0.5; text-transform: uppercase; letter-spacing: 2px; display: block; margin-bottom: 8px;">Year Range</label>
+                            <div style="display: flex; gap: 8px;">
+                                <input type="number" id="year-from" placeholder="From" min="1900" max="2025" style="width: 100%; background: var(--glass); border: 1px solid var(--glass-border); padding: 8px; border-radius: 8px; color: white; font-size: 12px;">
+                                <input type="number" id="year-to" placeholder="To" min="1900" max="2025" style="width: 100%; background: var(--glass); border: 1px solid var(--glass-border); padding: 8px; border-radius: 8px; color: white; font-size: 12px;">
+                            </div>
+                        </div>
+                        
+                        <div style="padding: 12px; border-bottom: 1px solid var(--glass-border);">
+                            <label style="font-size: 10px; opacity: 0.5; text-transform: uppercase; letter-spacing: 2px; display: block; margin-bottom: 8px;">Minimum Rating</label>
+                            <select id="min-rating" style="width: 100%; background: var(--glass); border: 1px solid var(--glass-border); padding: 8px; border-radius: 8px; color: white; font-size: 12px;">
+                                <option value="0">All Ratings</option>
+                                <option value="7">7+ ⭐</option>
+                                <option value="8">8+ ⭐⭐</option>
+                                <option value="9">9+ ⭐⭐⭐</option>
+                            </select>
+                        </div>
+                        
+                        <div style="padding: 12px;">
+                            <label style="font-size: 10px; opacity: 0.5; text-transform: uppercase; letter-spacing: 2px; display: block; margin-bottom: 8px;">Sort By</label>
+                            <select id="sort-by" style="width: 100%; background: var(--glass); border: 1px solid var(--glass-border); padding: 8px; border-radius: 8px; color: white; font-size: 12px; margin-bottom: 12px;">
+                                <option value="popularity.desc">Popularity</option>
+                                <option value="vote_average.desc">Highest Rated</option>
+                                <option value="release_date.desc">Newest First</option>
+                                <option value="release_date.asc">Oldest First</option>
+                                <option value="title.asc">A-Z</option>
+                            </select>
+                            
+                            <button onclick="applyFilters()" style="width: 100%; background: linear-gradient(135deg, var(--primary), var(--accent)); border: none; padding: 12px; border-radius: 10px; color: white; font-weight: 900; text-transform: uppercase; font-size: 11px; cursor: pointer;">
+                                Apply Filters
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <button onclick="showUpcomingCalendar()" class="nav-btn">
+                    <span>📅</span> Coming Soon
+                </button>
+
+                <button onclick="openRandomPicker()" class="nav-btn">
+                    <span>🎲</span> Surprise Me
+                </button>
             </div>
 
             <div class="flex items-center gap-4">
@@ -40,27 +88,95 @@
                 <div class="relative">
                     <button onclick="toggleDrop('notice-menu')" class="nav-btn notice-btn">
                         <span class="notice-icon">📢</span>
-                        <span class="notice-badge">3</span>
+                        <span class="notice-badge">12</span>
                     </button>
                     <div id="notice-menu" class="dropdown-menu notice-dropdown">
                         <div class="notice-header">Announcements</div>
+                        
                         <div class="notice-item">
-                            <div class="notice-title">🎉 New Servers Added!</div>
-                            <div class="notice-desc">We've added 2 new streaming servers for better experience</div>
-                            <div class="notice-time">2 hours ago</div>
+                            <div class="notice-title">🎉 HUGE UPDATE!</div>
+                            <div class="notice-desc">12 amazing new features added! IMDB ratings, actor pages, reviews, achievements & more!</div>
+                            <div class="notice-time">Just now</div>
                         </div>
+
                         <div class="notice-item">
-                            <div class="notice-title">🔥 Trending Now</div>
-                            <div class="notice-desc">Check out this week's most watched content</div>
-                            <div class="notice-time">1 day ago</div>
+                            <div class="notice-title">🎬 IMDB & Rotten Tomatoes Ratings</div>
+                            <div class="notice-desc">Now showing ratings from multiple sources for better insights</div>
+                            <div class="notice-time">Just now</div>
                         </div>
+
                         <div class="notice-item">
-                            <div class="notice-title">⚡ USE BRAVE BROWSER</div>
-                            <div class="notice-desc">I do not put advertisements, but sources have ads, that is not in my control</div>
-                            <div class="notice-time">3 days ago</div>
+                            <div class="notice-title">📅 Coming Soon Calendar</div>
+                            <div class="notice-desc">Check out upcoming movie releases for the next 3 months</div>
+                            <div class="notice-time">Just now</div>
+                        </div>
+
+                        <div class="notice-item">
+                            <div class="notice-title">👥 Actor & Director Pages</div>
+                            <div class="notice-desc">Click any actor to view their complete filmography</div>
+                            <div class="notice-time">Just now</div>
+                        </div>
+
+                        <div class="notice-item">
+                            <div class="notice-title">⭐ User Reviews System</div>
+                            <div class="notice-desc">Rate and review your favorite movies & series</div>
+                            <div class="notice-time">Just now</div>
+                        </div>
+
+                        <div class="notice-item">
+                            <div class="notice-title">🔗 Share Movies</div>
+                            <div class="notice-desc">Share your favorite content with friends on social media</div>
+                            <div class="notice-time">Just now</div>
+                        </div>
+
+                        <div class="notice-item">
+                            <div class="notice-title">💬 Comments Section</div>
+                            <div class="notice-desc">Discuss movies with the community in real-time</div>
+                            <div class="notice-time">Just now</div>
+                        </div>
+
+                        <div class="notice-item">
+                            <div class="notice-title">🤖 AI Recommendations</div>
+                            <div class="notice-desc">Get personalized suggestions based on your watch history</div>
+                            <div class="notice-time">Just now</div>
+                        </div>
+
+                        <div class="notice-item">
+                            <div class="notice-title">📊 Your Statistics</div>
+                            <div class="notice-desc">Track your watch time, favorite genres and more</div>
+                            <div class="notice-time">Just now</div>
+                        </div>
+
+                        <div class="notice-item">
+                            <div class="notice-title">🎲 Random Picker</div>
+                            <div class="notice-desc">Can't decide? Let us pick a random movie for you!</div>
+                            <div class="notice-time">Just now</div>
+                        </div>
+
+                        <div class="notice-item">
+                            <div class="notice-title">🎮 Movie Quiz</div>
+                            <div class="notice-desc">Test your movie knowledge with fun trivia games</div>
+                            <div class="notice-time">Just now</div>
+                        </div>
+
+                        <div class="notice-item">
+                            <div class="notice-title">🏆 Achievements</div>
+                            <div class="notice-desc">Earn badges for watching milestones and challenges</div>
+                            <div class="notice-time">Just now</div>
+                        </div>
+
+                        <div class="notice-item">
+                            <div class="notice-title">🆕 New Server Added</div>
+                            <div class="notice-desc">BidSrc Pro added for faster streaming experience</div>
+                            <div class="notice-time">1 hour ago</div>
                         </div>
                     </div>
                 </div>
+
+                <!-- Theme Toggle -->
+                <button onclick="toggleTheme()" id="theme-toggle" class="nav-btn" title="Toggle Theme">
+                    <span id="theme-icon">🌙</span>
+                </button>
 
                 <!-- Search Button -->
                 <button onclick="openSearchOverlay()" class="search-trigger">
@@ -77,6 +193,12 @@
                         <span id="user-name" class="user-name"></span>
                         <img id="user-pic" class="user-pic">
                         <div id="user-menu" class="dropdown-menu user-dropdown">
+                            <button onclick="openStatsModal()" class="drop-item">
+                                <span>📊</span> My Statistics
+                            </button>
+                            <button onclick="openAchievementsModal()" class="drop-item">
+                                <span>🏆</span> Achievements
+                            </button>
                             <button onclick="logout()" class="drop-item logout-item">
                                 <span>🚪</span> Sign Out
                             </button>
@@ -109,6 +231,17 @@
         </div>
     </div>
 
+    <!-- Continue Watching Section -->
+    <section id="continue-watching-section" class="hidden" style="padding: 120px 80px 40px;">
+        <div class="section-header">
+            <h3 class="section-title">
+                <span class="section-icon">▶️</span>
+                Continue Watching
+            </h3>
+        </div>
+        <div id="continue-watching-grid" class="content-grid"></div>
+    </section>
+
     <!-- Hero Section -->
     <header class="hero-section">
         <div id="hero-bg" class="hero-bg"></div>
@@ -131,6 +264,9 @@
                 <button id="hero-info" class="hero-btn-secondary">
                     <span>ℹ</span> More Info
                 </button>
+                <button id="hero-share" class="hero-btn-secondary">
+                    <span>🔗</span> Share
+                </button>
             </div>
         </div>
     </header>
@@ -147,6 +283,17 @@
             </div>
             <div id="my-list-grid" class="content-grid"></div>
         </div>
+
+        <!-- Recommended Section -->
+        <div id="recommended-section" class="content-section hidden">
+            <div class="section-header">
+                <h3 class="section-title">
+                    <span class="section-icon">🤖</span>
+                    Recommended For You
+                </h3>
+            </div>
+            <div id="recommended-grid" class="content-grid"></div>
+        </div>
         
         <!-- Discovery Feed -->
         <div class="content-section">
@@ -159,7 +306,6 @@
             <div id="grid" class="content-grid"></div>
         </div>
     </main>
-
     <!-- Player Overlay -->
     <div id="player-overlay" class="player-overlay">
         <div class="player-container">
@@ -170,6 +316,9 @@
                 </button>
                 <div class="control-right">
                     <button id="modal-add-btn" onclick="toggleMyList()" class="control-btn"></button>
+                    <button onclick="shareContent()" class="control-btn">
+                        <span>🔗</span> Share
+                    </button>
                     <div class="relative">
                         <button onclick="toggleDrop('srv-menu')" class="control-btn server-btn">
                             <span>🎯</span> <span id="active-srv">Aura Primary</span>
@@ -220,8 +369,295 @@
         </div>
     </div>
 
+    <!-- Details Modal -->
+    <div id="details-modal" class="player-overlay" style="display: none;">
+        <div class="player-container">
+            <div class="player-controls">
+                <button onclick="closeDetailsModal()" class="control-btn back-btn">
+                    <span>←</span> Back
+                </button>
+                <div class="control-right">
+                    <button id="details-play-btn" class="control-btn back-btn">
+                        <span>▶</span> Watch Now
+                    </button>
+                    <button id="details-add-btn" class="control-btn">
+                        <span>+</span> My List
+                    </button>
+                    <button onclick="shareContent()" class="control-btn">
+                        <span>🔗</span> Share
+                    </button>
+                </div>
+            </div>
+            
+            <div style="position: relative; margin-bottom: 40px;">
+                <div id="details-backdrop" style="width: 100%; height: 500px; background-size: cover; background-position: center; border-radius: 24px; position: relative;">
+                    <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(10,10,15,1) 0%, transparent 60%); border-radius: 24px;"></div>
+                </div>
+                <div style="position: absolute; bottom: 40px; left: 40px; right: 40px;">
+                    <div id="details-rating" style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px;"></div>
+                    <div class="flex items-center gap-4 mb-4">
+                        <span id="details-year" class="hero-year"></span>
+                        <span id="details-runtime" class="hero-quality"></span>
+                    </div>
+                    <h2 id="details-title" style="font-size: 56px; font-weight: 900; margin-bottom: 16px; text-transform: uppercase;">Title</h2>
+                </div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 40px; padding: 0 40px;">
+                <div>
+                    <div id="details-genres" class="flex gap-2 mb-6"></div>
+                    <h3 style="font-size: 18px; font-weight: 900; margin-bottom: 16px; text-transform: uppercase; opacity: 0.5;">Overview</h3>
+                    <p id="details-overview" style="font-size: 16px; line-height: 1.8; color: var(--text-secondary); margin-bottom: 32px;"></p>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 32px;">
+                        <div style="background: var(--glass); padding: 20px; border-radius: 16px; border: 1px solid var(--glass-border);">
+                            <div style="font-size: 11px; opacity: 0.5; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 2px;">Status</div>
+                            <div id="details-status" style="font-size: 16px; font-weight: 900;">-</div>
+                        </div>
+                        <div style="background: var(--glass); padding: 20px; border-radius: 16px; border: 1px solid var(--glass-border);">
+                            <div style="font-size: 11px; opacity: 0.5; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 2px;">Language</div>
+                            <div id="details-language" style="font-size: 16px; font-weight: 900;">-</div>
+                        </div>
+                        <div style="background: var(--glass); padding: 20px; border-radius: 16px; border: 1px solid var(--glass-border);">
+                            <div style="font-size: 11px; opacity: 0.5; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 2px;">Budget</div>
+                            <div id="details-budget" style="font-size: 16px; font-weight: 900;">-</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Trailer -->
+                    <h3 style="font-size: 18px; font-weight: 900; margin-bottom: 16px; text-transform: uppercase; opacity: 0.5;">Trailer</h3>
+                    <div id="details-trailer" style="width: 100%; aspect-ratio: 16/9; border-radius: 16px; background: var(--glass); margin-bottom: 32px;"></div>
+                    
+                    <!-- User Reviews -->
+                    <h3 style="font-size: 18px; font-weight: 900; margin-bottom: 16px; text-transform: uppercase; opacity: 0.5;">User Reviews</h3>
+                    <div id="user-rating-section" style="background: var(--glass); padding: 24px; border-radius: 16px; border: 1px solid var(--glass-border); margin-bottom: 24px;">
+                        <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
+                            <span style="font-size: 14px; font-weight: 800;">Rate this:</span>
+                            <div id="star-rating" style="display: flex; gap: 8px; font-size: 28px;">
+                                <span class="star-btn" onclick="rateMovie(1)">☆</span>
+                                <span class="star-btn" onclick="rateMovie(2)">☆</span>
+                                <span class="star-btn" onclick="rateMovie(3)">☆</span>
+                                <span class="star-btn" onclick="rateMovie(4)">☆</span>
+                                <span class="star-btn" onclick="rateMovie(5)">☆</span>
+                            </div>
+                        </div>
+                        <textarea id="review-text" placeholder="Write your review here..." style="width: 100%; background: var(--bg-dark); border: 1px solid var(--glass-border); padding: 12px; border-radius: 12px; color: white; font-size: 14px; min-height: 100px; resize: vertical;"></textarea>
+                        <button onclick="submitReview()" style="margin-top: 12px; background: linear-gradient(135deg, var(--primary), var(--accent)); border: none; padding: 12px 24px; border-radius: 10px; color: white; font-weight: 900; text-transform: uppercase; font-size: 11px; cursor: pointer;">
+                            Submit Review
+                        </button>
+                    </div>
+                    <div id="reviews-container" style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 32px;"></div>
+                    
+                    <!-- Comments Section -->
+                    <h3 style="font-size: 18px; font-weight: 900; margin-bottom: 16px; text-transform: uppercase; opacity: 0.5;">💬 Comments</h3>
+                    <div style="background: var(--glass); padding: 24px; border-radius: 16px; border: 1px solid var(--glass-border); margin-bottom: 24px;">
+                        <textarea id="comment-text" placeholder="Join the discussion..." style="width: 100%; background: var(--bg-dark); border: 1px solid var(--glass-border); padding: 12px; border-radius: 12px; color: white; font-size: 14px; min-height: 80px; resize: vertical;"></textarea>
+                        <button onclick="submitComment()" style="margin-top: 12px; background: linear-gradient(135deg, var(--primary), var(--accent)); border: none; padding: 12px 24px; border-radius: 10px; color: white; font-weight: 900; text-transform: uppercase; font-size: 11px; cursor: pointer;">
+                            Post Comment
+                        </button>
+                    </div>
+                    <div id="comments-container" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px;"></div>
+                    
+                    <!-- Similar -->
+                    <h3 style="font-size: 18px; font-weight: 900; margin-bottom: 16px; text-transform: uppercase; opacity: 0.5;">Similar Titles</h3>
+                    <div id="details-similar" class="grid grid-cols-4 gap-4"></div>
+                </div>
+                
+                <div>
+                    <div style="background: var(--glass); padding: 32px; border-radius: 24px; border: 1px solid var(--glass-border);">
+                        <h3 class="cast-title">👥 Cast</h3>
+                        <div id="details-cast" class="cast-list"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Actor Modal -->
+    <div id="actor-modal" class="player-overlay" style="display: none;">
+        <div class="player-container">
+            <div class="player-controls">
+                <button onclick="closeActorModal()" class="control-btn back-btn">
+                    <span>←</span> Back
+                </button>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 300px 1fr; gap: 40px; margin-bottom: 40px;">
+                <div>
+                    <img id="actor-photo" style="width: 100%; border-radius: 24px; margin-bottom: 20px; border: 2px solid var(--glass-border);">
+                    <div style="background: var(--glass); padding: 20px; border-radius: 16px; border: 1px solid var(--glass-border);">
+                        <div style="margin-bottom: 16px;">
+                            <div style="font-size: 10px; opacity: 0.5; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 4px;">Born</div>
+                            <div id="actor-birthday" style="font-size: 14px; font-weight: 800;"></div>
+                        </div>
+                        <div>
+                            <div style="font-size: 10px; opacity: 0.5; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 4px;">Birthplace</div>
+                            <div id="actor-birthplace" style="font-size: 14px; font-weight: 800;"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <h2 id="actor-name" style="font-size: 48px; font-weight: 900; text-transform: uppercase; margin-bottom: 24px;"></h2>
+                    <h3 style="font-size: 16px; font-weight: 900; text-transform: uppercase; opacity: 0.5; margin-bottom: 12px;">Biography</h3>
+                    <p id="actor-bio" style="font-size: 14px; line-height: 1.8; color: var(--text-secondary); margin-bottom: 32px;"></p>
+                    
+                    <h3 style="font-size: 16px; font-weight: 900; text-transform: uppercase; opacity: 0.5; margin-bottom: 16px;">Filmography</h3>
+                    <div id="actor-filmography" class="content-grid"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calendar Modal -->
+    <div id="calendar-modal" class="player-overlay" style="display: none;">
+        <div class="player-container">
+            <div class="player-controls">
+                <button onclick="closeCalendarModal()" class="control-btn back-btn">
+                    <span>←</span> Back
+                </button>
+                <h2 style="font-size: 24px; font-weight: 900; text-transform: uppercase;">
+                    📅 Upcoming Releases
+                </h2>
+            </div>
+            <div id="calendar-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 24px;"></div>
+        </div>
+    </div>
+
+    <!-- Random Picker Modal -->
+    <div id="random-modal" class="player-overlay" style="display: none;">
+        <div class="player-container" style="display: flex; align-items: center; justify-content: center; min-height: 80vh;">
+            <div style="text-align: center; max-width: 600px;">
+                <h2 style="font-size: 48px; font-weight: 900; margin-bottom: 32px;">🎲 Surprise Me!</h2>
+                <p style="font-size: 18px; color: var(--text-secondary); margin-bottom: 40px;">Let us pick something random for you to watch</p>
+                
+                <div style="display: flex; gap: 16px; justify-content: center; margin-bottom: 32px;">
+                    <button onclick="setRandomGenre(null)" id="random-any" class="control-btn" style="background: linear-gradient(135deg, var(--primary), var(--accent)); border: none;">
+                        Any Genre
+                    </button>
+                    <button onclick="setRandomGenre(28)" id="random-action" class="control-btn">Action</button>
+                    <button onclick="setRandomGenre(35)" id="random-comedy" class="control-btn">Comedy</button>
+                    <button onclick="setRandomGenre(27)" id="random-horror" class="control-btn">Horror</button>
+                    <button onclick="setRandomGenre(10749)" id="random-romance" class="control-btn">Romance</button>
+                </div>
+                
+                <button onclick="pickRandom()" class="hero-btn-primary" style="font-size: 18px; padding: 24px 48px;">
+                    <span>🎲</span> Pick Random Movie
+                </button>
+                
+                <div style="margin-top: 32px;">
+                    <button onclick="closeRandomModal()" style="background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 14px; text-decoration: underline;">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quiz Modal -->
+    <div id="quiz-modal" class="player-overlay" style="display: none;">
+        <div class="player-container">
+            <div class="player-controls">
+                <button onclick="closeQuizModal()" class="control-btn back-btn">
+                    <span>←</span> Back
+                </button>
+                <h2 style="font-size: 24px; font-weight: 900; text-transform: uppercase;">
+                    🎮 Movie Quiz
+                </h2>
+            </div>
+            
+            <div id="quiz-content" style="max-width: 800px; margin: 0 auto; text-align: center;">
+                <div id="quiz-question" style="margin-bottom: 40px;">
+                    <img id="quiz-poster" style="width: 300px; height: 450px; object-fit: cover; border-radius: 16px; margin: 0 auto 24px; border: 2px solid var(--glass-border);">
+                    <h3 style="font-size: 24px; font-weight: 900; margin-bottom: 32px;">Guess the Movie!</h3>
+                    <div id="quiz-options" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;"></div>
+                </div>
+                
+                <div id="quiz-score" style="margin-top: 32px; font-size: 18px; font-weight: 800;">
+                    Score: <span id="quiz-score-value">0</span> / <span id="quiz-total">0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Achievements Modal -->
+    <div id="achievements-modal" class="player-overlay" style="display: none;">
+        <div class="player-container">
+            <div class="player-controls">
+                <button onclick="closeAchievementsModal()" class="control-btn back-btn">
+                    <span>←</span> Back
+                </button>
+                <h2 style="font-size: 24px; font-weight: 900; text-transform: uppercase;">
+                    🏆 Your Achievements
+                </h2>
+            </div>
+            <div id="achievements-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 24px;"></div>
+        </div>
+    </div>
+
+    <!-- Statistics Modal -->
+    <div id="stats-modal" class="player-overlay" style="display: none;">
+        <div class="player-container">
+            <div class="player-controls">
+                <button onclick="closeStatsModal()" class="control-btn back-btn">
+                    <span>←</span> Back
+                </button>
+                <h2 style="font-size: 24px; font-weight: 900; text-transform: uppercase;">
+                    📊 Your Statistics
+                </h2>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-bottom: 40px;">
+                <div style="background: var(--glass); padding: 32px; border-radius: 16px; border: 1px solid var(--glass-border); text-align: center;">
+                    <div style="font-size: 48px; font-weight: 900; margin-bottom: 8px;" id="stat-movies">0</div>
+                    <div style="font-size: 12px; opacity: 0.5; text-transform: uppercase; letter-spacing: 2px;">Movies Watched</div>
+                </div>
+                <div style="background: var(--glass); padding: 32px; border-radius: 16px; border: 1px solid var(--glass-border); text-align: center;">
+                    <div style="font-size: 48px; font-weight: 900; margin-bottom: 8px;" id="stat-series">0</div>
+                    <div style="font-size: 12px; opacity: 0.5; text-transform: uppercase; letter-spacing: 2px;">Series Watched</div>
+                </div>
+                <div style="background: var(--glass); padding: 32px; border-radius: 16px; border: 1px solid var(--glass-border); text-align: center;">
+                    <div style="font-size: 48px; font-weight: 900; margin-bottom: 8px;" id="stat-hours">0</div>
+                    <div style="font-size: 12px; opacity: 0.5; text-transform: uppercase; letter-spacing: 2px;">Hours Watched</div>
+                </div>
+                <div style="background: var(--glass); padding: 32px; border-radius: 16px; border: 1px solid var(--glass-border); text-align: center;">
+                    <div style="font-size: 48px; font-weight: 900; margin-bottom: 8px;" id="stat-reviews">0</div>
+                    <div style="font-size: 12px; opacity: 0.5; text-transform: uppercase; letter-spacing: 2px;">Reviews Written</div>
+                </div>
+            </div>
+            
+            <h3 style="font-size: 18px; font-weight: 900; margin-bottom: 16px; text-transform: uppercase; opacity: 0.5;">Favorite Genres</h3>
+            <div id="genre-stats" style="display: flex; flex-wrap: wrap; gap: 12px;"></div>
+        </div>
+    </div>
+
+    <!-- Share Modal -->
+    <div id="share-modal" style="display: none; position: fixed; inset: 0; z-index: 10000; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); align-items: center; justify-content: center;">
+        <div style="background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: 24px; padding: 32px; max-width: 500px; width: 90%;">
+            <h3 style="font-size: 24px; font-weight: 900; margin-bottom: 24px; text-align: center;">Share This</h3>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px;">
+                <button onclick="shareOn('twitter')" style="background: #1DA1F2; border: none; padding: 16px; border-radius: 12px; color: white; font-weight: 800; cursor: pointer; font-size: 12px;">
+                    🐦 Twitter
+                </button>
+                <button onclick="shareOn('facebook')" style="background: #4267B2; border: none; padding: 16px; border-radius: 12px; color: white; font-weight: 800; cursor: pointer; font-size: 12px;">
+                    📘 Facebook
+                </button>
+                <button onclick="shareOn('whatsapp')" style="background: #25D366; border: none; padding: 16px; border-radius: 12px; color: white; font-weight: 800; cursor: pointer; font-size: 12px;">
+                    💬 WhatsApp
+                </button>
+            </div>
+            <div style="background: var(--glass); padding: 16px; border-radius: 12px; border: 1px solid var(--glass-border); margin-bottom: 16px; display: flex; align-items: center; gap: 12px;">
+                <input id="share-link" type="text" readonly style="flex: 1; background: none; border: none; color: white; font-size: 12px;" value="">
+                <button onclick="copyShareLink()" style="background: linear-gradient(135deg, var(--primary), var(--accent)); border: none; padding: 8px 16px; border-radius: 8px; color: white; font-weight: 800; cursor: pointer; font-size: 11px;">
+                    Copy
+                </button>
+            </div>
+            <button onclick="closeShareModal()" style="width: 100%; background: var(--glass); border: 1px solid var(--glass-border); padding: 12px; border-radius: 12px; color: white; font-weight: 800; cursor: pointer; font-size: 12px;">
+                Close
+            </button>
+        </div>
+    </div>
+
     <script type="module" src="script.js"></script>
 </body>
 </html>
-
-
