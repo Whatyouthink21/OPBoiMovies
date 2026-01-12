@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, collection, getDoc, addDoc, query, orderBy, limit, where, getDocs, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 // Firebase Configuration
 const firebaseConfig = {
@@ -21,10 +21,7 @@ const provider = new GoogleAuthProvider();
 
 // Constants
 const KEY = 'a45420333457411e78d5ad35d6c51a2d';
-const OMDB_KEY = '8d8b4e0b';
-
 const servers = [
-    {id:'bidsrc', n:'BidSrc Pro'},
     {id:'cinemaos', n:'Aura Primary'},
     {id:'vidsrcto', n:'Aura Mirror'},
     {id:'vidsrcme', n:'Aura Legacy'},
@@ -35,51 +32,21 @@ const servers = [
 // Global State
 let mode = 'movie';
 let activeID = null;
-let currentSrv = 'bidsrc';
+let currentSrv = 'cinemaos';
 let s = 1;
 let e = 1;
 let activeItem = null;
 let myList = [];
 let currentUser = null;
 let searchTimeout;
-let userRating = 0;
-let randomGenre = null;
-let quizScore = 0;
-let quizTotal = 0;
-let currentQuizMovie = null;
 
-// Menu Toggle
-window.toggleMenu = () => {
-    const sidebar = document.getElementById('sidebar-menu');
-    const overlay = document.getElementById('sidebar-overlay');
-    const hamburger = document.querySelector('.hamburger-btn');
-    
-    sidebar.classList.toggle('active');
-    overlay.classList.toggle('active');
-    hamburger.classList.toggle('active');
-};
-
-// Sidebar Dropdown Toggle
-window.toggleSidebarDrop = (id) => {
-    const dropdown = document.getElementById(id);
-    const isOpen = dropdown.classList.contains('open');
-    
-    // Close all dropdowns
-    document.querySelectorAll('.sidebar-dropdown').forEach(d => d.classList.remove('open'));
-    
-    // Toggle current
-    if (!isOpen) {
-        dropdown.classList.add('open');
-    }
-};
-
-// Authentication
+// Authentication Functions
 window.login = async () => { 
     try { 
         await signInWithPopup(auth, provider); 
     } catch(error) { 
         console.error(error); 
-        alert("Login Error: Please try again"); 
+        alert("Login Error: Make sure your domain is authorized in Firebase Console."); 
     } 
 };
 
@@ -96,15 +63,11 @@ onAuthStateChanged(auth, (user) => {
         document.getElementById('user-name').innerText = user.displayName.split(' ')[0];
         document.getElementById('user-pic').src = user.photoURL;
         syncCloudList(user.uid);
-        syncContinueWatching(user.uid);
-        loadRecommendations();
-        checkAchievements();
     } else {
         loginBtn.classList.remove('hidden');
         userProfile.classList.add('hidden');
         myList = [];
         updateListUI();
-        document.getElementById('recommended-section').classList.add('hidden');
     }
 });
 
@@ -120,108 +83,14 @@ window.toggleMyList = async () => {
     if (!currentUser) return alert("Login to save to collection");
     const docRef = doc(db, "users", currentUser.uid, "mylist", activeItem.id.toString());
     const exists = myList.some(x => x.id === activeItem.id);
-    
-    if(exists) {
-        await deleteDoc(docRef);
-    } else {
-        await setDoc(docRef, activeItem);
-        await trackStats('list_add');
-    }
+    exists ? await deleteDoc(docRef) : await setDoc(docRef, activeItem);
 };
 
-// Watch Progress System
-async function saveWatchProgress(itemId, progress, duration) {
-    if (!currentUser) return;
-    
-    const progressRef = doc(db, "users", currentUser.uid, "progress", itemId.toString());
-    await setDoc(progressRef, {
-        id: itemId,
-        progress: progress,
-        duration: duration,
-        timestamp: Date.now(),
-        title: activeItem.title,
-        poster_path: activeItem.poster_path,
-        mode: mode,
-        vote_average: activeItem.vote_average,
-        ...(mode === 'tv' && { season: s, episode: e })
-    });
-    
-    await trackStats(mode === 'movie' ? 'movie_watched' : 'episode_watched');
-}
-
-function syncContinueWatching(uid) {
-    onSnapshot(collection(db, "users", uid, "progress"), (snap) => {
-        const progressList = snap.docs.map(d => d.data());
-        progressList.sort((a, b) => b.timestamp - a.timestamp);
-        renderContinueWatching(progressList.slice(0, 6));
-    });
-}
-
-function renderContinueWatching(list) {
-    if(list.length === 0) {
-        document.getElementById('continue-watching-section').classList.add('hidden');
-        return;
-    }
-    
-    document.getElementById('continue-watching-section').classList.remove('hidden');
-    document.getElementById('continue-watching-grid').innerHTML = list.map(item => {
-        const progressPercent = ((item.progress / item.duration) * 100).toFixed(0);
-        const rating = item.vote_average ? item.vote_average.toFixed(1) : 'N/A';
-        
-        return `
-        <div class="media-card" onclick="resumeWatching(${item.id}, '${item.mode}', ${item.season || 1}, ${item.episode || 1})">
-            <div class="media-card-image">
-                <img src="https://image.tmdb.org/t/p/w500${item.poster_path}" alt="${item.title}">
-                <div class="progress-bar">
-                    <div class="progress-fill" style="width: ${progressPercent}%"></div>
-                </div>
-            </div>
-            <div class="media-card-content">
-                <h3 class="media-card-title">${item.title}</h3>
-                <div class="media-card-meta">
-                    <span class="media-rating">★ ${rating}</span>
-                    <span class="media-progress">${progressPercent}%</span>
-                </div>
-            </div>
-        </div>`;
-    }).join('');
-}
-
-window.resumeWatching = async (id, itemMode, season = 1, ep = 1) => {
-    mode = itemMode;
-    s = season;
-    e = ep;
-    updateModeButtons();
-    
-    const details = await fetch(`https://api.themoviedb.org/3/${mode}/${id}?api_key=${KEY}`).then(r => r.json());
-    openPlayer(id, details.title || details.name, details.poster_path, details.vote_average, details.release_date || details.first_air_date);
-};
-
-// External Ratings
-async function getExternalRatings(title, year) {
-    try {
-        const response = await fetch(`https://www.omdbapi.com/?apikey=${OMDB_KEY}&t=${encodeURIComponent(title)}&y=${year}`);
-        const data = await response.json();
-        
-        if(data.Response === 'True') {
-            return {
-                imdb: data.imdbRating !== 'N/A' ? data.imdbRating : null,
-                rotten: data.Ratings?.find(r => r.Source === 'Rotten Tomatoes')?.Value || null,
-                metacritic: data.Ratings?.find(r => r.Source === 'Metacritic')?.Value || null
-            };
-        }
-        return null;
-    } catch(e) {
-        console.error('Failed to fetch external ratings:', e);
-        return null;
-    }
-}
-
-// Search Overlay
+// Search Overlay Functions
 window.openSearchOverlay = () => {
     document.getElementById('search-overlay').classList.add('active');
     document.body.style.overflow = 'hidden';
-    setTimeout(() => document.getElementById('search-input').focus(), 100);
+    document.getElementById('search-input').focus();
 };
 
 window.closeSearchOverlay = () => {
@@ -229,16 +98,14 @@ window.closeSearchOverlay = () => {
     document.body.style.overflow = 'auto';
     document.getElementById('search-input').value = '';
     document.getElementById('search-results-container').innerHTML = `
-        <div class="search-empty-state">
-            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <circle cx="11" cy="11" r="8"></circle>
-                <path d="m21 21-4.35-4.35"></path>
-            </svg>
+        <div class="search-placeholder">
+            <div class="search-placeholder-icon">🎬</div>
             <p>Start typing to search...</p>
         </div>
     `;
 };
 
+// Search Input Handler
 document.getElementById('search-input').addEventListener('input', async (ev) => {
     clearTimeout(searchTimeout);
     const val = ev.target.value.trim();
@@ -246,11 +113,8 @@ document.getElementById('search-input').addEventListener('input', async (ev) => 
     
     if(val.length < 2) {
         resultsContainer.innerHTML = `
-            <div class="search-empty-state">
-                <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <path d="m21 21-4.35-4.35"></path>
-                </svg>
+            <div class="search-placeholder">
+                <div class="search-placeholder-icon">🎬</div>
                 <p>Start typing to search...</p>
             </div>
         `;
@@ -266,12 +130,8 @@ document.getElementById('search-input').addEventListener('input', async (ev) => 
         
         if(results.length === 0) {
             resultsContainer.innerHTML = `
-                <div class="search-empty-state">
-                    <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="15" y1="9" x2="9" y2="15"></line>
-                        <line x1="9" y1="9" x2="15" y2="15"></line>
-                    </svg>
+                <div class="search-placeholder">
+                    <div class="search-placeholder-icon">😕</div>
                     <p>No results found for "${val}"</p>
                 </div>
             `;
@@ -285,16 +145,16 @@ document.getElementById('search-input').addEventListener('input', async (ev) => 
                         const title = (m.title || m.name).replace(/'/g, "\\'").replace(/"/g, '&quot;');
                         
                         return `
-                        <div class="search-result-item" onclick="selectSearchResult(${m.id}, '${m.media_type}', '${title}', '${m.poster_path}', ${m.vote_average || 0}, '${m.release_date || m.first_air_date || ''}')">
+                        <div class="search-result-card" onclick="selectSearchResult(${m.id}, '${m.media_type}', '${title}', '${m.poster_path}', ${m.vote_average || 0}, '${m.release_date || m.first_air_date || ''}')">
                             <div class="search-result-poster">
                                 <img src="https://image.tmdb.org/t/p/w500${m.poster_path}" alt="${m.title || m.name}">
                             </div>
                             <div class="search-result-info">
-                                <h4>${m.title || m.name}</h4>
+                                <h4 class="search-result-title">${m.title || m.name}</h4>
                                 <div class="search-result-meta">
-                                    <span class="search-rating">★ ${rating}</span>
-                                    <span class="search-year">${year}</span>
-                                    <span class="search-type">${mediaType}</span>
+                                    <span class="search-result-rating">★ ${rating}</span>
+                                    <span class="search-result-year">${year}</span>
+                                    <span class="search-result-type">${mediaType}</span>
                                 </div>
                             </div>
                         </div>`;
@@ -314,10 +174,10 @@ window.selectSearchResult = (id, mediaType, title, poster, rating, releaseDate) 
     }
     
     closeSearchOverlay();
-    openDetailsModal(id, mediaType);
+    openPlayer(id, title, poster, rating, releaseDate);
 };
 
-// Main Init
+// Main Init Function
 async function init(q = '', g = '') {
     let url = `https://api.themoviedb.org/3/trending/${mode}/week?api_key=${KEY}`;
     if(q) url = `https://api.themoviedb.org/3/search/${mode}?api_key=${KEY}&query=${q}`;
@@ -342,6 +202,7 @@ async function setupHero(m) {
     const year = (m.release_date || m.first_air_date || '').split('-')[0];
     document.getElementById('hero-year').innerText = year || '';
     
+    // Fetch full details for description
     const details = await fetch(`https://api.themoviedb.org/3/${mode}/${m.id}?api_key=${KEY}`).then(r => r.json());
     document.getElementById('hero-description').innerText = details.overview || 'No description available.';
     
@@ -363,7 +224,13 @@ async function setupHero(m) {
         m.release_date || m.first_air_date
     );
     document.getElementById('hero-add').onclick = () => toggleMyList();
-    document.getElementById('hero-info').onclick = () => openDetailsModal(m.id, mode);
+    document.getElementById('hero-info').onclick = () => openPlayer(
+        m.id, 
+        m.title || m.name, 
+        m.poster_path, 
+        m.vote_average, 
+        m.release_date || m.first_air_date
+    );
     updateBtnStates();
 }
 
@@ -377,652 +244,20 @@ function renderGrid(list, target) {
         const title = (m.title || m.name).replace(/'/g, "\\'").replace(/"/g, '&quot;');
         
         return `
-        <div class="media-card" onclick="openDetailsModal(${m.id}, '${m.media_type || mode}')">
-            <div class="media-card-image">
-                <img src="https://image.tmdb.org/t/p/w500${m.poster_path}" alt="${m.title || m.name}">
-                <div class="media-card-overlay">
-                    <div class="overlay-content">
-                        <span class="overlay-rating">★ ${rating}</span>
-                        <span class="overlay-year">${year}</span>
-                    </div>
+        <div class="movie-card" onclick="openPlayer(${m.id}, '${title}', '${m.poster_path}', ${m.vote_average || 0}, '${m.release_date || m.first_air_date || ''}')">
+            <img src="https://image.tmdb.org/t/p/w500${m.poster_path}" class="w-full" alt="${m.title || m.name}">
+            <div class="card-info">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="rating-star">★ ${rating}</span>
+                    <span class="text-[9px] font-black uppercase opacity-40">${year}</span>
                 </div>
-            </div>
-            <div class="media-card-content">
-                <h3 class="media-card-title">${m.title || m.name}</h3>
+                <h4 class="font-black text-xs uppercase tracking-tight line-clamp-1">${m.title || m.name}</h4>
             </div>
         </div>`;
     }).join('');
 }
 
-// Details Modal
-window.openDetailsModal = async (id, mediaType) => {
-    const oldMode = mode;
-    mode = mediaType;
-    
-    document.getElementById('details-modal').classList.add('active');
-    document.body.style.overflow = 'hidden';
-    
-    const res = await fetch(`https://api.themoviedb.org/3/${mode}/${id}?api_key=${KEY}&append_to_response=credits,videos,similar`).then(r => r.json());
-    
-    // Backdrop
-    if(res.backdrop_path) {
-        document.getElementById('details-backdrop').style.backgroundImage = `url(https://image.tmdb.org/t/p/original${res.backdrop_path})`;
-    }
-    
-    // External Ratings
-    const externalRatings = await getExternalRatings(res.title || res.name, (res.release_date || res.first_air_date || '').split('-')[0]);
-    
-    document.getElementById('details-rating').innerHTML = `
-        <span class="rating-badge tmdb">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-            </svg>
-            ${res.vote_average ? res.vote_average.toFixed(1) : 'N/A'}
-        </span>
-        ${externalRatings?.imdb ? `
-        <span class="rating-badge imdb">
-            <strong>IMDB</strong> ${externalRatings.imdb}
-        </span>` : ''}
-        ${externalRatings?.rotten ? `
-        <span class="rating-badge rotten">
-            <strong>RT</strong> ${externalRatings.rotten}
-        </span>` : ''}
-        ${externalRatings?.metacritic ? `
-        <span class="rating-badge metacritic">
-            <strong>MC</strong> ${externalRatings.metacritic}
-        </span>` : ''}
-    `;
-    
-    // Basic Info
-    document.getElementById('details-title').innerText = res.title || res.name;
-    document.getElementById('details-year').innerText = (res.release_date || res.first_air_date || '').split('-')[0];
-    document.getElementById('details-runtime').innerText = res.runtime ? `${res.runtime}min` : (res.episode_run_time?.[0] ? `${res.episode_run_time[0]}min/ep` : 'N/A');
-    document.getElementById('details-overview').innerText = res.overview || 'No description available.';
-    
-    // Genres
-    document.getElementById('details-genres').innerHTML = res.genres?.map(g => 
-        `<span class="genre-badge">${g.name}</span>`
-    ).join('') || '';
-    
-    // Stats
-    document.getElementById('details-status').innerText = res.status || 'N/A';
-    document.getElementById('details-language').innerText = res.original_language?.toUpperCase() || 'N/A';
-    document.getElementById('details-budget').innerText = res.budget ? `$${(res.budget / 1000000).toFixed(1)}M` : 'N/A';
-    
-    // Cast
-    document.getElementById('details-cast').innerHTML = res.credits.cast.slice(0, 8).map(c => `
-        <div class="cast-member" onclick="event.stopPropagation(); closeDetailsModal(); openActorPage(${c.id}, '${c.name.replace(/'/g, "\\'").replace(/"/g, '&quot;')}')">
-            ${c.profile_path ? `<img src="https://image.tmdb.org/t/p/w185${c.profile_path}" alt="${c.name}" class="cast-photo">` : '<div class="cast-photo-placeholder"></div>'}
-            <div class="cast-info">
-                <div class="cast-name">${c.name}</div>
-                <div class="cast-character">${c.character}</div>
-            </div>
-        </div>
-    `).join('');
-    
-    // Trailer
-    const trailer = res.videos?.results?.find(v => v.type === 'Trailer' && v.site === 'YouTube');
-    if(trailer) {
-        document.getElementById('details-trailer').innerHTML = `<iframe src="https://www.youtube.com/embed/${trailer.key}" frameborder="0" allowfullscreen></iframe>`;
-    } else {
-        document.getElementById('details-trailer').innerHTML = '<div class="no-trailer">No trailer available</div>';
-    }
-    
-    // Similar
-    document.getElementById('details-similar').innerHTML = res.similar.results.slice(0, 6).map(m => 
-        m.poster_path ? `
-        <div class="similar-card" onclick="openDetailsModal(${m.id}, '${mode}')">
-            <img src="https://image.tmdb.org/t/p/w300${m.poster_path}" alt="${m.title || m.name}">
-            <div class="similar-title">${m.title || m.name}</div>
-        </div>` : ''
-    ).join('');
-    
-    // Load Reviews & Comments
-    loadReviews(id);
-    loadComments(id);
-    
-    // Buttons
-    activeItem = { id, title: res.title || res.name, poster_path: res.poster_path, mode, vote_average: res.vote_average };
-    document.getElementById('details-play-btn').onclick = () => {
-        closeDetailsModal();
-        openPlayer(id, res.title || res.name, res.poster_path, res.vote_average, res.release_date || res.first_air_date);
-    };
-    document.getElementById('details-add-btn').onclick = toggleMyList;
-    updateBtnStates();
-    
-    // Reset star rating
-    userRating = 0;
-    document.querySelectorAll('#star-rating .star-btn').forEach(star => {
-        star.innerText = '☆';
-        star.style.color = '';
-    });
-};
-
-window.closeDetailsModal = () => {
-    document.getElementById('details-modal').classList.remove('active');
-    document.body.style.overflow = 'auto';
-};
-
-// User Reviews
-window.rateMovie = (rating) => {
-    if (!currentUser) return alert("Login to rate");
-    userRating = rating;
-    
-    document.querySelectorAll('#star-rating .star-btn').forEach((star, index) => {
-        if(index < rating) {
-            star.innerText = '★';
-            star.style.color = '#fbbf24';
-        } else {
-            star.innerText = '☆';
-            star.style.color = '';
-        }
-    });
-};
-
-window.submitReview = async () => {
-    if (!currentUser) return alert("Login to review");
-    if (userRating === 0) return alert("Please rate first");
-    
-    const reviewText = document.getElementById('review-text').value.trim();
-    if (!reviewText) return alert("Please write a review");
-    
-    const reviewData = {
-        userId: currentUser.uid,
-        userName: currentUser.displayName,
-        userPhoto: currentUser.photoURL,
-        movieId: activeItem.id,
-        rating: userRating,
-        review: reviewText,
-        timestamp: Date.now()
-    };
-    
-    await addDoc(collection(db, "reviews"), reviewData);
-    await trackStats('review_written');
-    
-    document.getElementById('review-text').value = '';
-    userRating = 0;
-    document.querySelectorAll('#star-rating .star-btn').forEach(star => {
-        star.innerText = '☆';
-        star.style.color = '';
-    });
-    
-    loadReviews(activeItem.id);
-    alert("Review submitted!");
-};
-
-async function loadReviews(movieId) {
-    const q = query(
-        collection(db, "reviews"),
-        where("movieId", "==", movieId),
-        orderBy("timestamp", "desc"),
-        limit(10)
-    );
-    
-    const snapshot = await getDocs(q);
-    const reviews = snapshot.docs.map(doc => doc.data());
-    
-    document.getElementById('reviews-container').innerHTML = reviews.map(review => `
-        <div class="review-card">
-            <div class="review-header">
-                <img src="${review.userPhoto}" alt="${review.userName}" class="review-avatar">
-                <div class="review-user-info">
-                    <div class="review-user-name">${review.userName}</div>
-                    <div class="review-user-rating">${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}</div>
-                </div>
-                <div class="review-date">${new Date(review.timestamp).toLocaleDateString()}</div>
-            </div>
-            <div class="review-text">${review.review}</div>
-        </div>
-    `).join('') || '<div class="no-reviews">No reviews yet. Be the first!</div>';
-}
-
-// Comments
-window.submitComment = async () => {
-    if (!currentUser) return alert("Login to comment");
-    
-    const commentText = document.getElementById('comment-text').value.trim();
-    if (!commentText) return alert("Please write a comment");
-    
-    const commentData = {
-        userId: currentUser.uid,
-        userName: currentUser.displayName,
-        userPhoto: currentUser.photoURL,
-        movieId: activeItem.id,
-        comment: commentText,
-        timestamp: Date.now()
-    };
-    
-    await addDoc(collection(db, "comments"), commentData);
-    document.getElementById('comment-text').value = '';
-    loadComments(activeItem.id);
-};
-
-async function loadComments(movieId) {
-    const q = query(
-        collection(db, "comments"),
-        where("movieId", "==", movieId),
-        orderBy("timestamp", "desc"),
-        limit(20)
-    );
-    
-    const snapshot = await getDocs(q);
-    const comments = snapshot.docs.map(doc => doc.data());
-    
-    document.getElementById('comments-container').innerHTML = comments.map(comment => `
-        <div class="comment-card">
-            <img src="${comment.userPhoto}" alt="${comment.userName}" class="comment-avatar">
-            <div class="comment-content">
-                <div class="comment-header">
-                    <span class="comment-user-name">${comment.userName}</span>
-                    <span class="comment-date">${new Date(comment.timestamp).toLocaleDateString()}</span>
-                </div>
-                <div class="comment-text">${comment.comment}</div>
-            </div>
-        </div>
-    `).join('') || '<div class="no-comments">No comments yet. Start the discussion!</div>';
-}
-// Share Functionality
-window.shareContent = () => {
-    document.getElementById('share-modal').classList.add('active');
-    const shareLink = `${window.location.origin}?movie=${activeItem.id}&mode=${mode}`;
-    document.getElementById('share-link').value = shareLink;
-};
-
-window.closeShareModal = () => {
-    document.getElementById('share-modal').classList.remove('active');
-};
-
-window.shareOn = (platform) => {
-    const title = activeItem.title;
-    const url = document.getElementById('share-link').value;
-    
-    let shareUrl = '';
-    if(platform === 'twitter') {
-        shareUrl = `https://twitter.com/intent/tweet?text=Check out ${title} on OPBoi Movies!&url=${encodeURIComponent(url)}`;
-    } else if(platform === 'facebook') {
-        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
-    } else if(platform === 'whatsapp') {
-        shareUrl = `https://wa.me/?text=Check out ${title} on OPBoi Movies! ${encodeURIComponent(url)}`;
-    }
-    
-    window.open(shareUrl, '_blank', 'width=600,height=400');
-};
-
-window.copyShareLink = () => {
-    const input = document.getElementById('share-link');
-    input.select();
-    document.execCommand('copy');
-    alert('Link copied to clipboard!');
-};
-
-// Actor Pages
-window.openActorPage = async (actorId, actorName) => {
-    document.getElementById('actor-modal').classList.add('active');
-    document.body.style.overflow = 'hidden';
-    
-    const actorDetails = await fetch(`https://api.themoviedb.org/3/person/${actorId}?api_key=${KEY}`).then(r => r.json());
-    const credits = await fetch(`https://api.themoviedb.org/3/person/${actorId}/combined_credits?api_key=${KEY}`).then(r => r.json());
-    
-    document.getElementById('actor-name').innerText = actorName;
-    document.getElementById('actor-photo').src = actorDetails.profile_path ? `https://image.tmdb.org/t/p/w500${actorDetails.profile_path}` : '';
-    document.getElementById('actor-bio').innerText = actorDetails.biography || 'No biography available.';
-    document.getElementById('actor-birthday').innerText = actorDetails.birthday ? new Date(actorDetails.birthday).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Unknown';
-    document.getElementById('actor-birthplace').innerText = actorDetails.place_of_birth || 'Unknown';
-    
-    const filmography = credits.cast
-        .filter(c => (c.media_type === 'movie' || c.media_type === 'tv') && c.poster_path)
-        .sort((a, b) => b.popularity - a.popularity)
-        .slice(0, 20);
-    
-    document.getElementById('actor-filmography').innerHTML = filmography.map(m => {
-        const rating = m.vote_average ? m.vote_average.toFixed(1) : 'N/A';
-        const year = (m.release_date || m.first_air_date || '').split('-')[0] || '';
-        
-        return `
-        <div class="media-card" onclick="closeActorModal(); openDetailsModal(${m.id}, '${m.media_type}')">
-            <div class="media-card-image">
-                <img src="https://image.tmdb.org/t/p/w300${m.poster_path}" alt="${m.title || m.name}">
-                <div class="media-card-overlay">
-                    <div class="overlay-content">
-                        <span class="overlay-rating">★ ${rating}</span>
-                        <span class="overlay-year">${year}</span>
-                    </div>
-                </div>
-            </div>
-            <div class="media-card-content">
-                <h3 class="media-card-title">${m.title || m.name}</h3>
-                <p class="media-card-subtitle">as ${m.character || 'Unknown'}</p>
-            </div>
-        </div>`;
-    }).join('');
-};
-
-window.closeActorModal = () => {
-    document.getElementById('actor-modal').classList.remove('active');
-    document.body.style.overflow = 'auto';
-};
-
-// Upcoming Calendar
-async function loadUpcomingReleases() {
-    const today = new Date();
-    const futureDate = new Date();
-    futureDate.setDate(today.getDate() + 90);
-    
-    const url = `https://api.themoviedb.org/3/discover/${mode}?api_key=${KEY}&primary_release_date.gte=${today.toISOString().split('T')[0]}&primary_release_date.lte=${futureDate.toISOString().split('T')[0]}&sort_by=popularity.desc`;
-    
-    const r = await fetch(url);
-    const d = await r.json();
-    
-    return d.results.slice(0, 20);
-}
-
-window.showUpcomingCalendar = async () => {
-    const upcoming = await loadUpcomingReleases();
-    
-    document.getElementById('calendar-modal').classList.add('active');
-    document.body.style.overflow = 'hidden';
-    
-    document.getElementById('calendar-grid').innerHTML = upcoming.map(m => {
-        const releaseDate = new Date(m.release_date || m.first_air_date);
-        const dateStr = releaseDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-        const rating = m.vote_average ? m.vote_average.toFixed(1) : 'N/A';
-        
-        return `
-        <div class="media-card upcoming-card" onclick="closeCalendarModal(); openDetailsModal(${m.id}, '${mode}')">
-            <div class="media-card-image">
-                <img src="https://image.tmdb.org/t/p/w300${m.poster_path}" alt="${m.title || m.name}">
-                <div class="release-date-badge">${dateStr}</div>
-            </div>
-            <div class="media-card-content">
-                <h3 class="media-card-title">${m.title || m.name}</h3>
-                <div class="media-card-meta">
-                    <span class="media-rating">★ ${rating}</span>
-                </div>
-            </div>
-        </div>`;
-    }).join('');
-};
-
-window.closeCalendarModal = () => {
-    document.getElementById('calendar-modal').classList.remove('active');
-    document.body.style.overflow = 'auto';
-};
-
-// Recommendations
-async function loadRecommendations() {
-    if(!currentUser || myList.length === 0) {
-        document.getElementById('recommended-section').classList.add('hidden');
-        return;
-    }
-    
-    const url = `https://api.themoviedb.org/3/discover/${mode}?api_key=${KEY}&sort_by=vote_average.desc&vote_count.gte=100`;
-    const r = await fetch(url);
-    const d = await r.json();
-    
-    document.getElementById('recommended-section').classList.remove('hidden');
-    renderGrid(d.results.slice(0, 12), 'recommended-grid');
-}
-
-// Statistics
-async function trackStats(action) {
-    if(!currentUser) return;
-    
-    const statsRef = doc(db, "users", currentUser.uid, "stats", "overall");
-    const statsDoc = await getDoc(statsRef);
-    
-    if(!statsDoc.exists()) {
-        await setDoc(statsRef, {
-            movies_watched: 0,
-            episodes_watched: 0,
-            reviews_written: 0,
-            list_adds: 0,
-            hours_watched: 0,
-            genres: {}
-        });
-    }
-    
-    const updates = {};
-    if(action === 'movie_watched') {
-        updates.movies_watched = increment(1);
-        updates.hours_watched = increment(2);
-    } else if(action === 'episode_watched') {
-        updates.episodes_watched = increment(1);
-        updates.hours_watched = increment(0.75);
-    } else if(action === 'review_written') {
-        updates.reviews_written = increment(1);
-    } else if(action === 'list_add') {
-        updates.list_adds = increment(1);
-    }
-    
-    await updateDoc(statsRef, updates);
-}
-
-window.openStatsModal = async () => {
-    if(!currentUser) return alert("Login to view stats");
-    
-    document.getElementById('stats-modal').classList.add('active');
-    document.body.style.overflow = 'hidden';
-    
-    const statsRef = doc(db, "users", currentUser.uid, "stats", "overall");
-    const statsDoc = await getDoc(statsRef);
-    
-    if(statsDoc.exists()) {
-        const stats = statsDoc.data();
-        document.getElementById('stat-movies').innerText = stats.movies_watched || 0;
-        document.getElementById('stat-series').innerText = Math.floor((stats.episodes_watched || 0) / 10);
-        document.getElementById('stat-hours').innerText = Math.floor(stats.hours_watched || 0);
-        document.getElementById('stat-reviews').innerText = stats.reviews_written || 0;
-        
-        document.getElementById('genre-stats').innerHTML = `
-            <span class="genre-stat-tag">Action</span>
-            <span class="genre-stat-tag">Drama</span>
-            <span class="genre-stat-tag">Comedy</span>
-            <span class="genre-stat-tag">Thriller</span>
-        `;
-    }
-};
-
-window.closeStatsModal = () => {
-    document.getElementById('stats-modal').classList.remove('active');
-    document.body.style.overflow = 'auto';
-};
-
-// Random Picker
-window.openRandomPicker = () => {
-    document.getElementById('random-modal').classList.add('active');
-    document.body.style.overflow = 'hidden';
-    randomGenre = null;
-};
-
-window.closeRandomModal = () => {
-    document.getElementById('random-modal').classList.remove('active');
-    document.body.style.overflow = 'auto';
-};
-
-window.setRandomGenre = (genreId) => {
-    randomGenre = genreId;
-    
-    document.querySelectorAll('.random-genre-btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    
-    if(genreId === null) {
-        document.getElementById('random-any').classList.add('active');
-    } else {
-        document.querySelectorAll('.random-genre-btn').forEach(btn => {
-            if(btn.onclick && btn.onclick.toString().includes(genreId)) {
-                btn.classList.add('active');
-            }
-        });
-    }
-};
-
-window.pickRandom = async () => {
-    let url = `https://api.themoviedb.org/3/discover/${mode}?api_key=${KEY}&sort_by=popularity.desc&vote_count.gte=100`;
-    
-    if(randomGenre) {
-        url += `&with_genres=${randomGenre}`;
-    }
-    
-    const r = await fetch(url);
-    const d = await r.json();
-    
-    const randomIndex = Math.floor(Math.random() * Math.min(50, d.results.length));
-    const randomMovie = d.results[randomIndex];
-    
-    closeRandomModal();
-    openDetailsModal(randomMovie.id, mode);
-};
-
-// Quiz
-window.openQuizModal = async () => {
-    document.getElementById('quiz-modal').classList.add('active');
-    document.body.style.overflow = 'hidden';
-    quizScore = 0;
-    quizTotal = 0;
-    
-    loadQuizQuestion();
-};
-
-window.closeQuizModal = () => {
-    document.getElementById('quiz-modal').classList.remove('active');
-    document.body.style.overflow = 'auto';
-};
-
-async function loadQuizQuestion() {
-    const url = `https://api.themoviedb.org/3/movie/popular?api_key=${KEY}`;
-    const r = await fetch(url);
-    const d = await r.json();
-    
-    const randomIndex = Math.floor(Math.random() * d.results.length);
-    currentQuizMovie = d.results[randomIndex];
-    
-    const wrongAnswers = d.results
-        .filter(m => m.id !== currentQuizMovie.id)
-        .sort(() => 0.5 - Math.random())
-        .slice(0, 3)
-        .map(m => m.title);
-    
-    const allAnswers = [currentQuizMovie.title, ...wrongAnswers].sort(() => 0.5 - Math.random());
-    
-    document.getElementById('quiz-poster').src = `https://image.tmdb.org/t/p/w300${currentQuizMovie.poster_path}`;
-    document.getElementById('quiz-options').innerHTML = allAnswers.map(answer => `
-        <button onclick="checkQuizAnswer('${answer.replace(/'/g, "\\'").replace(/"/g, '&quot;')}')" class="quiz-option">
-            ${answer}
-        </button>
-    `).join('');
-    
-    document.getElementById('quiz-score-value').innerText = quizScore;
-    document.getElementById('quiz-total').innerText = quizTotal;
-}
-
-window.checkQuizAnswer = async (answer) => {
-    quizTotal++;
-    
-    if(answer === currentQuizMovie.title) {
-        quizScore++;
-        alert('Correct! 🎉');
-    } else {
-        alert(`Wrong! The correct answer was: ${currentQuizMovie.title}`);
-    }
-    
-    document.getElementById('quiz-score-value').innerText = quizScore;
-    document.getElementById('quiz-total').innerText = quizTotal;
-    
-    setTimeout(() => {
-        loadQuizQuestion();
-    }, 500);
-};
-
-// Achievements
-const achievements = [
-    { id: 'first_watch', icon: '🎬', title: 'First Watch', desc: 'Watch your first movie', condition: (stats) => stats.movies_watched >= 1 },
-    { id: 'movie_buff', icon: '🍿', title: 'Movie Buff', desc: 'Watch 10 movies', condition: (stats) => stats.movies_watched >= 10 },
-    { id: 'cinephile', icon: '🎭', title: 'Cinephile', desc: 'Watch 50 movies', condition: (stats) => stats.movies_watched >= 50 },
-    { id: 'movie_master', icon: '👑', title: 'Movie Master', desc: 'Watch 100 movies', condition: (stats) => stats.movies_watched >= 100 },
-    { id: 'first_review', icon: '✍️', title: 'First Review', desc: 'Write your first review', condition: (stats) => stats.reviews_written >= 1 },
-    { id: 'critic', icon: '⭐', title: 'Critic', desc: 'Write 10 reviews', condition: (stats) => stats.reviews_written >= 10 },
-    { id: 'binge_watcher', icon: '📺', title: 'Binge Watcher', desc: 'Watch 50 episodes', condition: (stats) => stats.episodes_watched >= 50 },
-    { id: 'marathon', icon: '🏃', title: 'Marathon', desc: 'Watch 24 hours of content', condition: (stats) => stats.hours_watched >= 24 },
-    { id: 'collector', icon: '📚', title: 'Collector', desc: 'Add 25 titles to your list', condition: (stats) => stats.list_adds >= 25 },
-    { id: 'mega_fan', icon: '🌟', title: 'Mega Fan', desc: 'Watch 200 movies', condition: (stats) => stats.movies_watched >= 200 }
-];
-
-async function checkAchievements() {
-    if(!currentUser) return;
-    
-    const statsRef = doc(db, "users", currentUser.uid, "stats", "overall");
-    const statsDoc = await getDoc(statsRef);
-    
-    if(!statsDoc.exists()) return;
-    
-    const stats = statsDoc.data();
-    const unlockedRef = doc(db, "users", currentUser.uid, "achievements", "unlocked");
-    const unlockedDoc = await getDoc(unlockedRef);
-    const unlocked = unlockedDoc.exists() ? unlockedDoc.data().achievements || [] : [];
-    
-    for(const achievement of achievements) {
-        if(!unlocked.includes(achievement.id) && achievement.condition(stats)) {
-            await setDoc(unlockedRef, {
-                achievements: [...unlocked, achievement.id]
-            });
-            
-            showAchievementNotification(achievement);
-        }
-    }
-}
-
-function showAchievementNotification(achievement) {
-    const notification = document.createElement('div');
-    notification.className = 'achievement-notification';
-    notification.innerHTML = `
-        <div class="achievement-notification-icon">${achievement.icon}</div>
-        <div class="achievement-notification-content">
-            <div class="achievement-notification-title">Achievement Unlocked!</div>
-            <div class="achievement-notification-name">${achievement.title}</div>
-            <div class="achievement-notification-desc">${achievement.desc}</div>
-        </div>
-    `;
-    
-    document.body.appendChild(notification);
-    
-    setTimeout(() => notification.classList.add('show'), 100);
-    
-    setTimeout(() => {
-        notification.classList.remove('show');
-        setTimeout(() => notification.remove(), 300);
-    }, 5000);
-}
-
-window.openAchievementsModal = async () => {
-    if(!currentUser) return alert("Login to view achievements");
-    
-    document.getElementById('achievements-modal').classList.add('active');
-    document.body.style.overflow = 'hidden';
-    
-    const unlockedRef = doc(db, "users", currentUser.uid, "achievements", "unlocked");
-    const unlockedDoc = await getDoc(unlockedRef);
-    const unlocked = unlockedDoc.exists() ? unlockedDoc.data().achievements || [] : [];
-    
-    document.getElementById('achievements-grid').innerHTML = achievements.map(achievement => {
-        const isUnlocked = unlocked.includes(achievement.id);
-        
-        return `
-        <div class="achievement-card ${isUnlocked ? 'unlocked' : 'locked'}">
-            <div class="achievement-icon">${achievement.icon}</div>
-            <div class="achievement-title">${achievement.title}</div>
-            <div class="achievement-desc">${achievement.desc}</div>
-            ${isUnlocked ? '<div class="achievement-status unlocked">✓ Unlocked</div>' : '<div class="achievement-status locked">🔒 Locked</div>'}
-        </div>`;
-    }).join('');
-};
-
-window.closeAchievementsModal = () => {
-    document.getElementById('achievements-modal').classList.remove('active');
-    document.body.style.overflow = 'auto';
-};
-
-// Player
+// Player Functions
 window.openPlayer = async (id, title, poster, rating = 0, releaseDate = '') => {
     activeID = id; 
     const year = releaseDate.split('-')[0] || '';
@@ -1038,7 +273,7 @@ window.openPlayer = async (id, title, poster, rating = 0, releaseDate = '') => {
     document.getElementById('p-title').innerText = title;
     document.getElementById('p-rating').innerHTML = `★ ${rating ? rating.toFixed(1) : 'N/A'}`;
     document.getElementById('p-year').innerText = year;
-    document.getElementById('player-overlay').classList.add('active');
+    document.getElementById('player-overlay').style.display = 'block';
     document.body.style.overflow = 'hidden';
     updateBtnStates();
     
@@ -1046,39 +281,35 @@ window.openPlayer = async (id, title, poster, rating = 0, releaseDate = '') => {
     
     document.getElementById('p-desc').innerText = res.overview || 'No description available.';
     document.getElementById('p-cast').innerHTML = res.credits.cast.slice(0, 5).map(c => `
-        <div class="cast-member-small">
-            ${c.profile_path ? `<img src="https://image.tmdb.org/t/p/w185${c.profile_path}" alt="${c.name}">` : '<div class="cast-placeholder"></div>'}
-            <span>${c.name}</span>
-        </div>
-    `).join('');
+        <div class="flex items-center gap-4">
+            ${c.profile_path ? `<img src="https://image.tmdb.org/t/p/w185${c.profile_path}" class="w-10 h-10 rounded-lg object-cover" alt="${c.name}">` : '<div class="w-10 h-10 rounded-lg bg-white/5"></div>'}
+            <p class="text-[11px] font-black uppercase tracking-wider">${c.name}</p>
+        </div>`).join('');
     
     document.getElementById('srv-menu').innerHTML = servers.map(sv => 
-        `<button onclick="setSrv('${sv.id}','${sv.n}')" class="dropdown-item">${sv.n}</button>`
+        `<button onclick="setSrv('${sv.id}','${sv.n}')" class="drop-item">${sv.n}</button>`
     ).join('');
     
     if(mode === 'tv') {
         document.getElementById('tv-controls').classList.remove('hidden');
         document.getElementById('s-menu').innerHTML = res.seasons
             .filter(sea => sea.season_number > 0)
-            .map(sea => `<button onclick="setS(${sea.season_number})" class="dropdown-item">Season ${sea.season_number}</button>`)
+            .map(sea => `<button onclick="setS(${sea.season_number})" class="drop-item">Season ${sea.season_number}</button>`)
             .join('');
         loadEpisodes();
     } else { 
         document.getElementById('tv-controls').classList.add('hidden'); 
         updPlayer(); 
     }
-    
-    setTimeout(() => {
-        saveWatchProgress(id, 300, 7200);
-    }, 60000);
 }
 
 window.closePlayer = () => { 
-    document.getElementById('player-overlay').classList.remove('active');
+    document.getElementById('player-overlay').style.display = 'none'; 
     document.getElementById('frame').src = ''; 
     document.body.style.overflow = 'auto'; 
 }
 
+// Player Controls
 window.setSrv = (id, n) => { 
     currentSrv = id; 
     document.getElementById('active-srv').innerText = n; 
@@ -1104,15 +335,13 @@ window.setE = (val) => {
 function updPlayer() {
     let src = '';
     if(mode === 'movie') {
-        if(currentSrv === 'bidsrc') src = `https://bidsrc.pro/movie/${activeID}`;
-        else if(currentSrv === 'cinemaos') src = `https://cinemaos.tech/player/${activeID}`;
+        if(currentSrv === 'cinemaos') src = `https://cinemaos.tech/player/${activeID}`;
         else if(currentSrv === 'vidsrcto') src = `https://vidsrc.to/embed/movie/${activeID}`;
         else if(currentSrv === 'vidsrcme') src = `https://vidsrc.me/embed/movie?tmdb=${activeID}`;
         else if(currentSrv === 'vidsrcicu') src = `https://vidsrc.icu/embed/movie/${activeID}`;
         else if(currentSrv === '2embed') src = `https://www.2embed.cc/embed/${activeID}`;
     } else {
-        if(currentSrv === 'bidsrc') src = `https://bidsrc.pro/tv/${activeID}/${s}/${e}`;
-        else if(currentSrv === 'cinemaos') src = `https://cinemaos.tech/player/${activeID}/${s}/${e}`;
+        if(currentSrv === 'cinemaos') src = `https://cinemaos.tech/player/${activeID}/${s}/${e}`;
         else if(currentSrv === 'vidsrcto') src = `https://vidsrc.to/embed/tv/${activeID}/${s}/${e}`;
         else if(currentSrv === 'vidsrcme') src = `https://vidsrc.me/embed/tv?tmdb=${activeID}&sea=${s}&epi=${e}`;
         else if(currentSrv === 'vidsrcicu') src = `https://vidsrc.icu/embed/tv/${activeID}/${s}/${e}`;
@@ -1124,30 +353,10 @@ function updPlayer() {
 async function loadEpisodes() {
     const d = await fetch(`https://api.themoviedb.org/3/tv/${activeID}/season/${s}?api_key=${KEY}`).then(r => r.json());
     document.getElementById('e-menu').innerHTML = d.episodes
-        .map(ep => `<button onclick="setE(${ep.episode_number})" class="dropdown-item">Episode ${ep.episode_number}</button>`)
+        .map(ep => `<button onclick="setE(${ep.episode_number})" class="drop-item">Episode ${ep.episode_number}</button>`)
         .join('');
     updPlayer();
 }
-
-// Filters
-window.applyFilters = async () => {
-    const yearFrom = document.getElementById('year-from').value;
-    const yearTo = document.getElementById('year-to').value;
-    const minRating = document.getElementById('min-rating').value;
-    const sortBy = document.getElementById('sort-by').value;
-    
-    let url = `https://api.themoviedb.org/3/discover/${mode}?api_key=${KEY}`;
-    url += `&sort_by=${sortBy}`;
-    
-    if(yearFrom) url += `&primary_release_date.gte=${yearFrom}-01-01`;
-    if(yearTo) url += `&primary_release_date.lte=${yearTo}-12-31`;
-    if(minRating > 0) url += `&vote_average.gte=${minRating}`;
-    
-    const r = await fetch(url);
-    const d = await r.json();
-    
-    renderGrid(d.results, 'grid');
-};
 
 // Mode Switch
 window.setMode = (m) => { 
@@ -1159,16 +368,13 @@ window.setMode = (m) => {
 function updateModeButtons() {
     const mBtn = document.getElementById('m-btn');
     const tBtn = document.getElementById('t-btn');
-    const slider = document.querySelector('.mode-slider');
     
     if(mode === 'movie') {
         mBtn.classList.add('active');
         tBtn.classList.remove('active');
-        slider.style.transform = 'translateX(0)';
     } else {
         tBtn.classList.add('active');
         mBtn.classList.remove('active');
-        slider.style.transform = 'translateX(100%)';
     }
 }
 
@@ -1176,9 +382,8 @@ function updateModeButtons() {
 async function loadGenres() {
     const r = await fetch(`https://api.themoviedb.org/3/genre/${mode}/list?api_key=${KEY}`);
     const d = await r.json();
-    
-    document.getElementById('genres-drop').innerHTML = d.genres
-        .map(g => `<button onclick="init('','${g.id}'); toggleMenu();" class="sidebar-dropdown-item">${g.name}</button>`)
+    document.getElementById('genre-menu').innerHTML = d.genres
+        .map(g => `<button onclick="init('','${g.id}')" class="drop-item">${g.name}</button>`)
         .join('');
 }
 
@@ -1199,34 +404,32 @@ function updateBtnStates() {
     
     const modalBtn = document.getElementById('modal-add-btn');
     const heroBtn = document.getElementById('hero-add');
-    const detailsBtn = document.getElementById('details-add-btn');
     
-    if(modalBtn) modalBtn.innerHTML = exists ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg><span>Saved</span>' : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg><span>Save</span>';
-    if(heroBtn) heroBtn.innerHTML = exists ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg><span>In My List</span>' : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg><span>My List</span>';
-    if(detailsBtn) detailsBtn.innerHTML = exists ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Saved' : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> My List';
+    if(modalBtn) modalBtn.innerText = exists ? '✓ SAVED' : '+ SAVE';
+    if(heroBtn) heroBtn.innerHTML = exists ? '<span>✓</span> Collected' : '<span>+</span> My List';
 }
 
-// Theme Toggle
-window.toggleTheme = () => {
-    const html = document.documentElement;
-    const currentTheme = html.getAttribute('data-theme');
-    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-    
-    html.setAttribute('data-theme', newTheme);
-    
-    const icon = document.getElementById('theme-icon-sidebar');
-    const text = document.getElementById('theme-text');
-    
-    if(newTheme === 'light') {
-        icon.innerHTML = '<circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>';
-        text.innerText = 'Light Mode';
-    } else {
-        icon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>';
-        text.innerText = 'Dark Mode';
-    }
-    
-    localStorage.setItem('theme', newTheme);
+// Dropdown Toggle
+window.toggleDrop = (id) => {
+    const el = document.getElementById(id);
+    const isShow = el.classList.contains('show');
+    document.querySelectorAll('.dropdown-menu').forEach(d => d.classList.remove('show'));
+    if(!isShow) el.classList.add('show');
 };
 
-// Load saved theme
-const save
+// Close dropdowns on outside click
+window.onclick = (e) => { 
+    if (!e.target.closest('.relative') && !e.target.closest('#user-profile')) {
+        document.querySelectorAll('.dropdown-menu').forEach(d => d.classList.remove('show')); 
+    }
+};
+
+// Close search overlay on ESC key
+document.addEventListener('keydown', (e) => {
+    if(e.key === 'Escape') {
+        closeSearchOverlay();
+    }
+});
+
+// Initialize App
+init();
