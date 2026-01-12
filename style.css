@@ -12,6 +12,34 @@
     --warning: #f59e0b;
 }
 
+[data-theme="light"] {
+    --primary: #6366f1;
+    --primary-dark: #4f46e5;
+    --accent: #ec4899;
+    --bg-dark: #ffffff;
+    --bg-card: #f5f5f5;
+    --glass: rgba(0, 0, 0, 0.05);
+    --glass-border: rgba(0, 0, 0, 0.1);
+    --text-primary: #000000;
+    --text-secondary: #666666;
+}
+
+[data-theme="light"] body {
+    background: #f5f5f5;
+    background-image: 
+        radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.05) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(236, 72, 153, 0.05) 0px, transparent 50%);
+}
+
+[data-theme="light"] .hero-overlay {
+    background: linear-gradient(to top, rgba(255,255,255, 1) 0%, rgba(255,255,255, 0.8) 30%, transparent 70%),
+                linear-gradient(to right, rgba(255,255,255, 1) 0%, rgba(255,255,255, 0.6) 40%, transparent 80%);
+}
+
+[data-theme="light"] .nav-glass {
+    background: rgba(255, 255, 255, 0.8);
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -30,7 +58,10 @@ body {
     background-attachment: fixed;
 }
 
-/* NAVIGATION */
+/* ============================================
+   NAVIGATION
+   ============================================ */
+
 .nav-glass {
     background: rgba(10, 10, 15, 0.8);
     backdrop-filter: blur(30px) saturate(180%);
@@ -121,7 +152,7 @@ body {
     transform: translateY(-2px);
 }
 
-/* Notice Board */
+/* Notice Board Styles */
 .notice-btn {
     position: relative;
 }
@@ -346,7 +377,10 @@ body {
     background: rgba(239, 68, 68, 0.1) !important;
 }
 
-/* SEARCH OVERLAY */
+/* ============================================
+   SEARCH OVERLAY
+   ============================================ */
+
 .search-overlay {
     position: fixed;
     inset: 0;
@@ -479,7 +513,7 @@ body {
     color: var(--text-secondary);
     font-weight: 600;
 }
-/* Search Results Grid */
+
 .search-results-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -587,7 +621,26 @@ body {
     letter-spacing: 1px;
 }
 
-/* HERO SECTION */
+/* Progress Bar */
+.progress-bar-container {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.2);
+    z-index: 3;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    transition: width 0.3s ease;
+}
+/* ============================================
+   HERO SECTION
+   ============================================ */
+
 .hero-section {
     position: relative;
     height: 90vh;
@@ -637,6 +690,7 @@ body {
     align-items: center;
     gap: 16px;
     margin-bottom: 24px;
+    flex-wrap: wrap;
 }
 
 .hero-rating {
@@ -740,7 +794,10 @@ body {
     transform: translateY(-4px);
 }
 
-/* MAIN CONTENT */
+/* ============================================
+   MAIN CONTENT
+   ============================================ */
+
 .main-content {
     padding: 80px;
     position: relative;
@@ -803,7 +860,9 @@ body {
 .movie-card:hover {
     transform: translateY(-12px) scale(1.02);
     border-color: var(--primary);
-    box-shadow: 0 20px 60px rgba(99, 102, 241, 0.3), 0 0 0 1px var(--primary);
+    box-shadow: 
+        0 20px 60px rgba(99, 102, 241, 0.3),
+        0 0 0 1px var(--primary);
 }
 
 .movie-card img {
@@ -857,7 +916,23 @@ body {
     gap: 4px;
 }
 
-/* PLAYER OVERLAY */
+.rating-badge {
+    background: rgba(234, 179, 8, 0.2);
+    border: 1px solid rgba(234, 179, 8, 0.4);
+    color: #fbbf24;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 900;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* ============================================
+   PLAYER OVERLAY
+   ============================================ */
+
 .player-overlay {
     position: fixed;
     inset: 0;
@@ -879,11 +954,14 @@ body {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 32px;
+    flex-wrap: wrap;
+    gap: 16px;
 }
 
 .control-right {
     display: flex;
     gap: 12px;
+    flex-wrap: wrap;
 }
 
 .control-btn {
@@ -950,11 +1028,16 @@ iframe {
     gap: 40px;
 }
 
+.player-info-main {
+    flex: 1;
+}
+
 .player-meta {
     display: flex;
     align-items: center;
     gap: 16px;
     margin-bottom: 20px;
+    flex-wrap: wrap;
 }
 
 .info-badge {
@@ -1057,7 +1140,32 @@ iframe {
     letter-spacing: 0.5px;
 }
 
-/* UTILITIES */
+/* Upcoming Card */
+.upcoming-card {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.upcoming-card:hover {
+    transform: translateY(-8px);
+    border-color: var(--primary);
+    box-shadow: 0 20px 40px rgba(99, 102, 241, 0.3);
+}
+
+.upcoming-card img {
+    width: 100%;
+    aspect-ratio: 2/3;
+    object-fit: cover;
+}
+
+/* ============================================
+   UTILITIES
+   ============================================ */
+
 .hidden {
     display: none !important;
 }
@@ -1067,6 +1175,86 @@ iframe {
     -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
     overflow: hidden;
+}
+
+.flex {
+    display: flex;
+}
+
+.items-center {
+    align-items: center;
+}
+
+.justify-between {
+    justify-content: space-between;
+}
+
+.gap-2 {
+    gap: 8px;
+}
+
+.gap-4 {
+    gap: 16px;
+}
+
+.mb-2 {
+    margin-bottom: 8px;
+}
+
+.mb-4 {
+    margin-bottom: 16px;
+}
+
+.mb-6 {
+    margin-bottom: 24px;
+}
+
+.text-xs {
+    font-size: 12px;
+}
+
+.opacity-40 {
+    opacity: 0.4;
+}
+
+.opacity-60 {
+    opacity: 0.6;
+}
+
+.uppercase {
+    text-transform: uppercase;
+}
+
+.font-black {
+    font-weight: 900;
+}
+
+.tracking-tight {
+    letter-spacing: -0.5px;
+}
+
+.grid {
+    display: grid;
+}
+
+.grid-cols-4 {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+.w-10 {
+    width: 40px;
+}
+
+.h-10 {
+    height: 40px;
+}
+
+.rounded-lg {
+    border-radius: 12px;
+}
+
+.object-cover {
+    object-fit: cover;
 }
 
 ::-webkit-scrollbar {
@@ -1087,7 +1275,10 @@ iframe {
     background: rgba(255, 255, 255, 0.2);
 }
 
-/* RESPONSIVE */
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
 @media (max-width: 1024px) {
     .hero-title {
         font-size: 48px;
@@ -1097,19 +1288,36 @@ iframe {
         grid-template-columns: 1fr;
     }
     
+    .player-title {
+        font-size: 36px;
+    }
+    
     .content-grid {
         grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
         gap: 20px;
     }
+
+    .main-content {
+        padding: 60px 40px;
+    }
+
+    .hero-section {
+        padding: 60px 40px;
+    }
 }
 
 @media (max-width: 768px) {
-    .main-content, .hero-section {
+    .main-content, 
+    .hero-section {
         padding: 40px 20px;
     }
     
     .hero-title {
         font-size: 36px;
+    }
+
+    .player-title {
+        font-size: 28px;
     }
     
     .search-title {
@@ -1120,6 +1328,11 @@ iframe {
         font-size: 18px;
         padding: 20px 20px 20px 60px;
     }
+
+    .search-icon {
+        font-size: 20px;
+        left: 20px;
+    }
     
     .mode-switcher {
         gap: 4px;
@@ -1129,4 +1342,91 @@ iframe {
         padding: 8px 16px;
         font-size: 10px;
     }
+
+    .nav-glass > div {
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .player-controls {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .control-right {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .content-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 16px;
+    }
+
+    .section-title {
+        font-size: 20px;
+    }
+
+    .section-icon {
+        font-size: 24px;
+    }
+
+    .hero-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .hero-btn-primary,
+    .hero-btn-secondary {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-title {
+        font-size: 28px;
+    }
+
+    .player-title {
+        font-size: 24px;
+    }
+
+    .search-title {
+        font-size: 20px;
+    }
+
+    .content-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .player-container {
+        padding: 20px;
+    }
+
+    .notice-dropdown {
+        min-width: 300px;
+    }
+}
+
+/* Animation Keyframes */
+@keyframes slideIn {
+    from { transform: translateX(400px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideOut {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(400px); opacity: 0; }
+}
+
+/* Star Rating Buttons */
+.star-btn {
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+}
+
+.star-btn:hover {
+    transform: scale(1.2);
 }
